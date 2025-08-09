@@ -1,0 +1,6 @@
+@JoyModels.API_HostAddress = http://localhost:5204
+
+GET {{JoyModels.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
