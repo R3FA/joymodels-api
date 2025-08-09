@@ -1,0 +1,7 @@
+﻿services:
+  joymodels.api:
+    image: joymodels.api
+    build:
+      context: .
+      dockerfile: JoyModels.API/Dockerfile
+
