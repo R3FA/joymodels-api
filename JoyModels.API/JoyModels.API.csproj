@@ -8,10 +8,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2"/>
-    </ItemGroup>
-
-    <ItemGroup>
       <Content Include="..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
@@ -19,6 +15,18 @@
 
     <ItemGroup>
       <Folder Include="src\Controllers\" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.19">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\JoyModels.Models\JoyModels.Models.csproj" />
     </ItemGroup>
 
 </Project>
