@@ -1,7 +1,11 @@
+using JoyModels.API.Handlers;
 using JoyModels.Models.src.Database.Entities;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddDbContext<JoyModelsDbContext>(options => options.UseMySql(
     builder.Configuration.GetConnectionString("DefaultConnectionString"),
@@ -20,6 +24,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseExceptionHandler();
 
 app.UseAuthorization();
 
