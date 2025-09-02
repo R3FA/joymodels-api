@@ -2,7 +2,7 @@ namespace JoyModels.API.Setups;
 
 public static class WebApplicationSetup
 {
-    public static WebApplication ConfigureRequestPipeline(this WebApplication app)
+    public static WebApplication RegisterAppSetup(this WebApplication app)
     {
         app.UseHttpsRedirection();
         app.UseExceptionHandler();
