@@ -2,7 +2,8 @@ using JoyModels.API.Setups;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.InitializeDatabaseServices(builder.Configuration);
-builder.Services.InitializeDependencyInjectionServices();
+builder.Services.RegisterDatabaseServices(builder.Configuration);
+builder.Services.RegisterDependencyInjectionServices();
 
-builder.Build().Create();
+var app = builder.Build().ConfigureRequestPipeline();
+app.Run();
