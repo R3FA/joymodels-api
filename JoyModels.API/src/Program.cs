@@ -9,7 +9,7 @@ builder.Services.AddProblemDetails();
 
 builder.Services.AddDbContext<JoyModelsDbContext>(options => options.UseMySql(
     builder.Configuration.GetConnectionString("DefaultConnectionString"),
-    Microsoft.EntityFrameworkCore.ServerVersion.Parse("11.8.2-mariadb")
+    ServerVersion.Parse("11.8.2-mariadb")
 ));
 
 // Add services to the container.
