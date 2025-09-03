@@ -8,13 +8,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Content Include="..\.dockerignore">
-        <Link>.dockerignore</Link>
-      </Content>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="src\Controllers\" />
+        <Content Include="..\.dockerignore">
+            <Link>.dockerignore</Link>
+        </Content>
     </ItemGroup>
 
     <ItemGroup>
@@ -22,11 +18,17 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.3" />
+        <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7"/>
+        <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.3"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\JoyModels.Models\JoyModels.Models.csproj" />
+        <ProjectReference Include="..\JoyModels.Models\JoyModels.Models.csproj"/>
+        <ProjectReference Include="..\JoyModels.Services\JoyModels.Services.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="src\Controllers\"/>
     </ItemGroup>
 
 </Project>
