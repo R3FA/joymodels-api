@@ -59,7 +59,7 @@ public partial class JoyModelsDbContext : DbContext
     public virtual DbSet<UserRole> UserRoles { get; set; }
 
     public virtual DbSet<UserToken> UserTokens { get; set; }
-    
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder
@@ -119,7 +119,8 @@ public partial class JoyModelsDbContext : DbContext
 
             entity.ToTable("community_post_pictures");
 
-            entity.HasIndex(e => new { e.CommunityPostUuid, e.PictureLocation }, "uq_community_post_picture").IsUnique();
+            entity.HasIndex(e => new { e.CommunityPostUuid, e.PictureLocation }, "uq_community_post_picture")
+                .IsUnique();
 
             entity.Property(e => e.Uuid).HasColumnName("uuid");
             entity.Property(e => e.CommunityPostUuid).HasColumnName("community_post_uuid");
