@@ -72,12 +72,12 @@ public partial class JoyModelsDbContext : DbContext
 
             entity.ToTable("categories");
 
-            entity.HasIndex(e => e.Name, "name").IsUnique();
+            entity.HasIndex(e => e.CategoryName, "category_name").IsUnique();
 
             entity.Property(e => e.Uuid).HasColumnName("uuid");
-            entity.Property(e => e.Name)
-                .HasColumnType("enum('Undefined')")
-                .HasColumnName("name");
+            entity.Property(e => e.CategoryName)
+                .HasMaxLength(50)
+                .HasColumnName("category_name");
         });
 
         modelBuilder.Entity<CommunityPost>(entity =>
@@ -193,12 +193,12 @@ public partial class JoyModelsDbContext : DbContext
 
             entity.ToTable("community_post_review_types");
 
-            entity.HasIndex(e => e.ReviewType, "review_type").IsUnique();
+            entity.HasIndex(e => e.ReviewName, "review_name").IsUnique();
 
             entity.Property(e => e.Uuid).HasColumnName("uuid");
-            entity.Property(e => e.ReviewType)
-                .HasColumnType("enum('Undefined')")
-                .HasColumnName("review_type");
+            entity.Property(e => e.ReviewName)
+                .HasMaxLength(50)
+                .HasColumnName("review_name");
         });
 
         modelBuilder.Entity<CommunityPostType>(entity =>
@@ -207,12 +207,12 @@ public partial class JoyModelsDbContext : DbContext
 
             entity.ToTable("community_post_types");
 
-            entity.HasIndex(e => e.CommunityPostType1, "community_post_type").IsUnique();
+            entity.HasIndex(e => e.CommunityPostName, "community_post_name").IsUnique();
 
             entity.Property(e => e.Uuid).HasColumnName("uuid");
-            entity.Property(e => e.CommunityPostType1)
-                .HasColumnType("enum('Undefined')")
-                .HasColumnName("community_post_type");
+            entity.Property(e => e.CommunityPostName)
+                .HasMaxLength(50)
+                .HasColumnName("community_post_name");
         });
 
         modelBuilder.Entity<CommunityPostUserReview>(entity =>
@@ -252,12 +252,12 @@ public partial class JoyModelsDbContext : DbContext
 
             entity.ToTable("message_types");
 
-            entity.HasIndex(e => e.MessageType1, "message_type").IsUnique();
+            entity.HasIndex(e => e.MessageName, "message_name").IsUnique();
 
             entity.Property(e => e.Uuid).HasColumnName("uuid");
-            entity.Property(e => e.MessageType1)
-                .HasColumnType("enum('Undefined')")
-                .HasColumnName("message_type");
+            entity.Property(e => e.MessageName)
+                .HasMaxLength(50)
+                .HasColumnName("message_name");
         });
 
         modelBuilder.Entity<Model>(entity =>
@@ -304,12 +304,12 @@ public partial class JoyModelsDbContext : DbContext
 
             entity.ToTable("model_availability");
 
-            entity.HasIndex(e => e.AvailabilityType, "availability_type").IsUnique();
+            entity.HasIndex(e => e.AvailabilityName, "availability_name").IsUnique();
 
             entity.Property(e => e.Uuid).HasColumnName("uuid");
-            entity.Property(e => e.AvailabilityType)
-                .HasColumnType("enum('Undefined')")
-                .HasColumnName("availability_type");
+            entity.Property(e => e.AvailabilityName)
+                .HasMaxLength(50)
+                .HasColumnName("availability_name");
         });
 
         modelBuilder.Entity<ModelCategory>(entity =>
@@ -452,12 +452,12 @@ public partial class JoyModelsDbContext : DbContext
 
             entity.ToTable("model_review_types");
 
-            entity.HasIndex(e => e.ReviewType, "review_type").IsUnique();
+            entity.HasIndex(e => e.ReviewName, "review_name").IsUnique();
 
             entity.Property(e => e.Uuid).HasColumnName("uuid");
-            entity.Property(e => e.ReviewType)
-                .HasColumnType("enum('Undefined')")
-                .HasColumnName("review_type");
+            entity.Property(e => e.ReviewName)
+                .HasMaxLength(50)
+                .HasColumnName("review_name");
         });
 
         modelBuilder.Entity<PendingUser>(entity =>
@@ -536,12 +536,12 @@ public partial class JoyModelsDbContext : DbContext
 
             entity.ToTable("user_devices");
 
-            entity.HasIndex(e => e.DeviceType, "device_type").IsUnique();
+            entity.HasIndex(e => e.DeviceName, "device_name").IsUnique();
 
             entity.Property(e => e.Uuid).HasColumnName("uuid");
-            entity.Property(e => e.DeviceType)
-                .HasColumnType("enum('Undefined')")
-                .HasColumnName("device_type");
+            entity.Property(e => e.DeviceName)
+                .HasMaxLength(50)
+                .HasColumnName("device_name");
         });
 
         modelBuilder.Entity<UserFollower>(entity =>
@@ -599,12 +599,12 @@ public partial class JoyModelsDbContext : DbContext
 
             entity.ToTable("user_roles");
 
-            entity.HasIndex(e => e.RoleType, "role_type").IsUnique();
+            entity.HasIndex(e => e.RoleName, "role_name").IsUnique();
 
             entity.Property(e => e.Uuid).HasColumnName("uuid");
-            entity.Property(e => e.RoleType)
-                .HasColumnType("enum('Undefined')")
-                .HasColumnName("role_type");
+            entity.Property(e => e.RoleName)
+                .HasMaxLength(50)
+                .HasColumnName("role_name");
         });
 
         modelBuilder.Entity<UserToken>(entity =>

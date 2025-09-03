@@ -31,15 +31,16 @@ namespace JoyModels.Models.src.Database.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("uuid");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("CategoryName")
                         .IsRequired()
-                        .HasColumnType("enum('Undefined')")
-                        .HasColumnName("name");
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("category_name");
 
                     b.HasKey("Uuid")
                         .HasName("PRIMARY");
 
-                    b.HasIndex(new[] { "Name" }, "name")
+                    b.HasIndex(new[] { "CategoryName" }, "category_name")
                         .IsUnique();
 
                     b.ToTable("categories", (string)null);
@@ -178,15 +179,16 @@ namespace JoyModels.Models.src.Database.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("uuid");
 
-                    b.Property<string>("ReviewType")
+                    b.Property<string>("ReviewName")
                         .IsRequired()
-                        .HasColumnType("enum('Undefined')")
-                        .HasColumnName("review_type");
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("review_name");
 
                     b.HasKey("Uuid")
                         .HasName("PRIMARY");
 
-                    b.HasIndex(new[] { "ReviewType" }, "review_type")
+                    b.HasIndex(new[] { "ReviewName" }, "review_name")
                         .IsUnique();
 
                     b.ToTable("community_post_review_types", (string)null);
@@ -199,15 +201,16 @@ namespace JoyModels.Models.src.Database.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("uuid");
 
-                    b.Property<string>("CommunityPostType1")
+                    b.Property<string>("CommunityPostName")
                         .IsRequired()
-                        .HasColumnType("enum('Undefined')")
-                        .HasColumnName("community_post_type");
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("community_post_name");
 
                     b.HasKey("Uuid")
                         .HasName("PRIMARY");
 
-                    b.HasIndex(new[] { "CommunityPostType1" }, "community_post_type")
+                    b.HasIndex(new[] { "CommunityPostName" }, "community_post_name")
                         .IsUnique();
 
                     b.ToTable("community_post_types", (string)null);
@@ -253,15 +256,16 @@ namespace JoyModels.Models.src.Database.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("uuid");
 
-                    b.Property<string>("MessageType1")
+                    b.Property<string>("MessageName")
                         .IsRequired()
-                        .HasColumnType("enum('Undefined')")
-                        .HasColumnName("message_type");
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("message_name");
 
                     b.HasKey("Uuid")
                         .HasName("PRIMARY");
 
-                    b.HasIndex(new[] { "MessageType1" }, "message_type")
+                    b.HasIndex(new[] { "MessageName" }, "message_name")
                         .IsUnique();
 
                     b.ToTable("message_types", (string)null);
@@ -308,8 +312,7 @@ namespace JoyModels.Models.src.Database.Migrations
                     b.HasIndex(new[] { "ModelAvailabilityUuid" }, "model_availability_uuid");
 
                     b.HasIndex(new[] { "Name" }, "name")
-                        .IsUnique()
-                        .HasDatabaseName("name1");
+                        .IsUnique();
 
                     b.HasIndex(new[] { "UserUuid" }, "user_uuid");
 
@@ -323,15 +326,16 @@ namespace JoyModels.Models.src.Database.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("uuid");
 
-                    b.Property<string>("AvailabilityType")
+                    b.Property<string>("AvailabilityName")
                         .IsRequired()
-                        .HasColumnType("enum('Undefined')")
-                        .HasColumnName("availability_type");
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("availability_name");
 
                     b.HasKey("Uuid")
                         .HasName("PRIMARY");
 
-                    b.HasIndex(new[] { "AvailabilityType" }, "availability_type")
+                    b.HasIndex(new[] { "AvailabilityName" }, "availability_name")
                         .IsUnique();
 
                     b.ToTable("model_availability", (string)null);
@@ -500,17 +504,18 @@ namespace JoyModels.Models.src.Database.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("uuid");
 
-                    b.Property<string>("ReviewType")
+                    b.Property<string>("ReviewName")
                         .IsRequired()
-                        .HasColumnType("enum('Undefined')")
-                        .HasColumnName("review_type");
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("review_name");
 
                     b.HasKey("Uuid")
                         .HasName("PRIMARY");
 
-                    b.HasIndex(new[] { "ReviewType" }, "review_type")
+                    b.HasIndex(new[] { "ReviewName" }, "review_name")
                         .IsUnique()
-                        .HasDatabaseName("review_type1");
+                        .HasDatabaseName("review_name1");
 
                     b.ToTable("model_review_types", (string)null);
                 });
@@ -624,15 +629,16 @@ namespace JoyModels.Models.src.Database.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("uuid");
 
-                    b.Property<string>("DeviceType")
+                    b.Property<string>("DeviceName")
                         .IsRequired()
-                        .HasColumnType("enum('Undefined')")
-                        .HasColumnName("device_type");
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("device_name");
 
                     b.HasKey("Uuid")
                         .HasName("PRIMARY");
 
-                    b.HasIndex(new[] { "DeviceType" }, "device_type")
+                    b.HasIndex(new[] { "DeviceName" }, "device_name")
                         .IsUnique();
 
                     b.ToTable("user_devices", (string)null);
@@ -703,15 +709,16 @@ namespace JoyModels.Models.src.Database.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("uuid");
 
-                    b.Property<string>("RoleType")
+                    b.Property<string>("RoleName")
                         .IsRequired()
-                        .HasColumnType("enum('Undefined')")
-                        .HasColumnName("role_type");
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("role_name");
 
                     b.HasKey("Uuid")
                         .HasName("PRIMARY");
 
-                    b.HasIndex(new[] { "RoleType" }, "role_type")
+                    b.HasIndex(new[] { "RoleName" }, "role_name")
                         .IsUnique();
 
                     b.ToTable("user_roles", (string)null);

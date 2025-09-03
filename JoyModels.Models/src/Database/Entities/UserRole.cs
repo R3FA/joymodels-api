@@ -7,7 +7,7 @@ public partial class UserRole
 {
     public Guid Uuid { get; set; }
 
-    public string RoleType { get; set; } = null!;
+    public string RoleName { get; set; } = null!;
 
     public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

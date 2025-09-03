@@ -4,6 +4,7 @@ public static class WebApplicationSetup
 {
     public static WebApplication RegisterAppServices(this WebApplication app)
     {
+        app.RegisterDatabaseMigrations();
         app.UseHttpsRedirection();
         app.UseExceptionHandler();
         app.UseAuthorization();

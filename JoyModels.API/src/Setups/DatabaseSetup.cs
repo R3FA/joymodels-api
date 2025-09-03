@@ -21,4 +21,16 @@ public static class DatabaseSetup
 
         return services;
     }
+
+    public static IApplicationBuilder RegisterDatabaseMigrations(this IApplicationBuilder app)
+    {
+        using var scope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope();
+        var context = scope.ServiceProvider.GetService<JoyModelsDbContext>();
+
+        if (context == null) throw new Exception("JoyModelsDbContext is not registered as a service!");
+
+        context.Database.Migrate();
+
+        return app;
+    }
 }
