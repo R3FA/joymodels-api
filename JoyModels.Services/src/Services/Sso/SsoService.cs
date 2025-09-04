@@ -20,15 +20,14 @@ public class SsoService : ISsoService
         if (!Guid.TryParse(uuid, out var guid))
             throw new ArgumentException($"UUID value `{uuid}` is invalid");
 
-        var exists = await _context.PendingUsers.AsNoTracking().AnyAsync(x => x.Uuid.ToString() == uuid);
-        if (!exists)
-            throw new KeyNotFoundException($"There is no pending user with UUID value of `{uuid}`");
-
         var pendingUserEntity = await _context.PendingUsers
             .Include(x => x.UserUu)
             .Include(x => x.UserUu.UserRoleUu)
             .AsNoTracking()
-            .FirstAsync(x => x.Uuid.ToString() == uuid);
+            .FirstOrDefaultAsync(x => x.Uuid.ToString() == uuid || x.UserUuid.ToString() == uuid);
+
+        if (pendingUserEntity == null)
+            throw new KeyNotFoundException($"Pending user with uuid `{uuid}` not found");
 
         var pendingUser = new SsoGet()
         {
