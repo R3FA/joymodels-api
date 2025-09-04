@@ -1,4 +1,4 @@
-namespace JoyModels.Models.DataTransferObjects.Users;
+namespace JoyModels.Models.DataTransferObjects.User;
 
 public class UserCreate
 {

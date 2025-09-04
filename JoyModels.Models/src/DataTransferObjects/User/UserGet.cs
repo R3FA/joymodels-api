@@ -1,6 +1,6 @@
-using JoyModels.Models.src.Database.Entities;
+using JoyModels.Models.DataTransferObjects.UserRole;
 
-namespace JoyModels.Models.DataTransferObjects.Users;
+namespace JoyModels.Models.DataTransferObjects.User;
 
 public class UserGet
 {
@@ -11,5 +11,5 @@ public class UserGet
     public string Email { get; set; } = null!;
     public DateTime CreatedAt { get; set; }
     public Guid UserRoleUuid { get; set; }
-    public virtual UserRole UserRole { get; set; } = null!;
+    public virtual UserRoleGet UserRole { get; set; } = null!;
 }

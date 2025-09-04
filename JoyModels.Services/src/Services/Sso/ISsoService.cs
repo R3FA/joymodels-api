@@ -1,5 +1,5 @@
 using JoyModels.Models.DataTransferObjects.Sso;
-using JoyModels.Models.DataTransferObjects.Users;
+using JoyModels.Models.DataTransferObjects.User;
 
 namespace JoyModels.Services.Services.Sso;
 
