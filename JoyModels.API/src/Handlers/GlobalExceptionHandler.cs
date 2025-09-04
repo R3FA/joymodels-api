@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 namespace JoyModels.API.Handlers;
 
 public sealed class GlobalExceptionHandler(
-    IProblemDetailsService problemDetailsService,
     ILogger<GlobalExceptionHandler> logger
 ) : IExceptionHandler
 {
