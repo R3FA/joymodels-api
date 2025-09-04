@@ -638,6 +638,15 @@ public partial class JoyModelsDbContext : DbContext
                 .HasConstraintName("user_tokens_ibfk_1");
         });
 
+        modelBuilder.Entity<UserRole>().HasData(
+            new UserRole { Uuid = Guid.NewGuid(), RoleName = "Undefined" },
+            new UserRole { Uuid = Guid.NewGuid(), RoleName = "Unverified" },
+            new UserRole { Uuid = Guid.NewGuid(), RoleName = "User" },
+            new UserRole { Uuid = Guid.NewGuid(), RoleName = "Helper" },
+            new UserRole { Uuid = Guid.NewGuid(), RoleName = "Admin" },
+            new UserRole { Uuid = Guid.NewGuid(), RoleName = "Root" }
+        );
+
         OnModelCreatingPartial(modelBuilder);
     }
 
