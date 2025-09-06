@@ -61,6 +61,7 @@ public class SsoService : ISsoService
     public async Task<UserGet> Create(UserCreate user)
     {
         user.ValidateUserCreation();
+        var hashedPassword = user.GeneratePasswordHash(user.Password);
 
         return new UserGet();
     }
