@@ -21,7 +21,7 @@ public static class RegularExpressionValidation
         if (string.IsNullOrWhiteSpace(password))
             throw new ApplicationException("Password cannot be empty string");
 
-        var pattern = $@"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{{8,{passwordMaxLength - 1}}}$";
+        var pattern = $@"^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{{8,{passwordMaxLength - 1}}}$";
         if (!Regex.IsMatch(password, pattern))
             return false;
 
