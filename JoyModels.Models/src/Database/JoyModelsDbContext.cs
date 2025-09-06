@@ -519,9 +519,6 @@ public partial class JoyModelsDbContext : DbContext
             entity.Property(e => e.PasswordHash)
                 .HasMaxLength(255)
                 .HasColumnName("password_hash");
-            entity.Property(e => e.PasswordSalt)
-                .HasMaxLength(255)
-                .HasColumnName("password_salt");
             entity.Property(e => e.UserRoleUuid).HasColumnName("user_role_uuid");
 
             entity.HasOne(d => d.UserRoleUu).WithMany(p => p.Users)
