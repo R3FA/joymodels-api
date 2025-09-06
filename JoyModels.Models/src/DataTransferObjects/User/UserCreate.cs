@@ -4,7 +4,7 @@ public class UserCreate
 {
     public string FirstName { get; set; } = null!;
     public string? LastName { get; set; }
-    public string NickName { get; set; } = null!;
+    public string Nickname { get; set; } = null!;
     public string Email { get; set; } = null!;
     public string Password { get; set; } = null!;
 }

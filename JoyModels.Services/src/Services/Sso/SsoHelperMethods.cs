@@ -18,9 +18,9 @@ public static class SsoHelperMethods
                 throw new ArgumentException($"Last name `{user.LastName}` is invalid");
         }
 
-        if (!RegularExpressionValidation.IsNicknameValid(user.NickName,
-                Validation.ConstantValidation.User.UserCreate.NickNameMaxLength))
-            throw new ArgumentException($"Nickname `{user.NickName}` is invalid");
+        if (!RegularExpressionValidation.IsNicknameValid(user.Nickname,
+                Validation.ConstantValidation.User.UserCreate.NicknameMaxLength))
+            throw new ArgumentException($"Nickname `{user.Nickname}` is invalid");
 
         if (!RegularExpressionValidation.IsEmailValid(user.Email,
                 Validation.ConstantValidation.User.UserCreate.EmailMaxLength))
