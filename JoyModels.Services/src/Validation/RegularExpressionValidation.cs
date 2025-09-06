@@ -28,7 +28,7 @@ public static class RegularExpressionValidation
         return true;
     }
 
-    public static bool IsNickNameValid(string nickName, int nickNameMaxLength)
+    public static bool IsNicknameValid(string nickName, int nickNameMaxLength)
     {
         if (string.IsNullOrWhiteSpace(nickName))
             throw new ApplicationException("Nickname cannot be empty string");
