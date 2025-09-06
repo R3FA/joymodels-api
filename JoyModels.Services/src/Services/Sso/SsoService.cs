@@ -60,7 +60,9 @@ public class SsoService : ISsoService
 
     public async Task<UserGet> Create(UserCreate user)
     {
-        throw new NotImplementedException();
+        user.ValidateUserCreation();
+
+        return new UserGet();
     }
 
     public async Task<UserGet> Verify()
