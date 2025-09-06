@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using JoyModels.Models.DataTransferObjects.PendingUser;
 using JoyModels.Models.DataTransferObjects.User;
 using JoyModels.Services.Validation;
 using Microsoft.AspNetCore.Identity;
@@ -37,7 +39,28 @@ public static class SsoHelperMethods
     public static string GeneratePasswordHash(this UserCreate user, string password)
         => PasswordHasher.HashPassword(user, password);
 
+    // TODO: You'll have to expand this logic when Login method comes
     public static PasswordVerificationResult VerifyPasswordHash(this UserCreate user, string hashedPassword,
         string password)
         => PasswordHasher.VerifyHashedPassword(user, hashedPassword, password);
+
+    public static string GenerateOtpCode()
+    {
+        const string otpAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        const int otpCodeLength = 8;
+        var chars = new char[otpCodeLength];
+
+        var randomBytes = new byte[otpCodeLength];
+        RandomNumberGenerator.Fill(randomBytes);
+
+        for (var i = 0; i < otpCodeLength; i++)
+        {
+            chars[i] = otpAlphabet[randomBytes[i] % otpAlphabet.Length];
+        }
+
+        var otpCode = new string(chars);
+        return !RegularExpressionValidation.IsOtpCodeValid(otpCode)
+            ? throw new ArgumentException($"Generated OTP Code `{otpCode}` is invalid")
+            : otpCode;
+    }
 }

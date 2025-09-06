@@ -17,7 +17,7 @@ namespace JoyModels.API.Controllers
         }
 
         [HttpGet("{uuid}")]
-        public async Task<ActionResult<SsoGet>> GetByUuid([FromQuery] string uuid)
+        public async Task<ActionResult<SsoGet>> GetByUuid(string uuid)
         {
             return await _service.GetByUuid(uuid);
         }

@@ -1,8 +1,10 @@
+using System.Transactions;
 using JoyModels.Models.DataTransferObjects.Sso;
 using JoyModels.Models.DataTransferObjects.User;
 using JoyModels.Models.DataTransferObjects.UserRole;
 using JoyModels.Models.src.Database.Entities;
 using Microsoft.EntityFrameworkCore;
+using UserRole = JoyModels.Models.Enums.UserRole;
 
 namespace JoyModels.Services.Services.Sso;
 
@@ -24,14 +26,14 @@ public class SsoService : ISsoService
             .Include(x => x.UserUu)
             .Include(x => x.UserUu.UserRoleUu)
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Uuid.ToString() == uuid || x.UserUuid.ToString() == uuid);
+            .FirstAsync(x => x.Uuid.ToString() == uuid || x.UserUuid.ToString() == uuid);
 
         if (pendingUserEntity == null)
             throw new KeyNotFoundException($"Pending user with uuid `{uuid}` not found");
 
         var pendingUser = new SsoGet()
         {
-            Uuid = Guid.Parse(uuid),
+            Uuid = pendingUserEntity.Uuid,
             UserUuid = pendingUserEntity.UserUuid,
             User = new UserGet()
             {
@@ -61,9 +63,63 @@ public class SsoService : ISsoService
     public async Task<UserGet> Create(UserCreate user)
     {
         user.ValidateUserCreation();
-        var hashedPassword = user.GeneratePasswordHash(user.Password);
 
-        return new UserGet();
+        var userRoleEntity = await _context.UserRoles
+            .AsNoTracking()
+            .FirstAsync(x => x.RoleName == nameof(UserRole.Unverified));
+
+        var userEntity = new User()
+        {
+            Uuid = Guid.NewGuid(),
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            NickName = user.Nickname,
+            Email = user.Email,
+            PasswordHash = user.GeneratePasswordHash(user.Password),
+            CreatedAt = DateTime.Now,
+            UserRoleUuid = userRoleEntity.Uuid
+        };
+
+        var pendingUserEntity = new PendingUser()
+        {
+            Uuid = Guid.NewGuid(),
+            UserUuid = userEntity.Uuid,
+            OtpCode = SsoHelperMethods.GenerateOtpCode(),
+            OtpCreatedAt = DateTime.Now,
+            OtpExpirationDate = DateTime.Now.AddMinutes(60)
+        };
+
+        var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            _context.Users.Add(userEntity);
+            await _context.SaveChangesAsync();
+
+            _context.PendingUsers.Add(pendingUserEntity);
+            await _context.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            throw new TransactionException(ex.Message, ex);
+        }
+
+        return new UserGet()
+        {
+            Uuid = userEntity.Uuid,
+            FirstName = userEntity.FirstName,
+            LastName = userEntity.LastName,
+            NickName = userEntity.NickName,
+            Email = userEntity.Email,
+            CreatedAt = userEntity.CreatedAt,
+            UserRoleUuid = userRoleEntity.Uuid,
+            UserRole = new UserRoleGet()
+            {
+                Uuid = userRoleEntity.Uuid,
+                RoleName = userRoleEntity.RoleName
+            }
+        };
     }
 
     public async Task<UserGet> Verify()
