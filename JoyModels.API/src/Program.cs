@@ -5,5 +5,4 @@ builder.Services.RegisterDatabaseServices(builder.Configuration);
 builder.Services.RegisterDependencyInjectionServices();
 
 var app = builder.Build().RegisterAppServices();
-app.RegisterSwaggerServices();
 app.Run();
