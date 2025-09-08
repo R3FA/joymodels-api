@@ -1,56 +1,28 @@
 using System.Transactions;
+using AutoMapper;
 using JoyModels.Models.DataTransferObjects.Sso;
 using JoyModels.Models.DataTransferObjects.User;
-using JoyModels.Models.DataTransferObjects.UserRole;
 using JoyModels.Models.src.Database.Entities;
-using Microsoft.EntityFrameworkCore;
-using UserRole = JoyModels.Models.Enums.UserRole;
 
 namespace JoyModels.Services.Services.Sso;
 
 public class SsoService : ISsoService
 {
     private readonly JoyModelsDbContext _context;
+    private readonly IMapper _mapper;
 
-    public SsoService(JoyModelsDbContext context)
+    public SsoService(JoyModelsDbContext context, IMapper mapper)
     {
         _context = context;
+        _mapper = mapper;
     }
 
     public async Task<SsoGet> GetByUuid(string uuid)
     {
-        if (!Guid.TryParse(uuid, out var guid))
-            throw new ArgumentException($"UUID value `{uuid}` is invalid");
+        SsoHelperMethods.ValidateUuidValue(uuid);
 
-        var pendingUserEntity = await _context.PendingUsers
-            .Include(x => x.UserUu)
-            .Include(x => x.UserUu.UserRoleUu)
-            .AsNoTracking()
-            .FirstAsync(x => x.Uuid.ToString() == uuid || x.UserUuid.ToString() == uuid);
-
-        if (pendingUserEntity == null)
-            throw new KeyNotFoundException($"Pending user with uuid `{uuid}` not found");
-
-        var pendingUser = new SsoGet()
-        {
-            Uuid = pendingUserEntity.Uuid,
-            UserUuid = pendingUserEntity.UserUuid,
-            User = new UserGet()
-            {
-                Uuid = pendingUserEntity.UserUuid,
-                FirstName = pendingUserEntity.UserUu.FirstName,
-                LastName = pendingUserEntity.UserUu.LastName,
-                NickName = pendingUserEntity.UserUu.NickName,
-                Email = pendingUserEntity.UserUu.Email,
-                CreatedAt = pendingUserEntity.UserUu.CreatedAt,
-                UserRoleUuid = pendingUserEntity.UserUu.UserRoleUuid,
-                UserRole = new UserRoleGet()
-                {
-                    Uuid = pendingUserEntity.UserUu.UserRoleUu.Uuid,
-                    RoleName = pendingUserEntity.UserUu.UserRoleUu.RoleName
-                }
-            }
-        };
+        var pendingUserEntity = await SsoHelperMethods.GetPendingUserEntity(_context, uuid);
+        var pendingUser = _mapper.Map<SsoGet>(pendingUserEntity);
 
         return pendingUser;
     }
@@ -64,30 +36,9 @@ public class SsoService : ISsoService
     {
         user.ValidateUserCreation();
 
-        var userRoleEntity = await _context.UserRoles
-            .AsNoTracking()
-            .FirstAsync(x => x.RoleName == nameof(UserRole.Unverified));
-
-        var userEntity = new User()
-        {
-            Uuid = Guid.NewGuid(),
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            NickName = user.Nickname,
-            Email = user.Email,
-            PasswordHash = user.GeneratePasswordHash(user.Password),
-            CreatedAt = DateTime.Now,
-            UserRoleUuid = userRoleEntity.Uuid
-        };
-
-        var pendingUserEntity = new PendingUser()
-        {
-            Uuid = Guid.NewGuid(),
-            UserUuid = userEntity.Uuid,
-            OtpCode = SsoHelperMethods.GenerateOtpCode(),
-            OtpCreatedAt = DateTime.Now,
-            OtpExpirationDate = DateTime.Now.AddMinutes(60)
-        };
+        var userRoleEntity = await SsoHelperMethods.GetUserRoleEntity(_context);
+        var userEntity = SsoHelperMethods.CreateUserEntity(user, userRoleEntity);
+        var pendingUserEntity = SsoHelperMethods.CreatePendingUserEntity(userEntity);
 
         var transaction = await _context.Database.BeginTransactionAsync();
         try
@@ -105,21 +56,8 @@ public class SsoService : ISsoService
             throw new TransactionException(ex.Message, ex);
         }
 
-        return new UserGet()
-        {
-            Uuid = userEntity.Uuid,
-            FirstName = userEntity.FirstName,
-            LastName = userEntity.LastName,
-            NickName = userEntity.NickName,
-            Email = userEntity.Email,
-            CreatedAt = userEntity.CreatedAt,
-            UserRoleUuid = userRoleEntity.Uuid,
-            UserRole = new UserRoleGet()
-            {
-                Uuid = userRoleEntity.Uuid,
-                RoleName = userRoleEntity.RoleName
-            }
-        };
+        userEntity.UserRoleUu = userRoleEntity;
+        return _mapper.Map<UserGet>(userEntity);
     }
 
     public async Task<UserGet> Verify()
