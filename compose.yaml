@@ -1,7 +1,11 @@
 ﻿services:
-  joymodels.api:
-    image: joymodels.api
-    build:
-      context: .
-      dockerfile: JoyModels.API/Dockerfile
-
+  joymodels-mariadb:
+    image: mariadb:lts
+    restart: always
+    environment:
+      MARIADB_DATABASE: joymodels-db
+      MARIADB_ROOT_PASSWORD: password
+    ports:
+      - 3306:3306
+    volumes:
+      - ./JoyModels.Models/src/Database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro

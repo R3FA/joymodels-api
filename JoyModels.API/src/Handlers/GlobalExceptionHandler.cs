@@ -1,39 +1,47 @@
+using System.Data;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace JoyModels.API.Handlers;
 
-public class GlobalExceptionHandler(
-    IProblemDetailsService problemDetailsService,
-    ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
+public sealed class GlobalExceptionHandler(
+    ILogger<GlobalExceptionHandler> logger
+) : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext,
         Exception exception,
         CancellationToken cancellationToken)
     {
-        logger.LogError(exception, "Unhandled exception occured");
+        logger.LogError(exception, "Unhandled exception occurred");
 
         httpContext.Response.StatusCode = exception switch
         {
-            ApplicationException => StatusCodes.Status400BadRequest,
+            ArgumentException or ApplicationException => StatusCodes.Status400BadRequest,
             UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
             KeyNotFoundException => StatusCodes.Status404NotFound,
-            DbUpdateConcurrencyException => StatusCodes.Status409Conflict,
+            DBConcurrencyException => StatusCodes.Status409Conflict,
             _ => StatusCodes.Status500InternalServerError
         };
 
-        return await problemDetailsService.TryWriteAsync(new ProblemDetailsContext
+        var problemDetails = new ProblemDetails
         {
-            HttpContext = httpContext,
-            Exception = exception,
-            ProblemDetails = new ProblemDetails
+            Type = exception.GetType().Name,
+            Title = httpContext.Response.StatusCode switch
             {
-                Type = exception.GetType().Name,
-                Title = "An error occured",
-                Detail = exception.Message,
-            }
-        });
+                400 => "Bad Request",
+                401 => "Unauthorized",
+                404 => "Not Found",
+                409 => "Conflict",
+                _ => "Internal Server Error"
+            },
+            Detail = exception.Message,
+            Status = httpContext.Response.StatusCode,
+            Instance = httpContext.Request.Path
+        };
+
+        await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
+
+        return true;
     }
 }

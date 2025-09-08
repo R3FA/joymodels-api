@@ -7,7 +7,7 @@ public partial class MessageType
 {
     public Guid Uuid { get; set; }
 
-    public string MessageType1 { get; set; } = null!;
+    public string MessageName { get; set; } = null!;
 
     public virtual ICollection<CommunityPostQuestionSection> CommunityPostQuestionSections { get; set; } = new List<CommunityPostQuestionSection>();
 
