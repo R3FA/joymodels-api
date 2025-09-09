@@ -41,7 +41,7 @@ public static class SsoHelperMethods
     public static void ValidateUuidValue(string uuid)
     {
         if (!Guid.TryParse(uuid, out var guid))
-            throw new ArgumentException($"UUID value `{uuid}` is invalid");
+            throw new ArgumentException($"Sent value `{uuid}` has invalid UUID format");
     }
 
     public static async Task<PendingUser> GetPendingUserEntity(JoyModelsDbContext context, string uuid)
@@ -52,7 +52,7 @@ public static class SsoHelperMethods
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Uuid.ToString() == uuid || x.UserUuid.ToString() == uuid);
 
-        return pendingUserEntity ?? throw new KeyNotFoundException($"Pending user with uuid `{uuid}` not found");
+        return pendingUserEntity ?? throw new KeyNotFoundException($"Pending user with uuid `{uuid}` is not found");
     }
 
     public static async Task<UserRole> GetUserRoleEntity(JoyModelsDbContext context)
