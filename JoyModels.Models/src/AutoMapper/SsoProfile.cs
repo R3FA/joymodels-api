@@ -10,7 +10,7 @@ public class SsoProfile : Profile
 {
     public SsoProfile()
     {
-        CreateMap<PendingUser, SsoGet>()
+        CreateMap<PendingUser, SsoReturn>()
             .ForMember(dest => dest.User,
                 opt => opt.MapFrom(src => src.UserUu));
 

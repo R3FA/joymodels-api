@@ -16,16 +16,22 @@ namespace JoyModels.API.Controllers
             _service = service;
         }
 
-        [HttpGet("{uuid}")]
-        public async Task<ActionResult<SsoGet>> GetByUuid(string uuid)
+        [HttpGet("GetByUuid")]
+        public async Task<ActionResult<SsoReturn>> GetByUuid([FromQuery] SsoGet request)
         {
-            return await _service.GetByUuid(uuid);
+            return await _service.GetByUuid(request);
         }
 
-        [HttpPost]
+        [HttpPost("Create")]
         public async Task<ActionResult<UserGet>> Create([FromBody] UserCreate user)
         {
             return await _service.Create(user);
+        }
+
+        [HttpPost("Verify")]
+        public async Task<ActionResult<UserGet>> Verify([FromBody] SsoVerify request)
+        {
+            return await _service.Verify(request);
         }
     }
 }

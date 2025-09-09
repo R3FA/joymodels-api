@@ -3,6 +3,8 @@ using AutoMapper;
 using JoyModels.Models.DataTransferObjects.Sso;
 using JoyModels.Models.DataTransferObjects.User;
 using JoyModels.Models.src.Database.Entities;
+using Microsoft.EntityFrameworkCore;
+using UserRoleEnum = JoyModels.Models.Enums.UserRole;
 
 namespace JoyModels.Services.Services.Sso;
 
@@ -17,17 +19,18 @@ public class SsoService : ISsoService
         _mapper = mapper;
     }
 
-    public async Task<SsoGet> GetByUuid(string uuid)
+    public async Task<SsoReturn> GetByUuid(SsoGet request)
     {
-        SsoHelperMethods.ValidateUuidValue(uuid);
+        SsoHelperMethods.ValidateUuidValue(request.PendingUserUuid.ToString());
+        SsoHelperMethods.ValidateUuidValue(request.UserUuid.ToString());
 
-        var pendingUserEntity = await SsoHelperMethods.GetPendingUserEntity(_context, uuid);
-        var pendingUser = _mapper.Map<SsoGet>(pendingUserEntity);
+        var pendingUserEntity = await SsoHelperMethods.GetPendingUserEntity(_context, request);
+        var pendingUser = _mapper.Map<SsoReturn>(pendingUserEntity);
 
         return pendingUser;
     }
 
-    public async Task<SsoGet> GetAll()
+    public async Task<SsoReturn> GetAll()
     {
         throw new NotImplementedException();
     }
@@ -36,7 +39,7 @@ public class SsoService : ISsoService
     {
         user.ValidateUserCreation();
 
-        var userRoleEntity = await SsoHelperMethods.GetUserRoleEntity(_context);
+        var userRoleEntity = await SsoHelperMethods.GetUserRoleEntity(_context, nameof(UserRoleEnum.Unverified));
 
         var userEntity = _mapper.Map<User>(user);
         userEntity.SetCustomValuesUserEntity(user, userRoleEntity);
@@ -64,9 +67,46 @@ public class SsoService : ISsoService
         return _mapper.Map<UserGet>(userEntity);
     }
 
-    public async Task<UserGet> Verify()
+    // TODO: Sutra uradi da fetcha samo OTP code koji je latest a ne prvi na koji naleti
+    public async Task<UserGet> Verify(SsoVerify request)
     {
-        throw new NotImplementedException();
+        SsoHelperMethods.ValidateUuidValue(request.PendingUserUuid.ToString());
+        SsoHelperMethods.ValidateUuidValue(request.UserUuid.ToString());
+        SsoHelperMethods.ValidateOtpCodeValueFormat(request.OtpCode);
+
+        var pendingUserEntity = await SsoHelperMethods
+            .GetPendingUserEntity(_context,
+                new SsoGet()
+                    { PendingUserUuid = request.PendingUserUuid, UserUuid = request.UserUuid });
+
+        await SsoHelperMethods.ValidateOtpCodeForUserVerification(_context, pendingUserEntity, request);
+
+        var userRoleEntity = await SsoHelperMethods.GetUserRoleEntity(_context, nameof(UserRoleEnum.User));
+        var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            await _context.PendingUsers
+                .Where(x => x.UserUuid == Guid.Parse(request.UserUuid))
+                .ExecuteDeleteAsync();
+            await _context.SaveChangesAsync();
+
+            await _context.Users
+                .Where(x => x.Uuid == Guid.Parse(request.UserUuid))
+                .ExecuteUpdateAsync(y => y.SetProperty(z => z.UserRoleUuid,
+                    z => userRoleEntity.Uuid));
+            await _context.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            throw new TransactionException(ex.Message, ex);
+        }
+
+        var updatedUserEntity = await SsoHelperMethods.GetUserEntity(_context, request.UserUuid);
+        var verifiedUser = _mapper.Map<UserGet>(updatedUserEntity);
+
+        return verifiedUser;
     }
 
     public async Task Delete(string uuid)
