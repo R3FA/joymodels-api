@@ -67,7 +67,9 @@ public static class SsoHelperMethods
 
     public static User SetCustomValuesUserEntity(this User userEntity, UserCreate userDto, UserRole userRole)
     {
+        userEntity.Uuid = Guid.NewGuid();
         userEntity.PasswordHash = userDto.GeneratePasswordHash(userDto.Password);
+        userEntity.CreatedAt = DateTime.Now;
         userEntity.UserRoleUuid = userRole.Uuid;
 
         return userEntity;
@@ -75,7 +77,10 @@ public static class SsoHelperMethods
 
     public static PendingUser SetCustomValuesPendingUserEntity(this PendingUser pendingUserEntity)
     {
+        pendingUserEntity.Uuid = Guid.NewGuid();
         pendingUserEntity.OtpCode = GenerateOtpCode();
+        pendingUserEntity.OtpCreatedAt = DateTime.Now;
+        pendingUserEntity.OtpExpirationDate = DateTime.Now.AddMinutes(60);
 
         return pendingUserEntity;
     }
