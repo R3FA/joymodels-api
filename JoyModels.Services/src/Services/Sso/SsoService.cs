@@ -37,8 +37,12 @@ public class SsoService : ISsoService
         user.ValidateUserCreation();
 
         var userRoleEntity = await SsoHelperMethods.GetUserRoleEntity(_context);
-        var userEntity = SsoHelperMethods.CreateUserEntity(user, userRoleEntity);
-        var pendingUserEntity = SsoHelperMethods.CreatePendingUserEntity(userEntity);
+
+        var userEntity = _mapper.Map<User>(user);
+        userEntity.SetCustomValuesUserEntity(user, userRoleEntity);
+
+        var pendingUserEntity = _mapper.Map<PendingUser>(userEntity);
+        pendingUserEntity.SetCustomValuesPendingUserEntity();
 
         var transaction = await _context.Database.BeginTransactionAsync();
         try

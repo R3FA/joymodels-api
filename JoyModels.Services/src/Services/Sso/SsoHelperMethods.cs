@@ -65,31 +65,19 @@ public static class SsoHelperMethods
                throw new KeyNotFoundException($"User Role {nameof(UserRoleEnum.Unverified)} is not found");
     }
 
-    public static User CreateUserEntity(UserCreate user, UserRole userRole)
+    public static User SetCustomValuesUserEntity(this User userEntity, UserCreate userDto, UserRole userRole)
     {
-        return new User()
-        {
-            Uuid = Guid.NewGuid(),
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            NickName = user.Nickname,
-            Email = user.Email,
-            PasswordHash = user.GeneratePasswordHash(user.Password),
-            CreatedAt = DateTime.Now,
-            UserRoleUuid = userRole.Uuid
-        };
+        userEntity.PasswordHash = userDto.GeneratePasswordHash(userDto.Password);
+        userEntity.UserRoleUuid = userRole.Uuid;
+
+        return userEntity;
     }
 
-    public static PendingUser CreatePendingUserEntity(User user)
+    public static PendingUser SetCustomValuesPendingUserEntity(this PendingUser pendingUserEntity)
     {
-        return new PendingUser()
-        {
-            Uuid = Guid.NewGuid(),
-            UserUuid = user.Uuid,
-            OtpCode = GenerateOtpCode(),
-            OtpCreatedAt = DateTime.Now,
-            OtpExpirationDate = DateTime.Now.AddMinutes(60)
-        };
+        pendingUserEntity.OtpCode = GenerateOtpCode();
+
+        return pendingUserEntity;
     }
 
     private static string GeneratePasswordHash(this UserCreate user, string password)
