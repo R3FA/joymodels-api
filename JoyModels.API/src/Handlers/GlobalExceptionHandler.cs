@@ -20,8 +20,7 @@ public sealed class GlobalExceptionHandler(
             ArgumentException or ApplicationException => StatusCodes.Status400BadRequest,
             UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
             KeyNotFoundException => StatusCodes.Status404NotFound,
-            // TODO: Find another exception for DB Conflict.
-            // DBConcurrencyException => StatusCodes.Status409Conflict,
+            DuplicateNameException => StatusCodes.Status409Conflict,
             _ => StatusCodes.Status500InternalServerError
         };
 

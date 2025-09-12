@@ -60,18 +60,17 @@ public class SsoService : ISsoService
         }
         catch (Exception ex)
         {
-            throw new TransactionException(ex.Message, ex);
+            throw new TransactionException(ex.InnerException!.Message);
         }
 
         userEntity.UserRoleUu = userRoleEntity;
         return _mapper.Map<UserGet>(userEntity);
     }
 
-    // TODO: Sutra uradi da fetcha samo OTP code koji je latest a ne prvi na koji naleti
     public async Task<UserGet> Verify(SsoVerify request)
     {
-        SsoHelperMethods.ValidateUuidValue(request.PendingUserUuid.ToString());
-        SsoHelperMethods.ValidateUuidValue(request.UserUuid.ToString());
+        SsoHelperMethods.ValidateUuidValue(request.PendingUserUuid);
+        SsoHelperMethods.ValidateUuidValue(request.UserUuid);
         SsoHelperMethods.ValidateOtpCodeValueFormat(request.OtpCode);
 
         var pendingUserEntity = await SsoHelperMethods
@@ -100,7 +99,7 @@ public class SsoService : ISsoService
         }
         catch (Exception ex)
         {
-            throw new TransactionException(ex.Message, ex);
+            throw new TransactionException(ex.InnerException!.Message);
         }
 
         var updatedUserEntity = await SsoHelperMethods.GetUserEntity(_context, request.UserUuid);

@@ -1,5 +1,5 @@
-using System.Data;
 using System.Security.Cryptography;
+using System.Transactions;
 using JoyModels.Models.DataTransferObjects.Sso;
 using JoyModels.Models.DataTransferObjects.User;
 using JoyModels.Models.src.Database.Entities;
@@ -61,7 +61,8 @@ public static class SsoHelperMethods
         if (DateTime.Now > pendingUserEntity.OtpExpirationDate)
         {
             await GeneratePendingUserAfterOtpCodeExpiration(context, pendingUserEntity);
-            throw new ArgumentException("Sent OTP Code has expired.");
+            throw new ArgumentException(
+                "Sent OTP Code has expired. Another code has been generated and will be sent to your mail inbox");
         }
     }
 
@@ -69,7 +70,7 @@ public static class SsoHelperMethods
     {
         var pendingUserEntity = await context.PendingUsers
             .Include(x => x.UserUu)
-            .Include(x => x.UserUu.UserRoleUu)
+            .Include(x => x.UserUu!.UserRoleUu)
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Uuid == Guid.Parse(ssoGetDto.PendingUserUuid)
                                       && x.UserUuid == Guid.Parse(ssoGetDto.UserUuid));
@@ -152,15 +153,23 @@ public static class SsoHelperMethods
     private static async Task GeneratePendingUserAfterOtpCodeExpiration(JoyModelsDbContext context,
         PendingUser pendingUserEntity)
     {
+        var transaction = await context.Database.BeginTransactionAsync();
         try
         {
+            await context.PendingUsers
+                .Where(x => x.UserUuid == pendingUserEntity.UserUuid)
+                .ExecuteDeleteAsync();
+            await context.SaveChangesAsync();
+
             pendingUserEntity.SetCustomValuesPendingUserEntity();
             await context.PendingUsers.AddAsync(pendingUserEntity);
             await context.SaveChangesAsync();
+
+            await transaction.CommitAsync();
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            throw new ApplicationException(e.Message);
+            throw new TransactionException(ex.InnerException!.Message);
         }
     }
 }
