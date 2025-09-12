@@ -1,3 +1,4 @@
+using System.Data;
 using System.Security.Cryptography;
 using System.Transactions;
 using JoyModels.Models.DataTransferObjects.Sso;
@@ -13,7 +14,7 @@ public static class SsoHelperMethods
 {
     private static readonly PasswordHasher<UserCreate> PasswordHasher = new();
 
-    public static void ValidateUserCreation(this UserCreate user)
+    public static void ValidateUserCreationArguments(this UserCreate user)
     {
         if (!RegularExpressionValidation.IsStringValid(user.FirstName,
                 Validation.ConstantValidation.User.UserCreate.FirstNameMaxLength))
@@ -37,6 +38,18 @@ public static class SsoHelperMethods
         if (!RegularExpressionValidation.IsPasswordValid(user.Password,
                 Validation.ConstantValidation.User.UserCreate.PasswordMaxLength))
             throw new ArgumentException($"Password `{user.Password}` is invalid.");
+    }
+
+    public static async Task ValidateUserCreationDuplicatedFields(this UserCreate user, JoyModelsDbContext context)
+    {
+        var isNicknameDuplicated = await context.Users.AnyAsync(x => x.NickName == user.Nickname);
+        var isEmailDuplicated = await context.Users.AnyAsync(x => x.Email == user.Email);
+
+        if (isNicknameDuplicated)
+            throw new DuplicateNameException($"Nickname `{user.Nickname}` is already registered in our database.");
+
+        if (isEmailDuplicated)
+            throw new DuplicateNameException($"Email `{user.Email}` is already registered in our database.");
     }
 
     public static void ValidateUuidValue(string uuid)

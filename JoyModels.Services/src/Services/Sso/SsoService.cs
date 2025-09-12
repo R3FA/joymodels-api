@@ -37,7 +37,8 @@ public class SsoService : ISsoService
 
     public async Task<UserGet> Create(UserCreate user)
     {
-        user.ValidateUserCreation();
+        user.ValidateUserCreationArguments();
+        await user.ValidateUserCreationDuplicatedFields(_context);
 
         var userRoleEntity = await SsoHelperMethods.GetUserRoleEntity(_context, nameof(UserRoleEnum.Unverified));
 
