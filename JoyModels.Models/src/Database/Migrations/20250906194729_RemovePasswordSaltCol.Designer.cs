@@ -719,6 +719,38 @@ namespace JoyModels.Models.src.Database.Migrations
                         .IsUnique();
 
                     b.ToTable("user_roles", (string)null);
+                    
+                    b.HasData(
+                        new
+                        {
+                            Uuid = new Guid("6aa5d268-c259-4054-b604-ff545eaa2f1e"),
+                            RoleName = "Undefined"
+                        },
+                        new
+                        {
+                            Uuid = new Guid("2107d612-ac38-4390-aeb6-276cf55b42bb"),
+                            RoleName = "Unverified"
+                        },
+                        new
+                        {
+                            Uuid = new Guid("efd09239-1461-4740-86ae-94ed49137a36"),
+                            RoleName = "User"
+                        },
+                        new
+                        {
+                            Uuid = new Guid("90051a72-89ea-48ca-8543-43f5843148c8"),
+                            RoleName = "Helper"
+                        },
+                        new
+                        {
+                            Uuid = new Guid("44b4be39-2884-462a-98c0-cb3b5eb9c3dd"),
+                            RoleName = "Admin"
+                        },
+                        new
+                        {
+                            Uuid = new Guid("c5c8ab92-5933-4122-a804-6533516aeb5d"),
+                            RoleName = "Root"
+                        });
                 });
 
             modelBuilder.Entity("JoyModels.Models.src.Database.Entities.UserToken", b =>
