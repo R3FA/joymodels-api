@@ -636,12 +636,12 @@ public partial class JoyModelsDbContext : DbContext
         });
 
         modelBuilder.Entity<UserRole>().HasData(
-            new UserRole { Uuid = Guid.NewGuid(), RoleName = "Undefined" },
-            new UserRole { Uuid = Guid.NewGuid(), RoleName = "Unverified" },
-            new UserRole { Uuid = Guid.NewGuid(), RoleName = "User" },
-            new UserRole { Uuid = Guid.NewGuid(), RoleName = "Helper" },
-            new UserRole { Uuid = Guid.NewGuid(), RoleName = "Admin" },
-            new UserRole { Uuid = Guid.NewGuid(), RoleName = "Root" }
+            new UserRole { Uuid = new Guid("9d532540-9d12-41be-88a2-4fe750f73972"), RoleName = "Undefined" },
+            new UserRole { Uuid = new Guid("3c093d83-18eb-41a4-9d62-c8d34e63d83c"), RoleName = "Unverified" },
+            new UserRole { Uuid = new Guid("b2d041cc-438b-49dc-9e2e-034f0cd88af2"), RoleName = "User" },
+            new UserRole { Uuid = new Guid("fee0de0a-f25d-4c5e-bb38-253c47e1964d"), RoleName = "Helper" },
+            new UserRole { Uuid = new Guid("3758f6b0-834f-4cd5-8725-ef718639e5b7"), RoleName = "Admin" },
+            new UserRole { Uuid = new Guid("03ee6412-91e7-4352-a614-23b09a779814"), RoleName = "Root" }
         );
 
         OnModelCreatingPartial(modelBuilder);
