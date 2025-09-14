@@ -16,28 +16,28 @@ public static class SsoHelperMethods
 
     public static void ValidateUserCreationArguments(this UserCreate user)
     {
-        if (!RegularExpressionValidation.IsStringValid(user.FirstName,
-                Validation.ConstantValidation.User.UserCreate.FirstNameMaxLength))
-            throw new ArgumentException($"First name `{user.FirstName}` is invalid.");
+        if (!RegularExpressionValidation.IsStringValid(user.FirstName))
+            throw new ArgumentException(
+                "Input must begin with a capital letter and contain only lowercase letters after.");
 
         if (user.LastName != null)
         {
-            if (!RegularExpressionValidation.IsStringValid(user.LastName,
-                    Validation.ConstantValidation.User.UserCreate.LastNameMaxLength))
-                throw new ArgumentException($"Last name `{user.LastName}` is invalid.");
+            if (!RegularExpressionValidation.IsStringValid(user.LastName))
+                throw new ArgumentException(
+                    "Input must begin with a capital letter and contain only lowercase letters after.");
         }
 
-        if (!RegularExpressionValidation.IsNicknameValid(user.Nickname,
-                Validation.ConstantValidation.User.UserCreate.NicknameMaxLength))
-            throw new ArgumentException($"Nickname `{user.Nickname}` is invalid.");
+        if (!RegularExpressionValidation.IsNicknameValid(user.Nickname))
+            throw new ArgumentException(
+                "Nickname must have at least 3 characters and may only contain lowercase letters and numbers.");
 
-        if (!RegularExpressionValidation.IsEmailValid(user.Email,
-                Validation.ConstantValidation.User.UserCreate.EmailMaxLength))
-            throw new ArgumentException($"Email `{user.Email}` is invalid.");
+        if (!RegularExpressionValidation.IsEmailValid(user.Email))
+            throw new ArgumentException(
+                "The email must contain the '@' symbol, followed by a domain with a dot. Value has to be without spaces or blank characters.");
 
-        if (!RegularExpressionValidation.IsPasswordValid(user.Password,
-                Validation.ConstantValidation.User.UserCreate.PasswordMaxLength))
-            throw new ArgumentException($"Password `{user.Password}` is invalid.");
+        if (!RegularExpressionValidation.IsPasswordValid(user.Password))
+            throw new ArgumentException(
+                "Password must have at least 8 characters, one uppercase letter, one number, and one special character (!@#$%^&*).");
     }
 
     public static async Task ValidateUserCreationDuplicatedFields(this UserCreate user, JoyModelsDbContext context)
