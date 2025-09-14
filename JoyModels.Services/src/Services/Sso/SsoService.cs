@@ -21,8 +21,8 @@ public class SsoService : ISsoService
 
     public async Task<SsoReturn> GetByUuid(SsoGet request)
     {
-        SsoHelperMethods.ValidateUuidValue(request.PendingUserUuid.ToString());
-        SsoHelperMethods.ValidateUuidValue(request.UserUuid.ToString());
+        SsoHelperMethods.ValidateUuidValue(request.PendingUserUuid);
+        SsoHelperMethods.ValidateUuidValue(request.UserUuid);
 
         var pendingUserEntity = await SsoHelperMethods.GetPendingUserEntity(_context, request);
         var pendingUser = _mapper.Map<SsoReturn>(pendingUserEntity);
