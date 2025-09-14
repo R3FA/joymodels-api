@@ -529,8 +529,8 @@ namespace JoyModels.Models.src.Database.Migrations
 
                     b.Property<string>("OtpCode")
                         .IsRequired()
-                        .HasMaxLength(12)
-                        .HasColumnType("char(12)")
+                        .HasMaxLength(8)
+                        .HasColumnType("char(8)")
                         .HasColumnName("otp_code")
                         .IsFixedLength();
 
