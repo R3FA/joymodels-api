@@ -472,7 +472,7 @@ public partial class JoyModelsDbContext : DbContext
 
             entity.Property(e => e.Uuid).HasColumnName("uuid");
             entity.Property(e => e.OtpCode)
-                .HasMaxLength(8)
+                .HasMaxLength(12)
                 .IsFixedLength()
                 .HasColumnName("otp_code");
             entity.Property(e => e.OtpCreatedAt)
