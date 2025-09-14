@@ -22,7 +22,23 @@ public class SsoProfile : Profile
 
         CreateMap<UserCreate, User>();
 
+        CreateMap<User, User>()
+            .AfterMap((_, dest, context) =>
+            {
+                if (context.TryGetItems(out var items) &&
+                    items.TryGetValue("UserRole", out var userRoleObject) &&
+                    userRoleObject is UserRole userRole)
+                {
+                    dest.UserRoleUu = userRole;
+                }
+            });
+
         CreateMap<User, PendingUser>()
             .ForMember(dest => dest.UserUuid, opt => opt.MapFrom(src => src.Uuid));
+
+        CreateMap<Guid, PendingUser>()
+            .ForMember(dest => dest.UserUuid, opt => opt.MapFrom(src => src));
+
+        CreateMap<SsoVerify, SsoGet>();
     }
 }

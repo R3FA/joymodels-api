@@ -1,3 +1,4 @@
+using JoyModels.Models.DataTransferObjects.CustomRequestTypes;
 using JoyModels.Models.DataTransferObjects.Sso;
 using JoyModels.Models.DataTransferObjects.User;
 
@@ -9,5 +10,5 @@ public interface ISsoService
     Task<SsoReturn> GetAll();
     Task<UserGet> Create(UserCreate user);
     Task<UserGet> Verify(SsoVerify request);
-    Task Delete(string uuid);
+    Task<SuccessReturnDetails> ResendOtpCode(SsoResendOtpCode request);
 }

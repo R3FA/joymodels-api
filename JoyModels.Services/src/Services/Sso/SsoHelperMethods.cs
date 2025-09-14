@@ -1,12 +1,12 @@
 using System.Data;
 using System.Security.Cryptography;
-using System.Transactions;
 using JoyModels.Models.DataTransferObjects.Sso;
 using JoyModels.Models.DataTransferObjects.User;
 using JoyModels.Models.src.Database.Entities;
 using JoyModels.Services.Validation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using UserRoleEnum = JoyModels.Models.Enums.UserRole;
 
 namespace JoyModels.Services.Services.Sso;
 
@@ -18,13 +18,13 @@ public static class SsoHelperMethods
     {
         if (!RegularExpressionValidation.IsStringValid(user.FirstName))
             throw new ArgumentException(
-                "Input must begin with a capital letter and contain only lowercase letters after.");
+                "First name must begin with a capital letter and contain only lowercase letters after.");
 
         if (user.LastName != null)
         {
             if (!RegularExpressionValidation.IsStringValid(user.LastName))
                 throw new ArgumentException(
-                    "Input must begin with a capital letter and contain only lowercase letters after.");
+                    "Last name must begin with a capital letter and contain only lowercase letters after.");
         }
 
         if (!RegularExpressionValidation.IsNicknameValid(user.Nickname))
@@ -33,7 +33,7 @@ public static class SsoHelperMethods
 
         if (!RegularExpressionValidation.IsEmailValid(user.Email))
             throw new ArgumentException(
-                "The email must contain the '@' symbol, followed by a domain with a dot. Value has to be without spaces or blank characters.");
+                "Email must contain the '@' symbol, followed by a domain with a dot. Value has to be without spaces or blank characters.");
 
         if (!RegularExpressionValidation.IsPasswordValid(user.Password))
             throw new ArgumentException(
@@ -52,19 +52,13 @@ public static class SsoHelperMethods
             throw new DuplicateNameException($"Email `{user.Email}` is already registered in our database.");
     }
 
-    public static void ValidateUuidValue(string uuid)
-    {
-        if (!Guid.TryParse(uuid, out var guid))
-            throw new ArgumentException($"Sent value `{uuid}` has invalid UUID format.");
-    }
-
     public static void ValidateOtpCodeValueFormat(string otpCode)
     {
         if (!RegularExpressionValidation.IsOtpCodeValid(otpCode))
             throw new ArgumentException("OTP code must be 12 characters, using only uppercase letters and numbers.");
     }
 
-    public static async Task ValidateOtpCodeForUserVerification(JoyModelsDbContext context,
+    public static void ValidateOtpCodeForUserVerification(JoyModelsDbContext context,
         PendingUser pendingUserEntity,
         SsoVerify ssoVerifyDto)
     {
@@ -72,21 +66,17 @@ public static class SsoHelperMethods
             throw new ArgumentException("Invalid OTP code.");
 
         if (DateTime.Now > pendingUserEntity.OtpExpirationDate)
-        {
-            await GeneratePendingUserAfterOtpCodeExpiration(context, pendingUserEntity);
             throw new ArgumentException(
-                "Sent OTP Code has expired. Another code has been generated and will be sent to your mail inbox");
-        }
+                "Sent OTP Code has expired. Click on resend verification button to regenerate a new OTP code.");
     }
 
     public static async Task<PendingUser> GetPendingUserEntity(JoyModelsDbContext context, SsoGet ssoGetDto)
     {
         var pendingUserEntity = await context.PendingUsers
             .Include(x => x.UserUu)
-            .Include(x => x.UserUu!.UserRoleUu)
+            .Include(x => x.UserUu.UserRoleUu)
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Uuid == Guid.Parse(ssoGetDto.PendingUserUuid)
-                                      && x.UserUuid == Guid.Parse(ssoGetDto.UserUuid));
+            .FirstOrDefaultAsync(x => x.UserUuid == ssoGetDto.UserUuid);
 
         return pendingUserEntity ?? throw new KeyNotFoundException("Pending user with sent values is not found.");
     }
@@ -103,15 +93,28 @@ public static class SsoHelperMethods
     }
 
     // TODO: Move this method when Users endpoint is created
-    public static async Task<User> GetUserEntity(JoyModelsDbContext context, string userUuid)
+    public static async Task<User> GetUserEntity(JoyModelsDbContext context, Guid userUuid)
     {
         var userEntity = await context.Users
             .AsNoTracking()
             .Include(x => x.UserRoleUu)
-            .FirstOrDefaultAsync(x => x.Uuid == Guid.Parse(userUuid));
+            .FirstOrDefaultAsync(x => x.Uuid == userUuid);
 
         return userEntity ??
-               throw new KeyNotFoundException($"User with UUID {userUuid} is not found.");
+               throw new KeyNotFoundException($"User with UUID `{userUuid}` is not found.");
+    }
+
+    public static async Task CheckIfUserIsVerified(JoyModelsDbContext context, Guid userUuid)
+    {
+        var userExists = await context.Users
+            .AsNoTracking()
+            .Include(x => x.UserRoleUu)
+            .Where(x => x.UserRoleUu.RoleName == nameof(UserRoleEnum.Unverified))
+            .AnyAsync(x => x.Uuid == userUuid);
+
+        if (!userExists)
+            throw new KeyNotFoundException(
+                $"User with UUID `{userUuid}` is already verified.");
     }
 
     public static User SetCustomValuesUserEntity(this User userEntity, UserCreate userDto, UserRole userRole)
@@ -130,18 +133,47 @@ public static class SsoHelperMethods
         pendingUserEntity.OtpCode = GenerateOtpCode();
         pendingUserEntity.OtpCreatedAt = DateTime.Now;
         pendingUserEntity.OtpExpirationDate = DateTime.Now.AddMinutes(60);
-        pendingUserEntity.UserUu = null;
 
         return pendingUserEntity;
+    }
+
+    public static async Task CreateUser(this User userEntity, JoyModelsDbContext context)
+    {
+        await context.Users.AddAsync(userEntity);
+        await context.SaveChangesAsync();
+    }
+
+    public static async Task CreatePendingUser(this PendingUser pendingUserEntity, JoyModelsDbContext context)
+    {
+        await context.PendingUsers.AddAsync(pendingUserEntity);
+        await context.SaveChangesAsync();
+    }
+
+    public static async Task DeleteAllPendingUserData(JoyModelsDbContext context, Guid userUuid)
+    {
+        await context.PendingUsers
+            .Where(x => x.UserUuid == userUuid)
+            .ExecuteDeleteAsync();
+        await context.SaveChangesAsync();
+    }
+
+    public static async Task UpdateUsersRoleAfterVerification(JoyModelsDbContext context, Guid userUuid,
+        Guid userRoleUuid)
+    {
+        await context.Users
+            .Where(x => x.Uuid == userUuid)
+            .ExecuteUpdateAsync(y => y.SetProperty(z => z.UserRoleUuid,
+                z => userRoleUuid));
+        await context.SaveChangesAsync();
     }
 
     private static string GeneratePasswordHash(this UserCreate user, string password)
         => PasswordHasher.HashPassword(user, password);
 
     // TODO: You'll have to expand this logic when Login method comes
-    private static PasswordVerificationResult VerifyPasswordHash(this UserCreate user, string hashedPassword,
-        string password)
-        => PasswordHasher.VerifyHashedPassword(user, hashedPassword, password);
+    // private static PasswordVerificationResult VerifyPasswordHash(this UserCreate user, string hashedPassword,
+    //     string password)
+    //     => PasswordHasher.VerifyHashedPassword(user, hashedPassword, password);
 
     private static string GenerateOtpCode()
     {
@@ -162,28 +194,5 @@ public static class SsoHelperMethods
             ? throw new ArgumentException(
                 "Generated OTP code must be 12 characters, using only uppercase letters and numbers.")
             : otpCode;
-    }
-
-    private static async Task GeneratePendingUserAfterOtpCodeExpiration(JoyModelsDbContext context,
-        PendingUser pendingUserEntity)
-    {
-        var transaction = await context.Database.BeginTransactionAsync();
-        try
-        {
-            await context.PendingUsers
-                .Where(x => x.UserUuid == pendingUserEntity.UserUuid)
-                .ExecuteDeleteAsync();
-            await context.SaveChangesAsync();
-
-            pendingUserEntity.SetCustomValuesPendingUserEntity();
-            await context.PendingUsers.AddAsync(pendingUserEntity);
-            await context.SaveChangesAsync();
-
-            await transaction.CommitAsync();
-        }
-        catch (Exception ex)
-        {
-            throw new TransactionException(ex.InnerException!.Message);
-        }
     }
 }

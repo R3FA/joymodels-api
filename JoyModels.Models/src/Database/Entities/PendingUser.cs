@@ -12,5 +12,5 @@ public partial class PendingUser
 
     public DateTime OtpExpirationDate { get; set; }
 
-    public virtual User? UserUu { get; set; }
+    public virtual User UserUu { get; set; } = null!;
 }

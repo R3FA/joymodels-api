@@ -1,3 +1,4 @@
+using JoyModels.Models.DataTransferObjects.CustomRequestTypes;
 using JoyModels.Models.DataTransferObjects.Sso;
 using JoyModels.Models.DataTransferObjects.User;
 using JoyModels.Services.Services.Sso;
@@ -32,6 +33,13 @@ namespace JoyModels.API.Controllers
         public async Task<ActionResult<UserGet>> Verify([FromBody] SsoVerify request)
         {
             return await _service.Verify(request);
+        }
+
+        [HttpPost("ResendOtpCode")]
+        public async Task<ActionResult<SuccessReturnDetails>> ResendOtpCode(
+            [FromBody] SsoResendOtpCode request)
+        {
+            return await _service.ResendOtpCode(request);
         }
     }
 }
