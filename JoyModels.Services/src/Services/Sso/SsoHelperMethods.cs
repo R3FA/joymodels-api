@@ -61,7 +61,7 @@ public static class SsoHelperMethods
     public static void ValidateOtpCodeValueFormat(string otpCode)
     {
         if (!RegularExpressionValidation.IsOtpCodeValid(otpCode))
-            throw new ArgumentException($"Otp `{otpCode}` has invalid format.");
+            throw new ArgumentException("OTP code must be 8 characters, using only uppercase letters and numbers.");
     }
 
     public static async Task ValidateOtpCodeForUserVerification(JoyModelsDbContext context,
@@ -159,7 +159,8 @@ public static class SsoHelperMethods
 
         var otpCode = new string(chars);
         return !RegularExpressionValidation.IsOtpCodeValid(otpCode)
-            ? throw new ArgumentException($"Generated OTP Code `{otpCode}` is invalid.")
+            ? throw new ArgumentException(
+                "Generated OTP code must be 8 characters, using only uppercase letters and numbers.")
             : otpCode;
     }
 
