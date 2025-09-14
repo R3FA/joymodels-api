@@ -57,7 +57,7 @@ public static class RegularExpressionValidation
         if (string.IsNullOrWhiteSpace(otpCode))
             throw new ArgumentException("OTP Code cannot be empty string");
 
-        const string pattern = @"^[A-Z0-9]{8}$";
+        const string pattern = @"^[A-Z0-9]{12}$";
         if (!Regex.IsMatch(otpCode, pattern))
             return false;
 

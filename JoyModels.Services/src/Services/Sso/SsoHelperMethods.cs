@@ -61,7 +61,7 @@ public static class SsoHelperMethods
     public static void ValidateOtpCodeValueFormat(string otpCode)
     {
         if (!RegularExpressionValidation.IsOtpCodeValid(otpCode))
-            throw new ArgumentException("OTP code must be 8 characters, using only uppercase letters and numbers.");
+            throw new ArgumentException("OTP code must be 12 characters, using only uppercase letters and numbers.");
     }
 
     public static async Task ValidateOtpCodeForUserVerification(JoyModelsDbContext context,
@@ -146,7 +146,7 @@ public static class SsoHelperMethods
     private static string GenerateOtpCode()
     {
         const string otpAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        const int otpCodeLength = 8;
+        const int otpCodeLength = 12;
         var chars = new char[otpCodeLength];
 
         var randomBytes = new byte[otpCodeLength];
@@ -160,7 +160,7 @@ public static class SsoHelperMethods
         var otpCode = new string(chars);
         return !RegularExpressionValidation.IsOtpCodeValid(otpCode)
             ? throw new ArgumentException(
-                "Generated OTP code must be 8 characters, using only uppercase letters and numbers.")
+                "Generated OTP code must be 12 characters, using only uppercase letters and numbers.")
             : otpCode;
     }
 
