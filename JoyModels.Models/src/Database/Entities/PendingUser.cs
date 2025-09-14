@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace JoyModels.Models.src.Database.Entities;
+﻿namespace JoyModels.Models.src.Database.Entities;
 
 public partial class PendingUser
 {
@@ -15,5 +12,5 @@ public partial class PendingUser
 
     public DateTime OtpExpirationDate { get; set; }
 
-    public virtual User? UserUu { get; set; }
+    public virtual User UserUu { get; set; } = null!;
 }
