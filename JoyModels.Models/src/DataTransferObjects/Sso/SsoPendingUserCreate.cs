@@ -1,6 +1,6 @@
-namespace JoyModels.Models.DataTransferObjects.PendingUser;
+namespace JoyModels.Models.DataTransferObjects.Sso;
 
-public class PendingUserCreate
+public class SsoPendingUserCreate
 {
     public Guid Uuid { get; set; }
     public Guid UserUuid { get; set; }

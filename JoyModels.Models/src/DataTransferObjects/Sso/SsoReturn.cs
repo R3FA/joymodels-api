@@ -1,10 +1,8 @@
-using JoyModels.Models.DataTransferObjects.User;
-
 namespace JoyModels.Models.DataTransferObjects.Sso;
 
 public class SsoReturn
 {
     public Guid Uuid { get; set; }
     public Guid UserUuid { get; set; }
-    public virtual UserGet User { get; set; } = null!;
+    public virtual SsoUserGet User { get; set; } = null!;
 }

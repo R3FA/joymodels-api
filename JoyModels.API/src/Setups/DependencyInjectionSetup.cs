@@ -17,6 +17,9 @@ public static class DependencyInjectionSetup
         // Swagger DI
         services.AddSwaggerGen();
 
+        // IHttpContext DI
+        services.AddHttpContextAccessor();
+
         // AutoMapper DI
         services.AddAutoMapper(cfg =>
         {

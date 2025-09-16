@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace JoyModels.Models.DataTransferObjects.User;
+namespace JoyModels.Models.DataTransferObjects.Sso;
 
-public class UserCreate
+public class SsoUserCreate
 {
     [Required, MaxLength(100, ErrorMessage = "First name cannot exceed 100 characters.")]
     public string FirstName { get; set; } = null!;

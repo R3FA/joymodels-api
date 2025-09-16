@@ -1,8 +1,7 @@
 using System.Transactions;
 using AutoMapper;
-using JoyModels.Models.DataTransferObjects.CustomRequestTypes;
+using JoyModels.Models.DataTransferObjects.CustomReturnTypes;
 using JoyModels.Models.DataTransferObjects.Sso;
-using JoyModels.Models.DataTransferObjects.User;
 using JoyModels.Models.src.Database.Entities;
 using Microsoft.AspNetCore.Http;
 using UserRoleEnum = JoyModels.Models.Enums.UserRole;
@@ -13,14 +12,16 @@ public class SsoService : ISsoService
 {
     private readonly JoyModelsDbContext _context;
     private readonly IMapper _mapper;
+    private readonly IHttpContextAccessor _httpContext;
 
-    public SsoService(JoyModelsDbContext context, IMapper mapper)
+    public SsoService(JoyModelsDbContext context, IMapper mapper, IHttpContextAccessor httpContext)
     {
         _context = context;
         _mapper = mapper;
+        _httpContext = httpContext;
     }
 
-    public async Task<SsoReturn> GetByUuid(SsoGet request)
+    public async Task<SsoReturn> GetByUuid(SsoGetByUuid request)
     {
         var pendingUserEntity = await SsoHelperMethods.GetPendingUserEntity(_context, request);
         var pendingUser = _mapper.Map<SsoReturn>(pendingUserEntity);
@@ -28,20 +29,26 @@ public class SsoService : ISsoService
         return pendingUser;
     }
 
-    public async Task<SsoReturn> GetAll()
+    public async Task<PaginationResponse<SsoReturn>> Search(SsoSearch request)
     {
-        throw new NotImplementedException();
+        request.ValidateUserSearchArguments();
+
+        var pendingUsersEntity = await SsoHelperMethods.SearchPendingUserEntities(_context, request);
+        var pendingUsers = _mapper.Map<PaginationResponse<SsoReturn>>(pendingUsersEntity);
+
+        return pendingUsers;
     }
 
-    public async Task<UserGet> Create(UserCreate user)
+
+    public async Task<SsoUserGet> Create(SsoUserCreate request)
     {
-        user.ValidateUserCreationArguments();
-        await user.ValidateUserCreationDuplicatedFields(_context);
+        request.ValidateUserCreationArguments();
+        await request.ValidateUserCreationDuplicatedFields(_context);
 
         var userRoleEntity = await SsoHelperMethods.GetUserRoleEntity(_context, nameof(UserRoleEnum.Unverified));
 
-        var userEntity = _mapper.Map<User>(user);
-        userEntity.SetCustomValuesUserEntity(user, userRoleEntity);
+        var userEntity = _mapper.Map<User>(request);
+        userEntity.SetCustomValuesUserEntity(request, userRoleEntity);
 
         var pendingUserEntity = _mapper.Map<PendingUser>(userEntity);
         pendingUserEntity.SetCustomValuesPendingUserEntity();
@@ -51,6 +58,7 @@ public class SsoService : ISsoService
         {
             await userEntity.CreateUser(_context);
             await pendingUserEntity.CreatePendingUser(_context);
+
             await transaction.CommitAsync();
         }
         catch (Exception ex)
@@ -59,19 +67,20 @@ public class SsoService : ISsoService
         }
 
         var updatedUserEntity = _mapper.Map<User>(userEntity, opt => { opt.Items["UserRole"] = userRoleEntity; });
-        return _mapper.Map<UserGet>(updatedUserEntity);
+        return _mapper.Map<SsoUserGet>(updatedUserEntity);
     }
 
-    public async Task<UserGet> Verify(SsoVerify request)
+    public async Task<SsoUserGet> Verify(SsoVerify request)
     {
         SsoHelperMethods.ValidateOtpCodeValueFormat(request.OtpCode);
 
         var pendingUserEntity = await SsoHelperMethods
-            .GetPendingUserEntity(_context, _mapper.Map<SsoGet>(request));
+            .GetPendingUserEntity(_context, _mapper.Map<SsoGetByUuid>(request));
 
         SsoHelperMethods.ValidateOtpCodeForUserVerification(_context, pendingUserEntity, request);
 
         var userRoleEntity = await SsoHelperMethods.GetUserRoleEntity(_context, nameof(UserRoleEnum.User));
+
         var transaction = await _context.Database.BeginTransactionAsync();
         try
         {
@@ -87,19 +96,30 @@ public class SsoService : ISsoService
         }
 
         var userEntity = await SsoHelperMethods.GetUserEntity(_context, request.UserUuid);
-        var verifiedUser = _mapper.Map<UserGet>(userEntity);
+        var verifiedUser = _mapper.Map<SsoUserGet>(userEntity);
 
         return verifiedUser;
     }
 
-    public async Task<SuccessReturnDetails> ResendOtpCode(SsoResendOtpCode request)
+    public async Task<SuccessReturnDetails> RequestNewOtpCode(SsoRequestNewOtpCode request)
     {
         await SsoHelperMethods.CheckIfUserIsVerified(_context, request.UserUuid);
-        await SsoHelperMethods.DeleteAllPendingUserData(_context, request.UserUuid);
 
         var pendingUserEntity = _mapper.Map<PendingUser>(request.UserUuid);
         pendingUserEntity.SetCustomValuesPendingUserEntity();
-        await pendingUserEntity.CreatePendingUser(_context);
+
+        var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            await SsoHelperMethods.DeleteAllPendingUserData(_context, pendingUserEntity.UserUuid);
+            await pendingUserEntity.CreatePendingUser(_context);
+
+            await transaction.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            throw new TransactionException(ex.InnerException!.Message);
+        }
 
         return new SuccessReturnDetails()
         {
@@ -107,6 +127,21 @@ public class SsoService : ISsoService
             Title = "Created",
             Detail = "Otp code has been generated and sent to your email.",
             Status = StatusCodes.Status200OK.ToString(),
+            Instance = _httpContext.HttpContext.Request.Path.ToString()
+        };
+    }
+
+    public async Task<SuccessReturnDetails> Delete(SsoDelete request)
+    {
+        await SsoHelperMethods.DeleteAllUnverifiedUserData(_context, request.UserUuid);
+
+        return new SuccessReturnDetails()
+        {
+            Type = "Success",
+            Title = "Deleted",
+            Detail = "Unverified user has been successfully deleted from our database.",
+            Status = StatusCodes.Status200OK.ToString(),
+            Instance = _httpContext.HttpContext.Request.Path.ToString()
         };
     }
 }

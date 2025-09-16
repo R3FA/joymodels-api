@@ -1,7 +1,8 @@
 using AutoMapper;
+using JoyModels.Models.DataTransferObjects.CustomReturnTypes;
 using JoyModels.Models.DataTransferObjects.Sso;
-using JoyModels.Models.DataTransferObjects.User;
 using JoyModels.Models.DataTransferObjects.UserRole;
+using JoyModels.Models.Pagination;
 using JoyModels.Models.src.Database.Entities;
 
 namespace JoyModels.Models.AutoMapper;
@@ -14,13 +15,13 @@ public class SsoProfile : Profile
             .ForMember(dest => dest.User,
                 opt => opt.MapFrom(src => src.UserUu));
 
-        CreateMap<User, UserGet>()
+        CreateMap<User, SsoUserGet>()
             .ForMember(dest => dest.UserRole,
                 opt => opt.MapFrom(src => src.UserRoleUu));
 
         CreateMap<UserRole, UserRoleGet>();
 
-        CreateMap<UserCreate, User>();
+        CreateMap<SsoUserCreate, User>();
 
         CreateMap<User, User>()
             .AfterMap((_, dest, context) =>
@@ -39,6 +40,8 @@ public class SsoProfile : Profile
         CreateMap<Guid, PendingUser>()
             .ForMember(dest => dest.UserUuid, opt => opt.MapFrom(src => src));
 
-        CreateMap<SsoVerify, SsoGet>();
+        CreateMap<SsoVerify, SsoGetByUuid>();
+
+        CreateMap(typeof(PaginationBase<>), typeof(PaginationResponse<>));
     }
 }

@@ -1,6 +1,5 @@
-using JoyModels.Models.DataTransferObjects.CustomRequestTypes;
+using JoyModels.Models.DataTransferObjects.CustomReturnTypes;
 using JoyModels.Models.DataTransferObjects.Sso;
-using JoyModels.Models.DataTransferObjects.User;
 using JoyModels.Services.Services.Sso;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,28 +17,40 @@ namespace JoyModels.API.Controllers
         }
 
         [HttpGet("GetByUuid")]
-        public async Task<ActionResult<SsoReturn>> GetByUuid([FromQuery] SsoGet request)
+        public async Task<ActionResult<SsoReturn>> GetByUuid([FromQuery] SsoGetByUuid request)
         {
             return await _service.GetByUuid(request);
         }
 
-        [HttpPost("Create")]
-        public async Task<ActionResult<UserGet>> Create([FromBody] UserCreate user)
+        [HttpGet("Search")]
+        public async Task<ActionResult<PaginationResponse<SsoReturn>>> Search([FromQuery] SsoSearch request)
         {
-            return await _service.Create(user);
+            return await _service.Search(request);
+        }
+
+        [HttpPost("Create")]
+        public async Task<ActionResult<SsoUserGet>> Create([FromBody] SsoUserCreate request)
+        {
+            return await _service.Create(request);
         }
 
         [HttpPost("Verify")]
-        public async Task<ActionResult<UserGet>> Verify([FromBody] SsoVerify request)
+        public async Task<ActionResult<SsoUserGet>> Verify([FromBody] SsoVerify request)
         {
             return await _service.Verify(request);
         }
 
-        [HttpPost("ResendOtpCode")]
-        public async Task<ActionResult<SuccessReturnDetails>> ResendOtpCode(
-            [FromBody] SsoResendOtpCode request)
+        [HttpPost("RequestNewOtpCode")]
+        public async Task<ActionResult<SuccessReturnDetails>> RequestNewOtpCode(
+            [FromBody] SsoRequestNewOtpCode request)
         {
-            return await _service.ResendOtpCode(request);
+            return await _service.RequestNewOtpCode(request);
+        }
+
+        [HttpDelete("Delete")]
+        public async Task<ActionResult<SuccessReturnDetails>> Delete([FromQuery] SsoDelete request)
+        {
+            return await _service.Delete(request);
         }
     }
 }
