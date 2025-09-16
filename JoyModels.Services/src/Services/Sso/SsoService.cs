@@ -1,12 +1,11 @@
 using System.Transactions;
 using AutoMapper;
 using JoyModels.Models.DataTransferObjects.CustomRequestTypes;
+using JoyModels.Models.DataTransferObjects.Pagination;
 using JoyModels.Models.DataTransferObjects.Sso;
 using JoyModels.Models.DataTransferObjects.User;
-using JoyModels.Models.Pagination;
 using JoyModels.Models.src.Database.Entities;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using UserRoleEnum = JoyModels.Models.Enums.UserRole;
 
 namespace JoyModels.Services.Services.Sso;
@@ -32,12 +31,12 @@ public class SsoService : ISsoService
         return pendingUser;
     }
 
-    public async Task<PaginatedList<SsoReturn>> Search(SsoSearch request)
+    public async Task<PaginationResponse<SsoReturn>> Search(SsoSearch request)
     {
         request.ValidateUserSearchArguments();
 
         var pendingUsersEntity = await SsoHelperMethods.SearchPendingUserEntities(_context, request);
-        var pendingUsers = _mapper.Map<PaginatedList<SsoReturn>>(pendingUsersEntity);
+        var pendingUsers = _mapper.Map<PaginationResponse<SsoReturn>>(pendingUsersEntity);
 
         return pendingUsers;
     }

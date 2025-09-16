@@ -1,8 +1,7 @@
 using JoyModels.Models.DataTransferObjects.CustomRequestTypes;
+using JoyModels.Models.DataTransferObjects.Pagination;
 using JoyModels.Models.DataTransferObjects.Sso;
 using JoyModels.Models.DataTransferObjects.User;
-using JoyModels.Models.Pagination;
-using JoyModels.Models.src.Database.Entities;
 using JoyModels.Services.Services.Sso;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,7 +25,7 @@ namespace JoyModels.API.Controllers
         }
 
         [HttpGet("Search")]
-        public async Task<ActionResult<PaginatedList<SsoReturn>>> Search([FromQuery] SsoSearch request)
+        public async Task<ActionResult<PaginationResponse<SsoReturn>>> Search([FromQuery] SsoSearch request)
         {
             return await _service.Search(request);
         }
