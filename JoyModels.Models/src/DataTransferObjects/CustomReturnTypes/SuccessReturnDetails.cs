@@ -1,4 +1,4 @@
-namespace JoyModels.Models.DataTransferObjects.CustomRequestTypes;
+namespace JoyModels.Models.DataTransferObjects.CustomReturnTypes;
 
 public class SuccessReturnDetails
 {

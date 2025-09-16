@@ -1,4 +1,4 @@
-namespace JoyModels.Models.DataTransferObjects.Pagination;
+namespace JoyModels.Models.DataTransferObjects.CustomReturnTypes;
 
 public class PaginationResponse<T>
 {
