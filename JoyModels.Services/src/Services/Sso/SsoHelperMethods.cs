@@ -61,9 +61,9 @@ public static class SsoHelperMethods
 
     public static void ValidateOtpCodeForUserVerification(JoyModelsDbContext context,
         PendingUser pendingUserEntity,
-        SsoVerify ssoVerifyDto)
+        SsoVerify request)
     {
-        if (pendingUserEntity.OtpCode != ssoVerifyDto.OtpCode)
+        if (pendingUserEntity.OtpCode != request.OtpCode)
             throw new ArgumentException("Invalid OTP code.");
 
         if (DateTime.Now > pendingUserEntity.OtpExpirationDate)
@@ -161,12 +161,12 @@ public static class SsoHelperMethods
                 $"Unverified user with UUID `{userUuid}` either is verified or does not exist.");
     }
 
-    public static User SetCustomValuesUserEntity(this User userEntity, SsoUserCreate ssoUserDto, UserRole userRole)
+    public static User SetCustomValuesUserEntity(this User userEntity, SsoUserCreate request, UserRole userRoleEntity)
     {
         userEntity.Uuid = Guid.NewGuid();
-        userEntity.PasswordHash = ssoUserDto.GeneratePasswordHash(ssoUserDto.Password);
+        userEntity.PasswordHash = request.GeneratePasswordHash(request.Password);
         userEntity.CreatedAt = DateTime.Now;
-        userEntity.UserRoleUuid = userRole.Uuid;
+        userEntity.UserRoleUuid = userRoleEntity.Uuid;
 
         return userEntity;
     }
