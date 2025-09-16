@@ -41,5 +41,11 @@ namespace JoyModels.API.Controllers
         {
             return await _service.ResendOtpCode(request);
         }
+
+        [HttpDelete("Delete")]
+        public async Task<ActionResult<SuccessReturnDetails>> Delete([FromQuery] SsoDelete request)
+        {
+            return await _service.Delete(request);
+        }
     }
 }

@@ -5,6 +5,7 @@ using JoyModels.Models.DataTransferObjects.Sso;
 using JoyModels.Models.DataTransferObjects.User;
 using JoyModels.Models.src.Database.Entities;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using UserRoleEnum = JoyModels.Models.Enums.UserRole;
 
 namespace JoyModels.Services.Services.Sso;
@@ -13,11 +14,13 @@ public class SsoService : ISsoService
 {
     private readonly JoyModelsDbContext _context;
     private readonly IMapper _mapper;
+    private readonly IHttpContextAccessor _httpContext;
 
-    public SsoService(JoyModelsDbContext context, IMapper mapper)
+    public SsoService(JoyModelsDbContext context, IMapper mapper, IHttpContextAccessor httpContext)
     {
         _context = context;
         _mapper = mapper;
+        _httpContext = httpContext;
     }
 
     public async Task<SsoReturn> GetByUuid(SsoGet request)
@@ -51,6 +54,7 @@ public class SsoService : ISsoService
         {
             await userEntity.CreateUser(_context);
             await pendingUserEntity.CreatePendingUser(_context);
+
             await transaction.CommitAsync();
         }
         catch (Exception ex)
@@ -95,11 +99,22 @@ public class SsoService : ISsoService
     public async Task<SuccessReturnDetails> ResendOtpCode(SsoResendOtpCode request)
     {
         await SsoHelperMethods.CheckIfUserIsVerified(_context, request.UserUuid);
-        await SsoHelperMethods.DeleteAllPendingUserData(_context, request.UserUuid);
 
         var pendingUserEntity = _mapper.Map<PendingUser>(request.UserUuid);
         pendingUserEntity.SetCustomValuesPendingUserEntity();
-        await pendingUserEntity.CreatePendingUser(_context);
+
+        var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            await SsoHelperMethods.DeleteAllPendingUserData(_context, pendingUserEntity.UserUuid);
+            await pendingUserEntity.CreatePendingUser(_context);
+
+            await transaction.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            throw new TransactionException(ex.InnerException!.Message);
+        }
 
         return new SuccessReturnDetails()
         {
@@ -107,6 +122,21 @@ public class SsoService : ISsoService
             Title = "Created",
             Detail = "Otp code has been generated and sent to your email.",
             Status = StatusCodes.Status200OK.ToString(),
+            Instance = _httpContext.HttpContext.Request.Path.ToString()
+        };
+    }
+
+    public async Task<SuccessReturnDetails> Delete(SsoDelete request)
+    {
+        await SsoHelperMethods.DeleteAllUnverifiedUserData(_context, request.UserUuid);
+
+        return new SuccessReturnDetails()
+        {
+            Type = "Success",
+            Title = "Deleted",
+            Detail = "Unverified user has been successfully deleted from our database.",
+            Status = StatusCodes.Status200OK.ToString(),
+            Instance = _httpContext.HttpContext.Request.Path.ToString()
         };
     }
 }

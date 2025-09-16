@@ -114,7 +114,7 @@ public static class SsoHelperMethods
 
         if (!userExists)
             throw new KeyNotFoundException(
-                $"User with UUID `{userUuid}` is already verified.");
+                $"Unverified user with UUID `{userUuid}` either is verified or does not exist.");
     }
 
     public static User SetCustomValuesUserEntity(this User userEntity, UserCreate userDto, UserRole userRole)
@@ -164,6 +164,20 @@ public static class SsoHelperMethods
             .Where(x => x.Uuid == userUuid)
             .ExecuteUpdateAsync(y => y.SetProperty(z => z.UserRoleUuid,
                 z => userRoleUuid));
+        await context.SaveChangesAsync();
+    }
+
+    public static async Task DeleteAllUnverifiedUserData(JoyModelsDbContext context, Guid userUuid)
+    {
+        var numberOfDeletedRows = await context.Users
+            .Include(x => x.UserRoleUu)
+            .Where(x => x.Uuid == userUuid && x.UserRoleUu.RoleName == nameof(UserRoleEnum.Unverified))
+            .ExecuteDeleteAsync();
+
+        if (numberOfDeletedRows == 0)
+            throw new KeyNotFoundException(
+                $"Unverified user with UUID `{userUuid}` either is verified or does not exist.");
+
         await context.SaveChangesAsync();
     }
 

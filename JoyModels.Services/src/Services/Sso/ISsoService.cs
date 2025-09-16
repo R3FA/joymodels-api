@@ -11,4 +11,5 @@ public interface ISsoService
     Task<UserGet> Create(UserCreate user);
     Task<UserGet> Verify(SsoVerify request);
     Task<SuccessReturnDetails> ResendOtpCode(SsoResendOtpCode request);
+    Task<SuccessReturnDetails> Delete(SsoDelete request);
 }
