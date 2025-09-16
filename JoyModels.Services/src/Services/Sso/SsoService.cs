@@ -3,6 +3,7 @@ using AutoMapper;
 using JoyModels.Models.DataTransferObjects.CustomRequestTypes;
 using JoyModels.Models.DataTransferObjects.Sso;
 using JoyModels.Models.DataTransferObjects.User;
+using JoyModels.Models.Pagination;
 using JoyModels.Models.src.Database.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -31,10 +32,16 @@ public class SsoService : ISsoService
         return pendingUser;
     }
 
-    public async Task<SsoReturn> GetAll()
+    public async Task<PaginatedList<SsoReturn>> Search(SsoSearch request)
     {
-        throw new NotImplementedException();
+        request.ValidateUserSearchArguments();
+
+        var pendingUsersEntity = await SsoHelperMethods.SearchPendingUsersEntity(_context, request);
+        var pendingUsers = _mapper.Map<PaginatedList<SsoReturn>>(pendingUsersEntity);
+
+        return pendingUsers;
     }
+
 
     public async Task<UserGet> Create(UserCreate user)
     {
@@ -76,6 +83,7 @@ public class SsoService : ISsoService
         SsoHelperMethods.ValidateOtpCodeForUserVerification(_context, pendingUserEntity, request);
 
         var userRoleEntity = await SsoHelperMethods.GetUserRoleEntity(_context, nameof(UserRoleEnum.User));
+
         var transaction = await _context.Database.BeginTransactionAsync();
         try
         {

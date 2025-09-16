@@ -1,6 +1,8 @@
 using JoyModels.Models.DataTransferObjects.CustomRequestTypes;
 using JoyModels.Models.DataTransferObjects.Sso;
 using JoyModels.Models.DataTransferObjects.User;
+using JoyModels.Models.Pagination;
+using JoyModels.Models.src.Database.Entities;
 using JoyModels.Services.Services.Sso;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,6 +23,12 @@ namespace JoyModels.API.Controllers
         public async Task<ActionResult<SsoReturn>> GetByUuid([FromQuery] SsoGet request)
         {
             return await _service.GetByUuid(request);
+        }
+
+        [HttpGet("Search")]
+        public async Task<ActionResult<PaginatedList<SsoReturn>>> Search([FromQuery] SsoSearch request)
+        {
+            return await _service.Search(request);
         }
 
         [HttpPost("Create")]

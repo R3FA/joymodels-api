@@ -2,6 +2,7 @@ using System.Data;
 using System.Security.Cryptography;
 using JoyModels.Models.DataTransferObjects.Sso;
 using JoyModels.Models.DataTransferObjects.User;
+using JoyModels.Models.Pagination;
 using JoyModels.Models.src.Database.Entities;
 using JoyModels.Services.Validation;
 using Microsoft.AspNetCore.Identity;
@@ -70,15 +71,58 @@ public static class SsoHelperMethods
                 "Sent OTP Code has expired. Click on resend verification button to regenerate a new OTP code.");
     }
 
+    public static void ValidateUserSearchArguments(this SsoSearch user)
+    {
+        if (user.Nickname != null)
+        {
+            if (!RegularExpressionValidation.IsNicknameValid(user.Nickname))
+                throw new ArgumentException(
+                    "Nickname must have at least 3 characters and may only contain lowercase letters and numbers.");
+        }
+
+        if (user.Email != null)
+        {
+            if (!RegularExpressionValidation.IsEmailValid(user.Email))
+                throw new ArgumentException(
+                    "Email must contain the '@' symbol, followed by a domain with a dot. Value has to be without spaces or blank characters.");
+        }
+    }
+
     public static async Task<PendingUser> GetPendingUserEntity(JoyModelsDbContext context, SsoGet ssoGetDto)
     {
         var pendingUserEntity = await context.PendingUsers
+            .AsNoTracking()
             .Include(x => x.UserUu)
             .Include(x => x.UserUu.UserRoleUu)
-            .AsNoTracking()
+            .Where(x => x.UserUu.UserRoleUu.RoleName == nameof(UserRoleEnum.Unverified))
             .FirstOrDefaultAsync(x => x.UserUuid == ssoGetDto.UserUuid);
 
         return pendingUserEntity ?? throw new KeyNotFoundException("Pending user with sent values is not found.");
+    }
+
+    public static async Task<PaginatedList<PendingUser>> SearchPendingUsersEntity(JoyModelsDbContext context,
+        SsoSearch ssoSearchDto)
+    {
+        var baseQuery = context.PendingUsers
+            .AsNoTracking()
+            .Include(x => x.UserUu)
+            .Include(x => x.UserUu.UserRoleUu)
+            .Where(x => x.UserUu.UserRoleUu.RoleName == nameof(UserRoleEnum.Unverified));
+
+        var filteredQuery = (ssoSearchDto.Nickname, ssoSearchDto.Email) switch
+        {
+            (not null, null) => baseQuery.Where(x => x.UserUu.NickName == ssoSearchDto.Nickname),
+            (null, not null) => baseQuery.Where(x => x.UserUu.Email == ssoSearchDto.Email),
+            (not null, not null) => baseQuery.Where(x =>
+                x.UserUu.NickName == ssoSearchDto.Nickname &&
+                x.UserUu.Email == ssoSearchDto.Email),
+            _ => baseQuery
+        };
+
+        var pendingUsersEntity = await PaginatedList<PendingUser>.CreateAsync(filteredQuery, ssoSearchDto.PageIndex,
+            ssoSearchDto.PageSize);
+
+        return pendingUsersEntity;
     }
 
     // TODO: Move this method when UserRole endpoint is created
