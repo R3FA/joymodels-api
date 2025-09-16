@@ -101,7 +101,7 @@ public class SsoService : ISsoService
         return verifiedUser;
     }
 
-    public async Task<SuccessReturnDetails> ResendOtpCode(SsoResendOtpCode request)
+    public async Task<SuccessReturnDetails> RequestNewOtpCode(SsoRequestNewOtpCode request)
     {
         await SsoHelperMethods.CheckIfUserIsVerified(_context, request.UserUuid);
 

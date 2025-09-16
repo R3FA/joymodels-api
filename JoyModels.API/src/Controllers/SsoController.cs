@@ -40,11 +40,11 @@ namespace JoyModels.API.Controllers
             return await _service.Verify(request);
         }
 
-        [HttpPost("ResendOtpCode")]
-        public async Task<ActionResult<SuccessReturnDetails>> ResendOtpCode(
-            [FromBody] SsoResendOtpCode request)
+        [HttpPost("RequestNewOtpCode")]
+        public async Task<ActionResult<SuccessReturnDetails>> RequestNewOtpCode(
+            [FromBody] SsoRequestNewOtpCode request)
         {
-            return await _service.ResendOtpCode(request);
+            return await _service.RequestNewOtpCode(request);
         }
 
         [HttpDelete("Delete")]

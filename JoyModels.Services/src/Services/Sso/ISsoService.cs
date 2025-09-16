@@ -9,6 +9,6 @@ public interface ISsoService
     Task<PaginationResponse<SsoReturn>> Search(SsoSearch request);
     Task<SsoUserGet> Create(SsoUserCreate request);
     Task<SsoUserGet> Verify(SsoVerify request);
-    Task<SuccessReturnDetails> ResendOtpCode(SsoResendOtpCode request);
+    Task<SuccessReturnDetails> RequestNewOtpCode(SsoRequestNewOtpCode request);
     Task<SuccessReturnDetails> Delete(SsoDelete request);
 }

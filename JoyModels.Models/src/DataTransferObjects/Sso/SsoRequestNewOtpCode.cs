@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace JoyModels.Models.DataTransferObjects.Sso;
 
-public class SsoResendOtpCode
+public class SsoRequestNewOtpCode
 {
     [Required] public Guid UserUuid { get; set; }
 }
