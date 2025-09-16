@@ -100,7 +100,7 @@ public static class SsoHelperMethods
         return pendingUserEntity ?? throw new KeyNotFoundException("Pending user with sent values is not found.");
     }
 
-    public static async Task<PaginatedList<PendingUser>> SearchPendingUsersEntity(JoyModelsDbContext context,
+    public static async Task<PaginatedList<PendingUser>> SearchPendingUsersEntities(JoyModelsDbContext context,
         SsoSearch ssoSearchDto)
     {
         var baseQuery = context.PendingUsers
