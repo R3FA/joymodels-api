@@ -36,7 +36,7 @@ public class SsoService : ISsoService
     {
         request.ValidateUserSearchArguments();
 
-        var pendingUsersEntity = await SsoHelperMethods.SearchPendingUsersEntities(_context, request);
+        var pendingUsersEntity = await SsoHelperMethods.SearchPendingUserEntities(_context, request);
         var pendingUsers = _mapper.Map<PaginatedList<SsoReturn>>(pendingUsersEntity);
 
         return pendingUsers;
