@@ -2,7 +2,6 @@ using System.Transactions;
 using AutoMapper;
 using JoyModels.Models.DataTransferObjects.CustomReturnTypes;
 using JoyModels.Models.DataTransferObjects.Sso;
-using JoyModels.Models.DataTransferObjects.User;
 using JoyModels.Models.src.Database.Entities;
 using Microsoft.AspNetCore.Http;
 using UserRoleEnum = JoyModels.Models.Enums.UserRole;
@@ -22,7 +21,7 @@ public class SsoService : ISsoService
         _httpContext = httpContext;
     }
 
-    public async Task<SsoReturn> GetByUuid(SsoGet request)
+    public async Task<SsoReturn> GetByUuid(SsoGetByUuid request)
     {
         var pendingUserEntity = await SsoHelperMethods.GetPendingUserEntity(_context, request);
         var pendingUser = _mapper.Map<SsoReturn>(pendingUserEntity);
@@ -41,15 +40,15 @@ public class SsoService : ISsoService
     }
 
 
-    public async Task<UserGet> Create(UserCreate user)
+    public async Task<SsoUserGet> Create(SsoUserCreate request)
     {
-        user.ValidateUserCreationArguments();
-        await user.ValidateUserCreationDuplicatedFields(_context);
+        request.ValidateUserCreationArguments();
+        await request.ValidateUserCreationDuplicatedFields(_context);
 
         var userRoleEntity = await SsoHelperMethods.GetUserRoleEntity(_context, nameof(UserRoleEnum.Unverified));
 
-        var userEntity = _mapper.Map<User>(user);
-        userEntity.SetCustomValuesUserEntity(user, userRoleEntity);
+        var userEntity = _mapper.Map<User>(request);
+        userEntity.SetCustomValuesUserEntity(request, userRoleEntity);
 
         var pendingUserEntity = _mapper.Map<PendingUser>(userEntity);
         pendingUserEntity.SetCustomValuesPendingUserEntity();
@@ -68,15 +67,15 @@ public class SsoService : ISsoService
         }
 
         var updatedUserEntity = _mapper.Map<User>(userEntity, opt => { opt.Items["UserRole"] = userRoleEntity; });
-        return _mapper.Map<UserGet>(updatedUserEntity);
+        return _mapper.Map<SsoUserGet>(updatedUserEntity);
     }
 
-    public async Task<UserGet> Verify(SsoVerify request)
+    public async Task<SsoUserGet> Verify(SsoVerify request)
     {
         SsoHelperMethods.ValidateOtpCodeValueFormat(request.OtpCode);
 
         var pendingUserEntity = await SsoHelperMethods
-            .GetPendingUserEntity(_context, _mapper.Map<SsoGet>(request));
+            .GetPendingUserEntity(_context, _mapper.Map<SsoGetByUuid>(request));
 
         SsoHelperMethods.ValidateOtpCodeForUserVerification(_context, pendingUserEntity, request);
 
@@ -97,7 +96,7 @@ public class SsoService : ISsoService
         }
 
         var userEntity = await SsoHelperMethods.GetUserEntity(_context, request.UserUuid);
-        var verifiedUser = _mapper.Map<UserGet>(userEntity);
+        var verifiedUser = _mapper.Map<SsoUserGet>(userEntity);
 
         return verifiedUser;
     }

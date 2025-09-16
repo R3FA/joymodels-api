@@ -1,6 +1,5 @@
 using JoyModels.Models.DataTransferObjects.CustomReturnTypes;
 using JoyModels.Models.DataTransferObjects.Sso;
-using JoyModels.Models.DataTransferObjects.User;
 using JoyModels.Services.Services.Sso;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,7 +17,7 @@ namespace JoyModels.API.Controllers
         }
 
         [HttpGet("GetByUuid")]
-        public async Task<ActionResult<SsoReturn>> GetByUuid([FromQuery] SsoGet request)
+        public async Task<ActionResult<SsoReturn>> GetByUuid([FromQuery] SsoGetByUuid request)
         {
             return await _service.GetByUuid(request);
         }
@@ -30,13 +29,13 @@ namespace JoyModels.API.Controllers
         }
 
         [HttpPost("Create")]
-        public async Task<ActionResult<UserGet>> Create([FromBody] UserCreate user)
+        public async Task<ActionResult<SsoUserGet>> Create([FromBody] SsoUserCreate request)
         {
-            return await _service.Create(user);
+            return await _service.Create(request);
         }
 
         [HttpPost("Verify")]
-        public async Task<ActionResult<UserGet>> Verify([FromBody] SsoVerify request)
+        public async Task<ActionResult<SsoUserGet>> Verify([FromBody] SsoVerify request)
         {
             return await _service.Verify(request);
         }

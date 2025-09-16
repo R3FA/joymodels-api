@@ -1,7 +1,6 @@
 using System.Data;
 using System.Security.Cryptography;
 using JoyModels.Models.DataTransferObjects.Sso;
-using JoyModels.Models.DataTransferObjects.User;
 using JoyModels.Models.Pagination;
 using JoyModels.Models.src.Database.Entities;
 using JoyModels.Services.Validation;
@@ -13,44 +12,45 @@ namespace JoyModels.Services.Services.Sso;
 
 public static class SsoHelperMethods
 {
-    private static readonly PasswordHasher<UserCreate> PasswordHasher = new();
+    private static readonly PasswordHasher<SsoUserCreate> PasswordHasher = new();
 
-    public static void ValidateUserCreationArguments(this UserCreate user)
+    public static void ValidateUserCreationArguments(this SsoUserCreate request)
     {
-        if (!RegularExpressionValidation.IsStringValid(user.FirstName))
+        if (!RegularExpressionValidation.IsStringValid(request.FirstName))
             throw new ArgumentException(
                 "First name must begin with a capital letter and contain only lowercase letters after.");
 
-        if (user.LastName != null)
+        if (request.LastName != null)
         {
-            if (!RegularExpressionValidation.IsStringValid(user.LastName))
+            if (!RegularExpressionValidation.IsStringValid(request.LastName))
                 throw new ArgumentException(
                     "Last name must begin with a capital letter and contain only lowercase letters after.");
         }
 
-        if (!RegularExpressionValidation.IsNicknameValid(user.Nickname))
+        if (!RegularExpressionValidation.IsNicknameValid(request.Nickname))
             throw new ArgumentException(
                 "Nickname must have at least 3 characters and may only contain lowercase letters and numbers.");
 
-        if (!RegularExpressionValidation.IsEmailValid(user.Email))
+        if (!RegularExpressionValidation.IsEmailValid(request.Email))
             throw new ArgumentException(
                 "Email must contain the '@' symbol, followed by a domain with a dot. Value has to be without spaces or blank characters.");
 
-        if (!RegularExpressionValidation.IsPasswordValid(user.Password))
+        if (!RegularExpressionValidation.IsPasswordValid(request.Password))
             throw new ArgumentException(
                 "Password must have at least 8 characters, one uppercase letter, one number, and one special character (!@#$%^&*).");
     }
 
-    public static async Task ValidateUserCreationDuplicatedFields(this UserCreate user, JoyModelsDbContext context)
+    public static async Task ValidateUserCreationDuplicatedFields(this SsoUserCreate request,
+        JoyModelsDbContext context)
     {
-        var isNicknameDuplicated = await context.Users.AnyAsync(x => x.NickName == user.Nickname);
-        var isEmailDuplicated = await context.Users.AnyAsync(x => x.Email == user.Email);
+        var isNicknameDuplicated = await context.Users.AnyAsync(x => x.NickName == request.Nickname);
+        var isEmailDuplicated = await context.Users.AnyAsync(x => x.Email == request.Email);
 
         if (isNicknameDuplicated)
-            throw new DuplicateNameException($"Nickname `{user.Nickname}` is already registered in our database.");
+            throw new DuplicateNameException($"Nickname `{request.Nickname}` is already registered in our database.");
 
         if (isEmailDuplicated)
-            throw new DuplicateNameException($"Email `{user.Email}` is already registered in our database.");
+            throw new DuplicateNameException($"Email `{request.Email}` is already registered in our database.");
     }
 
     public static void ValidateOtpCodeValueFormat(string otpCode)
@@ -71,31 +71,31 @@ public static class SsoHelperMethods
                 "Sent OTP Code has expired. Click on resend verification button to regenerate a new OTP code.");
     }
 
-    public static void ValidateUserSearchArguments(this SsoSearch user)
+    public static void ValidateUserSearchArguments(this SsoSearch request)
     {
-        if (user.Nickname != null)
+        if (request.Nickname != null)
         {
-            if (!RegularExpressionValidation.IsNicknameValid(user.Nickname))
+            if (!RegularExpressionValidation.IsNicknameValid(request.Nickname))
                 throw new ArgumentException(
                     "Nickname must have at least 3 characters and may only contain lowercase letters and numbers.");
         }
 
-        if (user.Email != null)
+        if (request.Email != null)
         {
-            if (!RegularExpressionValidation.IsEmailValid(user.Email))
+            if (!RegularExpressionValidation.IsEmailValid(request.Email))
                 throw new ArgumentException(
                     "Email must contain the '@' symbol, followed by a domain with a dot. Value has to be without spaces or blank characters.");
         }
     }
 
-    public static async Task<PendingUser> GetPendingUserEntity(JoyModelsDbContext context, SsoGet ssoGetDto)
+    public static async Task<PendingUser> GetPendingUserEntity(JoyModelsDbContext context, SsoGetByUuid ssoGetByUuidDto)
     {
         var pendingUserEntity = await context.PendingUsers
             .AsNoTracking()
             .Include(x => x.UserUu)
             .Include(x => x.UserUu.UserRoleUu)
             .Where(x => x.UserUu.UserRoleUu.RoleName == nameof(UserRoleEnum.Unverified))
-            .FirstOrDefaultAsync(x => x.UserUuid == ssoGetDto.UserUuid);
+            .FirstOrDefaultAsync(x => x.UserUuid == ssoGetByUuidDto.UserUuid);
 
         return pendingUserEntity ?? throw new KeyNotFoundException("Pending user with sent values is not found.");
     }
@@ -161,10 +161,10 @@ public static class SsoHelperMethods
                 $"Unverified user with UUID `{userUuid}` either is verified or does not exist.");
     }
 
-    public static User SetCustomValuesUserEntity(this User userEntity, UserCreate userDto, UserRole userRole)
+    public static User SetCustomValuesUserEntity(this User userEntity, SsoUserCreate ssoUserDto, UserRole userRole)
     {
         userEntity.Uuid = Guid.NewGuid();
-        userEntity.PasswordHash = userDto.GeneratePasswordHash(userDto.Password);
+        userEntity.PasswordHash = ssoUserDto.GeneratePasswordHash(ssoUserDto.Password);
         userEntity.CreatedAt = DateTime.Now;
         userEntity.UserRoleUuid = userRole.Uuid;
 
@@ -225,13 +225,13 @@ public static class SsoHelperMethods
         await context.SaveChangesAsync();
     }
 
-    private static string GeneratePasswordHash(this UserCreate user, string password)
-        => PasswordHasher.HashPassword(user, password);
+    private static string GeneratePasswordHash(this SsoUserCreate request, string password)
+        => PasswordHasher.HashPassword(request, password);
 
     // TODO: You'll have to expand this logic when Login method comes
-    // private static PasswordVerificationResult VerifyPasswordHash(this UserCreate user, string hashedPassword,
+    // private static PasswordVerificationResult VerifyPasswordHash(this UserCreate request, string hashedPassword,
     //     string password)
-    //     => PasswordHasher.VerifyHashedPassword(user, hashedPassword, password);
+    //     => PasswordHasher.VerifyHashedPassword(request, hashedPassword, password);
 
     private static string GenerateOtpCode()
     {
