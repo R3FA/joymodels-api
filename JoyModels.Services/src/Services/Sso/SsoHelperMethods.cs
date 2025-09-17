@@ -24,17 +24,9 @@ public static class SsoHelperMethods
                     "Last name must begin with a capital letter and contain only lowercase letters after.");
         }
 
-        if (!RegularExpressionValidation.IsNicknameValid(request.Nickname))
-            throw new ArgumentException(
-                "Nickname must have at least 3 characters and may only contain lowercase letters and numbers.");
-
-        if (!RegularExpressionValidation.IsEmailValid(request.Email))
-            throw new ArgumentException(
-                "Email must contain the '@' symbol, followed by a domain with a dot. Value has to be without spaces or blank characters.");
-
-        if (!RegularExpressionValidation.IsPasswordValid(request.Password))
-            throw new ArgumentException(
-                "Password must have at least 8 characters, one uppercase letter, one number, and one special character (!@#$%^&*).");
+        ValidateNickname(request.Nickname);
+        ValidateEmail(request.Email);
+        ValidatePassword(request.Password);
     }
 
     public static async Task ValidateUserCreationDuplicatedFields(this SsoUserCreate request,
@@ -72,16 +64,12 @@ public static class SsoHelperMethods
     {
         if (request.Nickname != null)
         {
-            if (!RegularExpressionValidation.IsNicknameValid(request.Nickname))
-                throw new ArgumentException(
-                    "Nickname must have at least 3 characters and may only contain lowercase letters and numbers.");
+            ValidateNickname(request.Nickname);
         }
 
         if (request.Email != null)
         {
-            if (!RegularExpressionValidation.IsEmailValid(request.Email))
-                throw new ArgumentException(
-                    "Email must contain the '@' symbol, followed by a domain with a dot. Value has to be without spaces or blank characters.");
+            ValidateEmail(request.Email);
         }
     }
 
@@ -93,9 +81,7 @@ public static class SsoHelperMethods
         if (request.NewPassword != request.ConfirmNewPassword)
             throw new ArgumentException("New password and confirm password do not match.");
 
-        if (!RegularExpressionValidation.IsPasswordValid(request.NewPassword))
-            throw new ArgumentException(
-                "Password must have at least 8 characters, one uppercase letter, one number, and one special character (!@#$%^&*).");
+        ValidatePassword(request.NewPassword);
     }
 
     public static async Task<PendingUser> GetPendingUserEntity(JoyModelsDbContext context, Guid userUuid)
@@ -135,7 +121,6 @@ public static class SsoHelperMethods
         return pendingUsersEntity;
     }
 
-    // TODO: Move this method when UserRole endpoint is created
     public static async Task<UserRole> GetUserRoleEntity(JoyModelsDbContext context, string roleName)
     {
         var userRoleEntity = await context.UserRoles
@@ -274,5 +259,26 @@ public static class SsoHelperMethods
         if (!userExists)
             throw new KeyNotFoundException(
                 $"User with UUID `{userUuid}` either is unverified or does not exist.");
+    }
+
+    private static void ValidateNickname(string nickname)
+    {
+        if (!RegularExpressionValidation.IsNicknameValid(nickname))
+            throw new ArgumentException(
+                "Nickname must have at least 3 characters and may only contain lowercase letters and numbers.");
+    }
+
+    private static void ValidateEmail(string email)
+    {
+        if (!RegularExpressionValidation.IsEmailValid(email))
+            throw new ArgumentException(
+                "Email must contain the '@' symbol, followed by a domain with a dot. Value has to be without spaces or blank characters.");
+    }
+
+    private static void ValidatePassword(string password)
+    {
+        if (!RegularExpressionValidation.IsPasswordValid(password))
+            throw new ArgumentException(
+                "Password must have at least 8 characters, one uppercase letter, one number, and one special character (!@#$%^&*).");
     }
 }
