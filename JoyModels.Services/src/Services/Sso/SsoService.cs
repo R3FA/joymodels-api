@@ -39,7 +39,6 @@ public class SsoService : ISsoService
         return pendingUsers;
     }
 
-
     public async Task<SsoUserGet> Create(SsoUserCreate request)
     {
         request.ValidateUserCreationArguments();
@@ -139,7 +138,7 @@ public class SsoService : ISsoService
         return new SuccessResponse()
         {
             Type = "Success",
-            Title = "Updated",
+            Title = "Patched",
             Detail = "You have successfully changed your password.",
             Status = StatusCodes.Status200OK.ToString(),
             Instance = _httpContext.HttpContext.Request.Path.ToString()
