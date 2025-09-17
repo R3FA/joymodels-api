@@ -1,6 +1,6 @@
-namespace JoyModels.Models.DataTransferObjects.CustomReturnTypes;
+namespace JoyModels.Models.DataTransferObjects.CustomResponseTypes;
 
-public class SuccessReturnDetails
+public class SuccessResponse
 {
     public string Type { get; set; } = null!;
     public string Title { get; set; } = null!;

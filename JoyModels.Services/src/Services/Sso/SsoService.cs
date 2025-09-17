@@ -1,6 +1,6 @@
 using System.Transactions;
 using AutoMapper;
-using JoyModels.Models.DataTransferObjects.CustomReturnTypes;
+using JoyModels.Models.DataTransferObjects.CustomResponseTypes;
 using JoyModels.Models.DataTransferObjects.Sso;
 using JoyModels.Models.src.Database.Entities;
 using Microsoft.AspNetCore.Http;
@@ -23,7 +23,7 @@ public class SsoService : ISsoService
 
     public async Task<SsoReturn> GetByUuid(SsoGetByUuid request)
     {
-        var pendingUserEntity = await SsoHelperMethods.GetPendingUserEntity(_context, request);
+        var pendingUserEntity = await SsoHelperMethods.GetPendingUserEntity(_context, request.UserUuid);
         var pendingUser = _mapper.Map<SsoReturn>(pendingUserEntity);
 
         return pendingUser;
@@ -38,7 +38,6 @@ public class SsoService : ISsoService
 
         return pendingUsers;
     }
-
 
     public async Task<SsoUserGet> Create(SsoUserCreate request)
     {
@@ -75,7 +74,7 @@ public class SsoService : ISsoService
         SsoHelperMethods.ValidateOtpCodeValueFormat(request.OtpCode);
 
         var pendingUserEntity = await SsoHelperMethods
-            .GetPendingUserEntity(_context, _mapper.Map<SsoGetByUuid>(request));
+            .GetPendingUserEntity(_context, request.UserUuid);
 
         SsoHelperMethods.ValidateOtpCodeForUserVerification(_context, pendingUserEntity, request);
 
@@ -95,15 +94,15 @@ public class SsoService : ISsoService
             throw new TransactionException(ex.InnerException!.Message);
         }
 
-        var userEntity = await SsoHelperMethods.GetUserEntity(_context, request.UserUuid);
+        var userEntity = await SsoHelperMethods.GetVerifiedUserEntity(_context, request.UserUuid);
         var verifiedUser = _mapper.Map<SsoUserGet>(userEntity);
 
         return verifiedUser;
     }
 
-    public async Task<SuccessReturnDetails> RequestNewOtpCode(SsoRequestNewOtpCode request)
+    public async Task<SuccessResponse> RequestNewOtpCode(SsoRequestNewOtpCode request)
     {
-        await SsoHelperMethods.CheckIfUserIsVerified(_context, request.UserUuid);
+        await SsoHelperMethods.CheckIfUserIsUnverified(_context, request.UserUuid);
 
         var pendingUserEntity = _mapper.Map<PendingUser>(request.UserUuid);
         pendingUserEntity.SetCustomValuesPendingUserEntity();
@@ -121,7 +120,7 @@ public class SsoService : ISsoService
             throw new TransactionException(ex.InnerException!.Message);
         }
 
-        return new SuccessReturnDetails()
+        return new SuccessResponse()
         {
             Type = "Success",
             Title = "Created",
@@ -131,15 +130,30 @@ public class SsoService : ISsoService
         };
     }
 
-    public async Task<SuccessReturnDetails> Delete(SsoDelete request)
+    public async Task<SuccessResponse> RequestPasswordChange(SsoRequestPasswordChange request)
+    {
+        await request.ValidateUserRequestPasswordChangeArguments(_context);
+        await request.UpdateUsersPassword(_context);
+
+        return new SuccessResponse()
+        {
+            Type = "Success",
+            Title = "Patched",
+            Detail = "You have successfully changed your password.",
+            Status = StatusCodes.Status200OK.ToString(),
+            Instance = _httpContext.HttpContext.Request.Path.ToString()
+        };
+    }
+
+    public async Task<SuccessResponse> Delete(SsoDelete request)
     {
         await SsoHelperMethods.DeleteAllUnverifiedUserData(_context, request.UserUuid);
 
-        return new SuccessReturnDetails()
+        return new SuccessResponse()
         {
             Type = "Success",
             Title = "Deleted",
-            Detail = "Unverified user has been successfully deleted from our database.",
+            Detail = $"Unverified user with UUID `{request.UserUuid}` has been successfully deleted from our database.",
             Status = StatusCodes.Status200OK.ToString(),
             Instance = _httpContext.HttpContext.Request.Path.ToString()
         };

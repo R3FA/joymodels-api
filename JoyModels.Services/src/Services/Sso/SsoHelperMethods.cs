@@ -4,7 +4,6 @@ using JoyModels.Models.DataTransferObjects.Sso;
 using JoyModels.Models.Pagination;
 using JoyModels.Models.src.Database.Entities;
 using JoyModels.Services.Validation;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using UserRoleEnum = JoyModels.Models.Enums.UserRole;
 
@@ -12,8 +11,6 @@ namespace JoyModels.Services.Services.Sso;
 
 public static class SsoHelperMethods
 {
-    private static readonly PasswordHasher<SsoUserCreate> PasswordHasher = new();
-
     public static void ValidateUserCreationArguments(this SsoUserCreate request)
     {
         if (!RegularExpressionValidation.IsStringValid(request.FirstName))
@@ -88,14 +85,27 @@ public static class SsoHelperMethods
         }
     }
 
-    public static async Task<PendingUser> GetPendingUserEntity(JoyModelsDbContext context, SsoGetByUuid ssoGetByUuidDto)
+    public static async Task ValidateUserRequestPasswordChangeArguments(this SsoRequestPasswordChange request,
+        JoyModelsDbContext context)
+    {
+        await CheckIfUserExists(context, request.UserUuid);
+
+        if (request.NewPassword != request.ConfirmNewPassword)
+            throw new ArgumentException("New password and confirm password do not match.");
+
+        if (!RegularExpressionValidation.IsPasswordValid(request.NewPassword))
+            throw new ArgumentException(
+                "Password must have at least 8 characters, one uppercase letter, one number, and one special character (!@#$%^&*).");
+    }
+
+    public static async Task<PendingUser> GetPendingUserEntity(JoyModelsDbContext context, Guid userUuid)
     {
         var pendingUserEntity = await context.PendingUsers
             .AsNoTracking()
             .Include(x => x.UserUu)
             .Include(x => x.UserUu.UserRoleUu)
             .Where(x => x.UserUu.UserRoleUu.RoleName == nameof(UserRoleEnum.Unverified))
-            .FirstOrDefaultAsync(x => x.UserUuid == ssoGetByUuidDto.UserUuid);
+            .FirstOrDefaultAsync(x => x.UserUuid == userUuid);
 
         return pendingUserEntity ?? throw new KeyNotFoundException("Pending user with sent values is not found.");
     }
@@ -136,19 +146,19 @@ public static class SsoHelperMethods
                throw new KeyNotFoundException($"User role `{roleName}` is not found.");
     }
 
-    // TODO: Move this method when Users endpoint is created
-    public static async Task<User> GetUserEntity(JoyModelsDbContext context, Guid userUuid)
+    public static async Task<User> GetVerifiedUserEntity(JoyModelsDbContext context, Guid userUuid)
     {
         var userEntity = await context.Users
             .AsNoTracking()
             .Include(x => x.UserRoleUu)
+            .Where(x => x.UserRoleUu.RoleName != nameof(UserRoleEnum.Unverified))
             .FirstOrDefaultAsync(x => x.Uuid == userUuid);
 
         return userEntity ??
                throw new KeyNotFoundException($"User with UUID `{userUuid}` is not found.");
     }
 
-    public static async Task CheckIfUserIsVerified(JoyModelsDbContext context, Guid userUuid)
+    public static async Task CheckIfUserIsUnverified(JoyModelsDbContext context, Guid userUuid)
     {
         var userExists = await context.Users
             .AsNoTracking()
@@ -164,7 +174,7 @@ public static class SsoHelperMethods
     public static User SetCustomValuesUserEntity(this User userEntity, SsoUserCreate request, UserRole userRoleEntity)
     {
         userEntity.Uuid = Guid.NewGuid();
-        userEntity.PasswordHash = request.GeneratePasswordHash(request.Password);
+        userEntity.PasswordHash = SsoPasswordHasher.Hash(request, request.Password);
         userEntity.CreatedAt = DateTime.Now;
         userEntity.UserRoleUuid = userRoleEntity.Uuid;
 
@@ -225,13 +235,14 @@ public static class SsoHelperMethods
         await context.SaveChangesAsync();
     }
 
-    private static string GeneratePasswordHash(this SsoUserCreate request, string password)
-        => PasswordHasher.HashPassword(request, password);
-
-    // TODO: You'll have to expand this logic when Login method comes
-    // private static PasswordVerificationResult VerifyPasswordHash(this UserCreate request, string hashedPassword,
-    //     string password)
-    //     => PasswordHasher.VerifyHashedPassword(request, hashedPassword, password);
+    public static async Task UpdateUsersPassword(this SsoRequestPasswordChange request, JoyModelsDbContext context)
+    {
+        await context.Users
+            .Where(x => x.Uuid == request.UserUuid)
+            .ExecuteUpdateAsync(y => y.SetProperty(z => z.PasswordHash,
+                z => SsoPasswordHasher.Hash(request, request.NewPassword)));
+        await context.SaveChangesAsync();
+    }
 
     private static string GenerateOtpCode()
     {
@@ -252,5 +263,18 @@ public static class SsoHelperMethods
             ? throw new ArgumentException(
                 "Generated OTP code must be 12 characters, using only uppercase letters and numbers.")
             : otpCode;
+    }
+
+    private static async Task CheckIfUserExists(JoyModelsDbContext context, Guid userUuid)
+    {
+        var userExists = await context.Users
+            .AsNoTracking()
+            .Include(x => x.UserRoleUu)
+            .Where(x => x.UserRoleUu.RoleName != nameof(UserRoleEnum.Unverified))
+            .AnyAsync(x => x.Uuid == userUuid);
+
+        if (!userExists)
+            throw new KeyNotFoundException(
+                $"User with UUID `{userUuid}` either is unverified or does not exist.");
     }
 }
