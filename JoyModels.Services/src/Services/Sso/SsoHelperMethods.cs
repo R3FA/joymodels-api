@@ -259,10 +259,8 @@ public static class SsoHelperMethods
         }
 
         var otpCode = new string(chars);
-        return !RegularExpressionValidation.IsOtpCodeValid(otpCode)
-            ? throw new ArgumentException(
-                "Generated OTP code must be 12 characters, using only uppercase letters and numbers.")
-            : otpCode;
+        ValidateOtpCodeValueFormat(otpCode);
+        return otpCode;
     }
 
     private static async Task CheckIfUserExists(JoyModelsDbContext context, Guid userUuid)
