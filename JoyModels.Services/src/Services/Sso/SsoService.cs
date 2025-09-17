@@ -153,7 +153,7 @@ public class SsoService : ISsoService
         {
             Type = "Success",
             Title = "Deleted",
-            Detail = "Unverified user has been successfully deleted from our database.",
+            Detail = $"Unverified user with UUID `{request.UserUuid}` has been successfully deleted from our database.",
             Status = StatusCodes.Status200OK.ToString(),
             Instance = _httpContext.HttpContext.Request.Path.ToString()
         };
