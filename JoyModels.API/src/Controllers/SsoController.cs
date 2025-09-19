@@ -47,6 +47,12 @@ public class SsoController : ControllerBase
         return await _service.RequestNewOtpCode(request);
     }
 
+    [HttpPost("Login")]
+    public async Task<ActionResult<SsoTokenResponse>> Login([FromBody] SsoLogin request)
+    {
+        return await _service.Login(request);
+    }
+
     [HttpPatch("RequestPasswordChange")]
     public async Task<ActionResult<SuccessResponse>> RequestPasswordChange(
         [FromBody] SsoRequestPasswordChange request)

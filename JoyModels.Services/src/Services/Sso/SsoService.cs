@@ -4,6 +4,7 @@ using JoyModels.Models.DataTransferObjects.CustomResponseTypes;
 using JoyModels.Models.DataTransferObjects.Sso;
 using JoyModels.Models.src.Database.Entities;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using UserRoleEnum = JoyModels.Models.Enums.UserRole;
 
 namespace JoyModels.Services.Services.Sso;
@@ -94,7 +95,7 @@ public class SsoService : ISsoService
             throw new TransactionException(ex.InnerException!.Message);
         }
 
-        var userEntity = await SsoHelperMethods.GetVerifiedUserEntity(_context, request.UserUuid);
+        var userEntity = await SsoHelperMethods.GetVerifiedUserEntity(_context, request.UserUuid, null);
         var verifiedUser = _mapper.Map<SsoUserGet>(userEntity);
 
         return verifiedUser;
@@ -127,6 +128,24 @@ public class SsoService : ISsoService
             Detail = "Otp code has been generated and sent to your email.",
             Status = StatusCodes.Status200OK.ToString(),
             Instance = _httpContext.HttpContext.Request.Path.ToString()
+        };
+    }
+
+    public async Task<SsoTokenResponse> Login(SsoLogin request)
+    {
+        request.ValidateUserLoginArguments();
+
+        var userEntity = await SsoHelperMethods.GetVerifiedUserEntity(_context, null, request.Nickname);
+
+        var passwordVerificationResult =
+            SsoPasswordHasher.Verify(userEntity, userEntity.PasswordHash, request.Password);
+        if (passwordVerificationResult is PasswordVerificationResult.Failed)
+            throw new ArgumentException("User password is incorrect");
+
+        return new SsoTokenResponse()
+        {
+            AccessToken = "test",
+            RefreshToken = "test"
         };
     }
 

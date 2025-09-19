@@ -84,6 +84,12 @@ public static class SsoHelperMethods
         ValidatePassword(request.NewPassword);
     }
 
+    public static void ValidateUserLoginArguments(this SsoLogin request)
+    {
+        ValidateNickname(request.Nickname);
+        ValidatePassword(request.Password);
+    }
+
     public static async Task<PendingUser> GetPendingUserEntity(JoyModelsDbContext context, Guid userUuid)
     {
         var pendingUserEntity = await context.PendingUsers
@@ -131,16 +137,26 @@ public static class SsoHelperMethods
                throw new KeyNotFoundException($"User role `{roleName}` is not found.");
     }
 
-    public static async Task<User> GetVerifiedUserEntity(JoyModelsDbContext context, Guid userUuid)
+    public static async Task<User> GetVerifiedUserEntity(JoyModelsDbContext context, Guid? userUuid,
+        string? userNickname)
     {
-        var userEntity = await context.Users
+        var baseQuery = context.Users
             .AsNoTracking()
             .Include(x => x.UserRoleUu)
-            .Where(x => x.UserRoleUu.RoleName != nameof(UserRoleEnum.Unverified))
-            .FirstOrDefaultAsync(x => x.Uuid == userUuid);
+            .Where(x => x.UserRoleUu.RoleName != nameof(UserRoleEnum.Unverified));
+
+        var userEntity = (userUuid, userNickname) switch
+        {
+            (not null, null) => await baseQuery.FirstOrDefaultAsync(x => x.Uuid == userUuid),
+            (null, not null) => await baseQuery.FirstOrDefaultAsync(x => x.NickName == userNickname),
+            (not null, not null) => await baseQuery.FirstOrDefaultAsync(x =>
+                x.Uuid == userUuid &&
+                x.NickName == userNickname),
+            _ => throw new ArgumentException("Invalid arguments")
+        };
 
         return userEntity ??
-               throw new KeyNotFoundException($"User with UUID `{userUuid}` is not found.");
+               throw new KeyNotFoundException("User with sent values is not found.");
     }
 
     public static async Task CheckIfUserIsUnverified(JoyModelsDbContext context, Guid userUuid)
