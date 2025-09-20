@@ -3,7 +3,6 @@ using JoyModels.Models.DataTransferObjects.Sso;
 using JoyModels.Services.Services.Sso;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using UserRoleEnum = JoyModels.Models.Enums.UserRole;
 
 namespace JoyModels.API.Controllers;
 
@@ -18,14 +17,14 @@ public class SsoController : ControllerBase
         _service = service;
     }
 
-    [Authorize(Policy = "Staff")]
+    [Authorize(Policy = "HeadStaff")]
     [HttpGet("GetByUuid")]
     public async Task<ActionResult<SsoReturn>> GetByUuid([FromQuery] SsoGetByUuid request)
     {
         return await _service.GetByUuid(request);
     }
 
-    [Authorize(Policy = "Staff")]
+    [Authorize(Policy = "HeadStaff")]
     [HttpGet("Search")]
     public async Task<ActionResult<PaginationResponse<SsoReturn>>> Search([FromQuery] SsoSearch request)
     {
@@ -65,7 +64,7 @@ public class SsoController : ControllerBase
         return await _service.RequestPasswordChange(request);
     }
 
-    [Authorize(Policy = "Staff")]
+    [Authorize(Policy = "HeadStaff")]
     [HttpDelete("Delete")]
     public async Task<ActionResult<SuccessResponse>> Delete([FromQuery] SsoDelete request)
     {
