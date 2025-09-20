@@ -1,10 +1,15 @@
 using System.Data;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Text;
 using JoyModels.Models.DataTransferObjects.Sso;
 using JoyModels.Models.Pagination;
 using JoyModels.Models.src.Database.Entities;
 using JoyModels.Services.Validation;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using UserRoleEnum = JoyModels.Models.Enums.UserRole;
 
 namespace JoyModels.Services.Services.Sso;
@@ -88,6 +93,15 @@ public static class SsoHelperMethods
     {
         ValidateNickname(request.Nickname);
         ValidatePassword(request.Password);
+    }
+
+    public static void ValidateUsersPassword(this SsoLogin request, User userEntity)
+    {
+        var passwordVerificationResult =
+            SsoPasswordHasher.Verify(userEntity, userEntity.PasswordHash, request.Password);
+
+        if (passwordVerificationResult is PasswordVerificationResult.Failed)
+            throw new ArgumentException("User password is incorrect");
     }
 
     public static async Task<PendingUser> GetPendingUserEntity(JoyModelsDbContext context, Guid userUuid)
@@ -245,6 +259,28 @@ public static class SsoHelperMethods
         await context.SaveChangesAsync();
     }
 
+    public static string CreateUserJwtAccessToken(this User user, SsoJwtDetails ssoJwtDetails)
+    {
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.NameIdentifier, user.Uuid.ToString()),
+            new(ClaimTypes.Name, user.NickName),
+            new(ClaimTypes.Role, user.UserRoleUu.RoleName)
+        };
+
+        var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(ssoJwtDetails.JwtSigningKey));
+        var signingCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha512);
+        var signingKeyDescriptor = new JwtSecurityToken(
+            issuer: ssoJwtDetails.JwtIssuer,
+            audience: ssoJwtDetails.JwtAudience,
+            claims: claims,
+            expires: DateTime.UtcNow.AddMinutes(5),
+            signingCredentials: signingCredentials
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(signingKeyDescriptor);
+    }
+
     private static string GenerateOtpCode()
     {
         const string otpAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -262,6 +298,13 @@ public static class SsoHelperMethods
         var otpCode = new string(chars);
         ValidateOtpCodeValueFormat(otpCode);
         return otpCode;
+    }
+
+    private static string CreateUserRefreshToken()
+    {
+        var randomBytes = new byte[64];
+        RandomNumberGenerator.Create().GetBytes(randomBytes);
+        return Convert.ToBase64String(randomBytes);
     }
 
     private static async Task CheckIfUserExists(JoyModelsDbContext context, Guid userUuid)

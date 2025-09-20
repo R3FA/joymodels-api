@@ -4,7 +4,6 @@ using JoyModels.Models.DataTransferObjects.CustomResponseTypes;
 using JoyModels.Models.DataTransferObjects.Sso;
 using JoyModels.Models.src.Database.Entities;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using UserRoleEnum = JoyModels.Models.Enums.UserRole;
 
 namespace JoyModels.Services.Services.Sso;
@@ -14,12 +13,15 @@ public class SsoService : ISsoService
     private readonly JoyModelsDbContext _context;
     private readonly IMapper _mapper;
     private readonly IHttpContextAccessor _httpContext;
+    private readonly SsoJwtDetails _ssoJwtDetails;
 
-    public SsoService(JoyModelsDbContext context, IMapper mapper, IHttpContextAccessor httpContext)
+    public SsoService(JoyModelsDbContext context, IMapper mapper, IHttpContextAccessor httpContext,
+        SsoJwtDetails ssoJwtDetails)
     {
         _context = context;
         _mapper = mapper;
         _httpContext = httpContext;
+        _ssoJwtDetails = ssoJwtDetails;
     }
 
     public async Task<SsoReturn> GetByUuid(SsoGetByUuid request)
@@ -131,20 +133,17 @@ public class SsoService : ISsoService
         };
     }
 
-    public async Task<SsoTokenResponse> Login(SsoLogin request)
+    public async Task<SsoLoginResponse> Login(SsoLogin request)
     {
         request.ValidateUserLoginArguments();
 
         var userEntity = await SsoHelperMethods.GetVerifiedUserEntity(_context, null, request.Nickname);
+        request.ValidateUsersPassword(userEntity);
+        var userAccessToken = userEntity.CreateUserJwtAccessToken(_ssoJwtDetails);
 
-        var passwordVerificationResult =
-            SsoPasswordHasher.Verify(userEntity, userEntity.PasswordHash, request.Password);
-        if (passwordVerificationResult is PasswordVerificationResult.Failed)
-            throw new ArgumentException("User password is incorrect");
-
-        return new SsoTokenResponse()
+        return new SsoLoginResponse()
         {
-            AccessToken = "test",
+            AccessToken = userAccessToken,
             RefreshToken = "test"
         };
     }
