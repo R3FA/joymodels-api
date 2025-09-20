@@ -18,14 +18,14 @@ public class SsoController : ControllerBase
         _service = service;
     }
 
-    [Authorize(Roles = nameof(UserRoleEnum.Admin) + "," + nameof(UserRoleEnum.Root))]
+    [Authorize(Policy = "Staff")]
     [HttpGet("GetByUuid")]
     public async Task<ActionResult<SsoReturn>> GetByUuid([FromQuery] SsoGetByUuid request)
     {
         return await _service.GetByUuid(request);
     }
 
-    [Authorize(Roles = nameof(UserRoleEnum.Admin) + "," + nameof(UserRoleEnum.Root))]
+    [Authorize(Policy = "Staff")]
     [HttpGet("Search")]
     public async Task<ActionResult<PaginationResponse<SsoReturn>>> Search([FromQuery] SsoSearch request)
     {
@@ -65,7 +65,7 @@ public class SsoController : ControllerBase
         return await _service.RequestPasswordChange(request);
     }
 
-    [Authorize(Roles = nameof(UserRoleEnum.Admin) + "," + nameof(UserRoleEnum.Root))]
+    [Authorize(Policy = "Staff")]
     [HttpDelete("Delete")]
     public async Task<ActionResult<SuccessResponse>> Delete([FromQuery] SsoDelete request)
     {
