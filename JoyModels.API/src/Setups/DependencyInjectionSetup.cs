@@ -1,6 +1,6 @@
 using System.Reflection;
 using JoyModels.API.Handlers;
-using JoyModels.Models.src.Database.Entities;
+using JoyModels.Models.Database;
 using JoyModels.Services.Services.Sso;
 using Microsoft.OpenApi.Models;
 

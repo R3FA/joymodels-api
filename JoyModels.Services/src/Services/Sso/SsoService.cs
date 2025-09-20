@@ -1,8 +1,9 @@
 using System.Transactions;
 using AutoMapper;
+using JoyModels.Models.Database;
+using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.CustomResponseTypes;
 using JoyModels.Models.DataTransferObjects.Sso;
-using JoyModels.Models.src.Database.Entities;
 using Microsoft.AspNetCore.Http;
 using UserRoleEnum = JoyModels.Models.Enums.UserRole;
 
