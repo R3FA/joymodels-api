@@ -253,7 +253,7 @@ public static class SsoHelperMethods
     public static async Task UpdateUsersPassword(this SsoRequestPasswordChange request, JoyModelsDbContext context)
     {
         await context.Users
-            .Where(x => x.Uuid == request.UserUuid)
+            .Where(x => x.Uuid == request.UserUuid && x.UserRoleUu.RoleName != nameof(UserRoleEnum.Unverified))
             .ExecuteUpdateAsync(y => y.SetProperty(z => z.PasswordHash,
                 z => SsoPasswordHasher.Hash(request, request.NewPassword)));
         await context.SaveChangesAsync();
