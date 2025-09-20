@@ -140,13 +140,13 @@ public class SsoService : ISsoService
 
         var userEntity = await SsoHelperMethods.GetVerifiedUserEntity(_context, null, request.Nickname);
         request.ValidateUsersPassword(userEntity);
-        var userAccessToken = userEntity.CreateUserJwtAccessToken(_ssoJwtDetails);
 
-        return new SsoLoginResponse()
-        {
-            AccessToken = userAccessToken,
-            RefreshToken = "test"
-        };
+        var ssoLoginResponse = SsoHelperMethods.SetCustomValuesSsoLoginResponse(userEntity, _ssoJwtDetails);
+
+        var userTokenEntity = SsoHelperMethods.SetCustomValuesUserTokenEntity(userEntity, ssoLoginResponse);
+        await userTokenEntity.CreateUserToken(_context);
+
+        return ssoLoginResponse;
     }
 
     public async Task<SuccessResponse> RequestPasswordChange(SsoRequestPasswordChange request)

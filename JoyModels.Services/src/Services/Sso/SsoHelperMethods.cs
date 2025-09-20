@@ -207,6 +207,26 @@ public static class SsoHelperMethods
         return pendingUserEntity;
     }
 
+    public static SsoLoginResponse SetCustomValuesSsoLoginResponse(User userEntity, SsoJwtDetails ssoJwtDetails)
+    {
+        return new SsoLoginResponse()
+        {
+            AccessToken = CreateUserJwtAccessToken(userEntity, ssoJwtDetails),
+            RefreshToken = CreateUserJwtRefreshToken()
+        };
+    }
+
+    public static UserToken SetCustomValuesUserTokenEntity(User userEntity, SsoLoginResponse ssoLoginResponse)
+    {
+        return new UserToken()
+        {
+            Uuid = Guid.NewGuid(),
+            UserUuid = userEntity.Uuid,
+            RefreshToken = ssoLoginResponse.RefreshToken,
+            TokenExpirationDate = DateTime.Now.AddDays(7)
+        };
+    }
+
     public static async Task CreateUser(this User userEntity, JoyModelsDbContext context)
     {
         await context.Users.AddAsync(userEntity);
@@ -219,11 +239,9 @@ public static class SsoHelperMethods
         await context.SaveChangesAsync();
     }
 
-    public static async Task DeleteAllPendingUserData(JoyModelsDbContext context, Guid userUuid)
+    public static async Task CreateUserToken(this UserToken tokenEntity, JoyModelsDbContext context)
     {
-        await context.PendingUsers
-            .Where(x => x.UserUuid == userUuid)
-            .ExecuteDeleteAsync();
+        await context.UserTokens.AddAsync(tokenEntity);
         await context.SaveChangesAsync();
     }
 
@@ -234,6 +252,23 @@ public static class SsoHelperMethods
             .Where(x => x.Uuid == userUuid)
             .ExecuteUpdateAsync(y => y.SetProperty(z => z.UserRoleUuid,
                 z => userRoleUuid));
+        await context.SaveChangesAsync();
+    }
+
+    public static async Task UpdateUsersPassword(this SsoRequestPasswordChange request, JoyModelsDbContext context)
+    {
+        await context.Users
+            .Where(x => x.Uuid == request.UserUuid && x.UserRoleUu.RoleName != nameof(UserRoleEnum.Unverified))
+            .ExecuteUpdateAsync(y => y.SetProperty(z => z.PasswordHash,
+                z => SsoPasswordHasher.Hash(request, request.NewPassword)));
+        await context.SaveChangesAsync();
+    }
+
+    public static async Task DeleteAllPendingUserData(JoyModelsDbContext context, Guid userUuid)
+    {
+        await context.PendingUsers
+            .Where(x => x.UserUuid == userUuid)
+            .ExecuteDeleteAsync();
         await context.SaveChangesAsync();
     }
 
@@ -251,16 +286,7 @@ public static class SsoHelperMethods
         await context.SaveChangesAsync();
     }
 
-    public static async Task UpdateUsersPassword(this SsoRequestPasswordChange request, JoyModelsDbContext context)
-    {
-        await context.Users
-            .Where(x => x.Uuid == request.UserUuid && x.UserRoleUu.RoleName != nameof(UserRoleEnum.Unverified))
-            .ExecuteUpdateAsync(y => y.SetProperty(z => z.PasswordHash,
-                z => SsoPasswordHasher.Hash(request, request.NewPassword)));
-        await context.SaveChangesAsync();
-    }
-
-    public static string CreateUserJwtAccessToken(this User user, SsoJwtDetails ssoJwtDetails)
+    private static string CreateUserJwtAccessToken(User user, SsoJwtDetails ssoJwtDetails)
     {
         var claims = new List<Claim>
         {
@@ -282,6 +308,13 @@ public static class SsoHelperMethods
         return new JwtSecurityTokenHandler().WriteToken(signingKeyDescriptor);
     }
 
+    private static string CreateUserJwtRefreshToken()
+    {
+        var randomBytes = new byte[64];
+        RandomNumberGenerator.Create().GetBytes(randomBytes);
+        return Convert.ToBase64String(randomBytes);
+    }
+
     private static string GenerateOtpCode()
     {
         const string otpAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -299,13 +332,6 @@ public static class SsoHelperMethods
         var otpCode = new string(chars);
         ValidateOtpCodeValueFormat(otpCode);
         return otpCode;
-    }
-
-    private static string CreateUserRefreshToken()
-    {
-        var randomBytes = new byte[64];
-        RandomNumberGenerator.Create().GetBytes(randomBytes);
-        return Convert.ToBase64String(randomBytes);
     }
 
     private static async Task CheckIfUserExists(JoyModelsDbContext context, Guid userUuid)
