@@ -596,9 +596,6 @@ public partial class JoyModelsDbContext : DbContext
 
             entity.Property(e => e.Uuid).HasColumnName("uuid");
             entity.Property(e => e.RefreshToken).HasColumnName("refresh_token");
-            entity.Property(e => e.TokenCreatedAt)
-                .HasColumnType("datetime")
-                .HasColumnName("token_created_at");
             entity.Property(e => e.TokenExpirationDate)
                 .HasColumnType("datetime")
                 .HasColumnName("token_expiration_date");

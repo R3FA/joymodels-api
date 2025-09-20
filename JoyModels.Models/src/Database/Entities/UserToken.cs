@@ -8,8 +8,6 @@ public partial class UserToken
 
     public string RefreshToken { get; set; } = null!;
 
-    public DateTime TokenCreatedAt { get; set; }
-
     public DateTime TokenExpirationDate { get; set; }
 
     public virtual User UserUu { get; set; } = null!;
