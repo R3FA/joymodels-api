@@ -1,4 +1,4 @@
-﻿namespace JoyModels.Models.src.Database.Entities;
+﻿namespace JoyModels.Models.Database.Entities;
 
 public partial class PendingUser
 {

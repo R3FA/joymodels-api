@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using JoyModels.Models.Database.Entities;
 using Microsoft.EntityFrameworkCore;
-using Pomelo.EntityFrameworkCore.MySql.Scaffolding.Internal;
 
-namespace JoyModels.Models.src.Database.Entities;
+namespace JoyModels.Models.Database;
 
 public partial class JoyModelsDbContext : DbContext
 {
@@ -49,8 +47,6 @@ public partial class JoyModelsDbContext : DbContext
     public virtual DbSet<PendingUser> PendingUsers { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
-
-    public virtual DbSet<UserDevice> UserDevices { get; set; }
 
     public virtual DbSet<UserFollower> UserFollowers { get; set; }
 
@@ -527,20 +523,6 @@ public partial class JoyModelsDbContext : DbContext
                 .HasConstraintName("users_ibfk_1");
         });
 
-        modelBuilder.Entity<UserDevice>(entity =>
-        {
-            entity.HasKey(e => e.Uuid).HasName("PRIMARY");
-
-            entity.ToTable("user_devices");
-
-            entity.HasIndex(e => e.DeviceName, "device_name").IsUnique();
-
-            entity.Property(e => e.Uuid).HasColumnName("uuid");
-            entity.Property(e => e.DeviceName)
-                .HasMaxLength(50)
-                .HasColumnName("device_name");
-        });
-
         modelBuilder.Entity<UserFollower>(entity =>
         {
             entity.HasKey(e => e.Uuid).HasName("PRIMARY");
@@ -612,8 +594,6 @@ public partial class JoyModelsDbContext : DbContext
 
             entity.HasIndex(e => new { e.UserUuid, e.RefreshToken }, "uq_user_refresh_token").IsUnique();
 
-            entity.HasIndex(e => e.UserDeviceUuid, "user_device_uuid");
-
             entity.Property(e => e.Uuid).HasColumnName("uuid");
             entity.Property(e => e.RefreshToken).HasColumnName("refresh_token");
             entity.Property(e => e.TokenCreatedAt)
@@ -622,13 +602,7 @@ public partial class JoyModelsDbContext : DbContext
             entity.Property(e => e.TokenExpirationDate)
                 .HasColumnType("datetime")
                 .HasColumnName("token_expiration_date");
-            entity.Property(e => e.UserDeviceUuid).HasColumnName("user_device_uuid");
             entity.Property(e => e.UserUuid).HasColumnName("user_uuid");
-
-            entity.HasOne(d => d.UserDeviceUu).WithMany(p => p.UserTokens)
-                .HasForeignKey(d => d.UserDeviceUuid)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("user_tokens_ibfk_2");
 
             entity.HasOne(d => d.UserUu).WithMany(p => p.UserTokens)
                 .HasForeignKey(d => d.UserUuid)
