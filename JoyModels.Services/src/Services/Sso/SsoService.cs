@@ -149,6 +149,20 @@ public class SsoService : ISsoService
         return ssoLoginResponse;
     }
 
+    public async Task<SuccessResponse> Logout(SsoLogoutRequest request)
+    {
+        await request.DeleteUserRefreshToken(_context);
+
+        return new SuccessResponse()
+        {
+            Type = "Success",
+            Title = "Deleted",
+            Detail = "You have successfully logged out of your account.",
+            Status = StatusCodes.Status200OK.ToString(),
+            Instance = _httpContext.HttpContext.Request.Path.ToString()
+        };
+    }
+
     public async Task<SuccessResponse> RequestPasswordChange(SsoRequestPasswordChange request)
     {
         await request.ValidateUserRequestPasswordChangeArguments(_context);

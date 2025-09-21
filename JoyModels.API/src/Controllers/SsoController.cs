@@ -57,6 +57,13 @@ public class SsoController : ControllerBase
     }
 
     [Authorize(Policy = "VerifiedUsers")]
+    [HttpPost("Logout")]
+    public async Task<ActionResult<SuccessResponse>> Logout([FromBody] SsoLogoutRequest request)
+    {
+        return await _service.Logout(request);
+    }
+
+    [Authorize(Policy = "VerifiedUsers")]
     [HttpPatch("RequestPasswordChange")]
     public async Task<ActionResult<SuccessResponse>> RequestPasswordChange(
         [FromBody] SsoRequestPasswordChange request)

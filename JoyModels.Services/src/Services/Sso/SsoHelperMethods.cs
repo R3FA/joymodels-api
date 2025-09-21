@@ -286,6 +286,19 @@ public static class SsoHelperMethods
         await context.SaveChangesAsync();
     }
 
+    public static async Task DeleteUserRefreshToken(this SsoLogoutRequest request, JoyModelsDbContext context)
+    {
+        var numberOfDeletedRows = await context.UserTokens
+            .Where(x => x.UserUuid == request.UserUuid && x.RefreshToken == request.UserRefreshToken)
+            .ExecuteDeleteAsync();
+
+        if (numberOfDeletedRows == 0)
+            throw new KeyNotFoundException(
+                "Logout process failed.");
+
+        await context.SaveChangesAsync();
+    }
+
     private static string CreateUserJwtAccessToken(User user, SsoJwtDetails ssoJwtDetails)
     {
         var claims = new List<Claim>
