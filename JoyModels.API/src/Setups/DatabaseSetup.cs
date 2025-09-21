@@ -1,4 +1,4 @@
-using JoyModels.Models.src.Database.Entities;
+using JoyModels.Models.Database;
 using Microsoft.EntityFrameworkCore;
 
 namespace JoyModels.API.Setups;

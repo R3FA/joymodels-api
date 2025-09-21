@@ -1,9 +1,9 @@
 using AutoMapper;
+using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.CustomResponseTypes;
 using JoyModels.Models.DataTransferObjects.Sso;
 using JoyModels.Models.DataTransferObjects.UserRole;
 using JoyModels.Models.Pagination;
-using JoyModels.Models.src.Database.Entities;
 
 namespace JoyModels.Models.AutoMapper;
 
@@ -43,5 +43,7 @@ public class SsoProfile : Profile
         CreateMap<SsoVerify, SsoGetByUuid>();
 
         CreateMap(typeof(PaginationBase<>), typeof(PaginationResponse<>));
+
+        CreateMap<SsoRequestAccessTokenChangeRequest, SsoLogoutRequest>();
     }
 }

@@ -1,8 +1,9 @@
 using System.Transactions;
 using AutoMapper;
+using JoyModels.Models.Database;
+using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.CustomResponseTypes;
 using JoyModels.Models.DataTransferObjects.Sso;
-using JoyModels.Models.src.Database.Entities;
 using Microsoft.AspNetCore.Http;
 using UserRoleEnum = JoyModels.Models.Enums.UserRole;
 
@@ -13,12 +14,15 @@ public class SsoService : ISsoService
     private readonly JoyModelsDbContext _context;
     private readonly IMapper _mapper;
     private readonly IHttpContextAccessor _httpContext;
+    private readonly SsoJwtDetails _ssoJwtDetails;
 
-    public SsoService(JoyModelsDbContext context, IMapper mapper, IHttpContextAccessor httpContext)
+    public SsoService(JoyModelsDbContext context, IMapper mapper, IHttpContextAccessor httpContext,
+        SsoJwtDetails ssoJwtDetails)
     {
         _context = context;
         _mapper = mapper;
         _httpContext = httpContext;
+        _ssoJwtDetails = ssoJwtDetails;
     }
 
     public async Task<SsoReturn> GetByUuid(SsoGetByUuid request)
@@ -94,7 +98,7 @@ public class SsoService : ISsoService
             throw new TransactionException(ex.InnerException!.Message);
         }
 
-        var userEntity = await SsoHelperMethods.GetVerifiedUserEntity(_context, request.UserUuid);
+        var userEntity = await SsoHelperMethods.GetVerifiedUserEntity(_context, request.UserUuid, null);
         var verifiedUser = _mapper.Map<SsoUserGet>(userEntity);
 
         return verifiedUser;
@@ -130,12 +134,54 @@ public class SsoService : ISsoService
         };
     }
 
+    public async Task<SsoLoginResponse> Login(SsoLogin request)
+    {
+        request.ValidateUserLoginArguments();
+
+        var userEntity = await SsoHelperMethods.GetVerifiedUserEntity(_context, null, request.Nickname);
+        request.ValidateUsersPassword(userEntity);
+
+        var ssoLoginResponse = SsoHelperMethods.SetCustomValuesSsoLoginResponse(userEntity, _ssoJwtDetails);
+
+        var userTokenEntity = SsoHelperMethods.SetCustomValuesUserTokenEntity(userEntity, ssoLoginResponse);
+        await userTokenEntity.CreateUserToken(_context);
+
+        return ssoLoginResponse;
+    }
+
+    public async Task<SsoRequestAccessTokenChangeResponse> RequestAccessTokenChange(
+        SsoRequestAccessTokenChangeRequest request)
+    {
+        await request.ValidateUserRefreshToken(_context, _mapper);
+
+        var userEntity = await SsoHelperMethods.GetVerifiedUserEntity(_context, request.UserUuid, null);
+
+        var ssoRequestAccessTokenChangeRequest =
+            SsoHelperMethods.SetCustomValuesSsoRequestAccessTokenChangeResponse(userEntity, _ssoJwtDetails);
+
+        return ssoRequestAccessTokenChangeRequest;
+    }
+
+    public async Task<SuccessResponse> Logout(SsoLogoutRequest request)
+    {
+        await request.DeleteUserRefreshToken(_context);
+
+        return new SuccessResponse
+        {
+            Type = "Success",
+            Title = "Deleted",
+            Detail = "You have successfully logged out of your account.",
+            Status = StatusCodes.Status200OK.ToString(),
+            Instance = _httpContext.HttpContext.Request.Path.ToString()
+        };
+    }
+
     public async Task<SuccessResponse> RequestPasswordChange(SsoRequestPasswordChange request)
     {
         await request.ValidateUserRequestPasswordChangeArguments(_context);
         await request.UpdateUsersPassword(_context);
 
-        return new SuccessResponse()
+        return new SuccessResponse
         {
             Type = "Success",
             Title = "Patched",
@@ -149,7 +195,7 @@ public class SsoService : ISsoService
     {
         await SsoHelperMethods.DeleteAllUnverifiedUserData(_context, request.UserUuid);
 
-        return new SuccessResponse()
+        return new SuccessResponse
         {
             Type = "Success",
             Title = "Deleted",

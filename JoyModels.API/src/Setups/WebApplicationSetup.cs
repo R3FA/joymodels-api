@@ -6,8 +6,9 @@ public static class WebApplicationSetup
     {
         app.RegisterSwaggerServices();
         app.RegisterDatabaseMigrations();
-        // app.UseHttpsRedirection();
+        app.UseHttpsRedirection();
         app.UseExceptionHandler();
+        app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();
 

@@ -4,6 +4,7 @@ using JoyModels.Models.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JoyModels.Models.src.Database.Migrations
 {
     [DbContext(typeof(JoyModelsDbContext))]
-    partial class JoyModelsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250920171151_DropUserDeviceTable")]
+    partial class DropUserDeviceTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -739,6 +742,10 @@ namespace JoyModels.Models.src.Database.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(255)")
                         .HasColumnName("refresh_token");
+
+                    b.Property<DateTime>("TokenCreatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("token_created_at");
 
                     b.Property<DateTime>("TokenExpirationDate")
                         .HasColumnType("datetime")

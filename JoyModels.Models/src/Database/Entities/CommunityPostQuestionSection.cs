@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace JoyModels.Models.src.Database.Entities;
+﻿namespace JoyModels.Models.Database.Entities;
 
 public partial class CommunityPostQuestionSection
 {

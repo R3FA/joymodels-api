@@ -10,6 +10,9 @@ public interface ISsoService
     Task<SsoUserGet> Create(SsoUserCreate request);
     Task<SsoUserGet> Verify(SsoVerify request);
     Task<SuccessResponse> RequestNewOtpCode(SsoRequestNewOtpCode request);
+    Task<SsoLoginResponse> Login(SsoLogin request);
+    Task<SsoRequestAccessTokenChangeResponse> RequestAccessTokenChange(SsoRequestAccessTokenChangeRequest request);
+    Task<SuccessResponse> Logout(SsoLogoutRequest request);
     Task<SuccessResponse> RequestPasswordChange(SsoRequestPasswordChange request);
     Task<SuccessResponse> Delete(SsoDelete request);
 }
