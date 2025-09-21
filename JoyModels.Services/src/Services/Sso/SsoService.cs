@@ -149,11 +149,24 @@ public class SsoService : ISsoService
         return ssoLoginResponse;
     }
 
+    public async Task<SsoRequestAccessTokenChangeResponse> RequestAccessTokenChange(
+        SsoRequestAccessTokenChangeRequest request)
+    {
+        await request.ValidateUserRefreshToken(_context, _mapper);
+
+        var userEntity = await SsoHelperMethods.GetVerifiedUserEntity(_context, request.UserUuid, null);
+
+        var ssoRequestAccessTokenChangeRequest =
+            SsoHelperMethods.SetCustomValuesSsoRequestAccessTokenChangeResponse(userEntity, _ssoJwtDetails);
+
+        return ssoRequestAccessTokenChangeRequest;
+    }
+
     public async Task<SuccessResponse> Logout(SsoLogoutRequest request)
     {
         await request.DeleteUserRefreshToken(_context);
 
-        return new SuccessResponse()
+        return new SuccessResponse
         {
             Type = "Success",
             Title = "Deleted",
@@ -168,7 +181,7 @@ public class SsoService : ISsoService
         await request.ValidateUserRequestPasswordChangeArguments(_context);
         await request.UpdateUsersPassword(_context);
 
-        return new SuccessResponse()
+        return new SuccessResponse
         {
             Type = "Success",
             Title = "Patched",
@@ -182,7 +195,7 @@ public class SsoService : ISsoService
     {
         await SsoHelperMethods.DeleteAllUnverifiedUserData(_context, request.UserUuid);
 
-        return new SuccessResponse()
+        return new SuccessResponse
         {
             Type = "Success",
             Title = "Deleted",

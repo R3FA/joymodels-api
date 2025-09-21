@@ -57,6 +57,14 @@ public class SsoController : ControllerBase
     }
 
     [Authorize(Policy = "VerifiedUsers")]
+    [HttpPost("RequestAccessTokenChange")]
+    public async Task<ActionResult<SsoRequestAccessTokenChangeResponse>> RequestAccessTokenChange(
+        SsoRequestAccessTokenChangeRequest request)
+    {
+        return await _service.RequestAccessTokenChange(request);
+    }
+
+    [Authorize(Policy = "VerifiedUsers")]
     [HttpPost("Logout")]
     public async Task<ActionResult<SuccessResponse>> Logout([FromBody] SsoLogoutRequest request)
     {

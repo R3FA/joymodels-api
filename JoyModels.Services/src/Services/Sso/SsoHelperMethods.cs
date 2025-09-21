@@ -3,8 +3,10 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using AutoMapper;
 using JoyModels.Models.Database;
 using JoyModels.Models.Database.Entities;
+using JoyModels.Models.DataTransferObjects.CustomResponseTypes;
 using JoyModels.Models.DataTransferObjects.Sso;
 using JoyModels.Models.Pagination;
 using JoyModels.Services.Validation;
@@ -24,11 +26,9 @@ public static class SsoHelperMethods
                 "First name must begin with a capital letter and contain only lowercase letters after.");
 
         if (request.LastName != null)
-        {
             if (!RegularExpressionValidation.IsStringValid(request.LastName))
                 throw new ArgumentException(
                     "Last name must begin with a capital letter and contain only lowercase letters after.");
-        }
 
         ValidateNickname(request.Nickname);
         ValidateEmail(request.Email);
@@ -69,14 +69,10 @@ public static class SsoHelperMethods
     public static void ValidateUserSearchArguments(this SsoSearch request)
     {
         if (request.Nickname != null)
-        {
             ValidateNickname(request.Nickname);
-        }
 
         if (request.Email != null)
-        {
             ValidateEmail(request.Email);
-        }
     }
 
     public static async Task ValidateUserRequestPasswordChangeArguments(this SsoRequestPasswordChange request,
@@ -103,6 +99,24 @@ public static class SsoHelperMethods
 
         if (passwordVerificationResult is PasswordVerificationResult.Failed)
             throw new ArgumentException("User password is incorrect");
+    }
+
+    public static async Task ValidateUserRefreshToken(this SsoRequestAccessTokenChangeRequest request,
+        JoyModelsDbContext context, IMapper mapper)
+    {
+        var userTokenEntity = await context.UserTokens
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.UserUuid == request.UserUuid && x.RefreshToken == request.UserRefreshToken);
+
+        if (userTokenEntity == null)
+            throw new KeyNotFoundException("Users token token does not exist.");
+
+        if (DateTime.Now >= userTokenEntity.TokenExpirationDate)
+        {
+            var ssoLogoutRequest = mapper.Map<SsoLogoutRequest>(request);
+            await ssoLogoutRequest.DeleteUserRefreshToken(context);
+            throw new ApplicationException("Refresh token is expired. Logging user out of the application.");
+        }
     }
 
     public static async Task<PendingUser> GetPendingUserEntity(JoyModelsDbContext context, Guid userUuid)
@@ -209,7 +223,7 @@ public static class SsoHelperMethods
 
     public static SsoLoginResponse SetCustomValuesSsoLoginResponse(User userEntity, SsoJwtDetails ssoJwtDetails)
     {
-        return new SsoLoginResponse()
+        return new SsoLoginResponse
         {
             AccessToken = CreateUserJwtAccessToken(userEntity, ssoJwtDetails),
             RefreshToken = CreateUserJwtRefreshToken()
@@ -218,12 +232,21 @@ public static class SsoHelperMethods
 
     public static UserToken SetCustomValuesUserTokenEntity(User userEntity, SsoLoginResponse ssoLoginResponse)
     {
-        return new UserToken()
+        return new UserToken
         {
             Uuid = Guid.NewGuid(),
             UserUuid = userEntity.Uuid,
             RefreshToken = ssoLoginResponse.RefreshToken,
             TokenExpirationDate = DateTime.Now.AddDays(7)
+        };
+    }
+
+    public static SsoRequestAccessTokenChangeResponse SetCustomValuesSsoRequestAccessTokenChangeResponse(
+        User userEntity, SsoJwtDetails ssoJwtDetails)
+    {
+        return new SsoRequestAccessTokenChangeResponse
+        {
+            UserAccessToken = CreateUserJwtAccessToken(userEntity, ssoJwtDetails),
         };
     }
 
@@ -338,9 +361,7 @@ public static class SsoHelperMethods
         RandomNumberGenerator.Fill(randomBytes);
 
         for (var i = 0; i < otpCodeLength; i++)
-        {
             chars[i] = otpAlphabet[randomBytes[i] % otpAlphabet.Length];
-        }
 
         var otpCode = new string(chars);
         ValidateOtpCodeValueFormat(otpCode);

@@ -43,5 +43,7 @@ public class SsoProfile : Profile
         CreateMap<SsoVerify, SsoGetByUuid>();
 
         CreateMap(typeof(PaginationBase<>), typeof(PaginationResponse<>));
+
+        CreateMap<SsoRequestAccessTokenChangeRequest, SsoLogoutRequest>();
     }
 }
