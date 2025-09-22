@@ -1,8 +1,10 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace JoyModels.Models.DataTransferObjects.ResponseTypes.Sso;
 
 public class SsoResponse
 {
-    public Guid Uuid { get; set; }
-    public Guid UserUuid { get; set; }
-    public virtual SsoUserResponse User { get; set; } = null!;
+    [Required] public Guid Uuid { get; set; }
+    [Required] public Guid UserUuid { get; set; }
+    [Required] public virtual SsoUserResponse User { get; set; } = null!;
 }
