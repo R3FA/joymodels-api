@@ -78,6 +78,7 @@ public class SsoService : ISsoService
         return _mapper.Map<SsoUserResponse>(updatedUserEntity);
     }
 
+    // TODO: Implement generating new access token because you're changing users role
     public async Task<SsoUserResponse> Verify(Guid userUuid, SsoVerifyRequest request)
     {
         SsoHelperMethods.ValidateRequestUserUuids(userUuid, request.UserUuid);
