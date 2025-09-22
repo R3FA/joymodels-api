@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace JoyModels.Models.DataTransferObjects.Sso;
+namespace JoyModels.Models.DataTransferObjects.RequestTypes.Sso;
 
-public class SsoVerify
+public class SsoVerifyRequest
 {
     [Required] public Guid UserUuid { get; set; }
     [Required] public string OtpCode { get; set; } = null!;

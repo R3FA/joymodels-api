@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace JoyModels.Models.DataTransferObjects.CustomResponseTypes;
+namespace JoyModels.Models.DataTransferObjects.ResponseTypes.Sso;
 
-public class SsoRequestAccessTokenChangeResponse
+public class SsoAccessTokenChangeResponse
 {
     [Required] public string UserAccessToken { get; set; } = string.Empty;
 }

@@ -1,5 +1,5 @@
 using System.Text;
-using JoyModels.Models.DataTransferObjects.Sso;
+using JoyModels.Models.DataTransferObjects.Jwt;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using UserRoleEnum = JoyModels.Models.Enums.UserRole;
@@ -29,6 +29,12 @@ public static class JwtSetup
 
         services.AddAuthorization(options =>
         {
+            options.AddPolicy("UnverifiedUsers", policy =>
+                policy.RequireRole(
+                    nameof(UserRoleEnum.Undefined),
+                    nameof(UserRoleEnum.Unverified)
+                ));
+
             options.AddPolicy("VerifiedUsers", policy =>
                 policy.RequireRole(
                     nameof(UserRoleEnum.User),
@@ -54,7 +60,7 @@ public static class JwtSetup
         return services;
     }
 
-    public static SsoJwtDetails RegisterJwtDetails(IConfiguration configuration)
+    public static JwtClaimDetails RegisterJwtDetails(IConfiguration configuration)
     {
         var jwtDetails = configuration.GetSection("JWT");
         var jwtSigningKey = jwtDetails["SigningKey"];
@@ -66,7 +72,7 @@ public static class JwtSetup
             || string.IsNullOrEmpty(jwtAudience))
             throw new ApplicationException("JWT Signing Key or Issuer or Audience are not configured!");
 
-        return new SsoJwtDetails()
+        return new JwtClaimDetails()
         {
             JwtSigningKey = jwtSigningKey,
             JwtAudience = jwtAudience,

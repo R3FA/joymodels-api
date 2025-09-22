@@ -1,4 +1,4 @@
-namespace JoyModels.Models.DataTransferObjects.Sso;
+namespace JoyModels.Models.DataTransferObjects.ResponseTypes.Sso;
 
 public class SsoLoginResponse
 {

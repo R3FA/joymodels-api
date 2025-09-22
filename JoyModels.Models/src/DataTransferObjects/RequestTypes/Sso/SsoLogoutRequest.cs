@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace JoyModels.Models.DataTransferObjects.Sso;
+namespace JoyModels.Models.DataTransferObjects.RequestTypes.Sso;
 
 public class SsoLogoutRequest
 {

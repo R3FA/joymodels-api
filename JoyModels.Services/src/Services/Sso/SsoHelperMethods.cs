@@ -6,8 +6,9 @@ using System.Text;
 using AutoMapper;
 using JoyModels.Models.Database;
 using JoyModels.Models.Database.Entities;
-using JoyModels.Models.DataTransferObjects.CustomResponseTypes;
-using JoyModels.Models.DataTransferObjects.Sso;
+using JoyModels.Models.DataTransferObjects.Jwt;
+using JoyModels.Models.DataTransferObjects.RequestTypes.Sso;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.Sso;
 using JoyModels.Models.Pagination;
 using JoyModels.Services.Validation;
 using Microsoft.AspNetCore.Identity;
@@ -19,7 +20,19 @@ namespace JoyModels.Services.Services.Sso;
 
 public static class SsoHelperMethods
 {
-    public static void ValidateUserCreationArguments(this SsoUserCreate request)
+    public static void ValidateRequestUserUuids(Guid queryUserUuid, Guid requestUserUuid)
+    {
+        if (queryUserUuid != requestUserUuid)
+            throw new ArgumentException("User uuid query parameter doesn't match the user uuid in request body");
+    }
+
+    public static void ValidateAuthUserRequest(Guid authUserUuid, Guid requestUserUuid)
+    {
+        if (authUserUuid != requestUserUuid)
+            throw new ApplicationException("You are not authorized for this request.");
+    }
+
+    public static void ValidateUserCreationArguments(this SsoUserCreateRequest request)
     {
         if (!RegularExpressionValidation.IsStringValid(request.FirstName))
             throw new ArgumentException(
@@ -35,7 +48,7 @@ public static class SsoHelperMethods
         ValidatePassword(request.Password);
     }
 
-    public static async Task ValidateUserCreationDuplicatedFields(this SsoUserCreate request,
+    public static async Task ValidateUserCreationDuplicatedFields(this SsoUserCreateRequest request,
         JoyModelsDbContext context)
     {
         var isNicknameDuplicated = await context.Users.AnyAsync(x => x.NickName == request.Nickname);
@@ -54,9 +67,8 @@ public static class SsoHelperMethods
             throw new ArgumentException("OTP code must be 12 characters, using only uppercase letters and numbers.");
     }
 
-    public static void ValidateOtpCodeForUserVerification(JoyModelsDbContext context,
-        PendingUser pendingUserEntity,
-        SsoVerify request)
+    public static void ValidateOtpCodeForUserVerification(PendingUser pendingUserEntity,
+        SsoVerifyRequest request)
     {
         if (pendingUserEntity.OtpCode != request.OtpCode)
             throw new ArgumentException("Invalid OTP code.");
@@ -66,7 +78,7 @@ public static class SsoHelperMethods
                 "Sent OTP Code has expired. Click on resend verification button to regenerate a new OTP code.");
     }
 
-    public static void ValidateUserSearchArguments(this SsoSearch request)
+    public static void ValidateUserSearchArguments(this SsoSearchRequest request)
     {
         if (request.Nickname != null)
             ValidateNickname(request.Nickname);
@@ -75,24 +87,25 @@ public static class SsoHelperMethods
             ValidateEmail(request.Email);
     }
 
-    public static async Task ValidateUserRequestPasswordChangeArguments(this SsoRequestPasswordChange request,
+    public static async Task ValidateUserRequestPasswordChangeArguments(
+        this SsoPasswordChangeRequest passwordChangeRequest,
         JoyModelsDbContext context)
     {
-        await CheckIfUserExists(context, request.UserUuid);
+        await CheckIfUserExists(context, passwordChangeRequest.UserUuid);
 
-        if (request.NewPassword != request.ConfirmNewPassword)
+        if (passwordChangeRequest.NewPassword != passwordChangeRequest.ConfirmNewPassword)
             throw new ArgumentException("New password and confirm password do not match.");
 
-        ValidatePassword(request.NewPassword);
+        ValidatePassword(passwordChangeRequest.NewPassword);
     }
 
-    public static void ValidateUserLoginArguments(this SsoLogin request)
+    public static void ValidateUserLoginArguments(this SsoLoginRequest request)
     {
         ValidateNickname(request.Nickname);
         ValidatePassword(request.Password);
     }
 
-    public static void ValidateUsersPassword(this SsoLogin request, User userEntity)
+    public static void ValidateUsersPassword(this SsoLoginRequest request, User userEntity)
     {
         var passwordVerificationResult =
             SsoPasswordHasher.Verify(userEntity, userEntity.PasswordHash, request.Password);
@@ -101,21 +114,23 @@ public static class SsoHelperMethods
             throw new ArgumentException("User password is incorrect");
     }
 
-    public static async Task ValidateUserRefreshToken(this SsoRequestAccessTokenChangeRequest request,
+    public static async Task ValidateUserRefreshToken(this SsoAccessTokenChangeRequest accessTokenChangeRequest,
         JoyModelsDbContext context, IMapper mapper)
     {
         var userTokenEntity = await context.UserTokens
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.UserUuid == request.UserUuid && x.RefreshToken == request.UserRefreshToken);
+            .FirstOrDefaultAsync(x =>
+                x.UserUuid == accessTokenChangeRequest.UserUuid &&
+                x.RefreshToken == accessTokenChangeRequest.UserRefreshToken);
 
         if (userTokenEntity == null)
             throw new KeyNotFoundException("Users token token does not exist.");
 
         if (DateTime.Now >= userTokenEntity.TokenExpirationDate)
         {
-            var ssoLogoutRequest = mapper.Map<SsoLogoutRequest>(request);
+            var ssoLogoutRequest = mapper.Map<SsoLogoutRequest>(accessTokenChangeRequest);
             await ssoLogoutRequest.DeleteUserRefreshToken(context);
-            throw new ApplicationException("Refresh token is expired. Logging user out of the application.");
+            throw new ArgumentException("Refresh token is expired. Logging user out of the application.");
         }
     }
 
@@ -125,33 +140,32 @@ public static class SsoHelperMethods
             .AsNoTracking()
             .Include(x => x.UserUu)
             .Include(x => x.UserUu.UserRoleUu)
-            .Where(x => x.UserUu.UserRoleUu.RoleName == nameof(UserRoleEnum.Unverified))
             .FirstOrDefaultAsync(x => x.UserUuid == userUuid);
 
         return pendingUserEntity ?? throw new KeyNotFoundException("Pending user with sent values is not found.");
     }
 
     public static async Task<PaginationBase<PendingUser>> SearchPendingUserEntities(JoyModelsDbContext context,
-        SsoSearch ssoSearchDto)
+        SsoSearchRequest ssoSearchRequestDto)
     {
         var baseQuery = context.PendingUsers
             .AsNoTracking()
             .Include(x => x.UserUu)
-            .Include(x => x.UserUu.UserRoleUu)
-            .Where(x => x.UserUu.UserRoleUu.RoleName == nameof(UserRoleEnum.Unverified));
+            .Include(x => x.UserUu.UserRoleUu);
 
-        var filteredQuery = (ssoSearchDto.Nickname, ssoSearchDto.Email) switch
+        var filteredQuery = (ssoSearchRequestDto.Nickname, ssoSearchRequestDto.Email) switch
         {
-            (not null, null) => baseQuery.Where(x => x.UserUu.NickName == ssoSearchDto.Nickname),
-            (null, not null) => baseQuery.Where(x => x.UserUu.Email == ssoSearchDto.Email),
+            (not null, null) => baseQuery.Where(x => x.UserUu.NickName == ssoSearchRequestDto.Nickname),
+            (null, not null) => baseQuery.Where(x => x.UserUu.Email == ssoSearchRequestDto.Email),
             (not null, not null) => baseQuery.Where(x =>
-                x.UserUu.NickName == ssoSearchDto.Nickname &&
-                x.UserUu.Email == ssoSearchDto.Email),
+                x.UserUu.NickName == ssoSearchRequestDto.Nickname &&
+                x.UserUu.Email == ssoSearchRequestDto.Email),
             _ => baseQuery
         };
 
-        var pendingUsersEntity = await PaginationBase<PendingUser>.CreateAsync(filteredQuery, ssoSearchDto.PageNumber,
-            ssoSearchDto.PageSize);
+        var pendingUsersEntity = await PaginationBase<PendingUser>.CreateAsync(filteredQuery,
+            ssoSearchRequestDto.PageNumber,
+            ssoSearchRequestDto.PageSize);
 
         return pendingUsersEntity;
     }
@@ -166,13 +180,12 @@ public static class SsoHelperMethods
                throw new KeyNotFoundException($"User role `{roleName}` is not found.");
     }
 
-    public static async Task<User> GetVerifiedUserEntity(JoyModelsDbContext context, Guid? userUuid,
+    public static async Task<User> GetUserEntity(JoyModelsDbContext context, Guid? userUuid,
         string? userNickname)
     {
         var baseQuery = context.Users
             .AsNoTracking()
-            .Include(x => x.UserRoleUu)
-            .Where(x => x.UserRoleUu.RoleName != nameof(UserRoleEnum.Unverified));
+            .Include(x => x.UserRoleUu);
 
         var userEntity = (userUuid, userNickname) switch
         {
@@ -201,7 +214,8 @@ public static class SsoHelperMethods
                 $"Unverified user with UUID `{userUuid}` either is verified or does not exist.");
     }
 
-    public static User SetCustomValuesUserEntity(this User userEntity, SsoUserCreate request, UserRole userRoleEntity)
+    public static User SetCustomValuesUserEntity(this User userEntity, SsoUserCreateRequest request,
+        UserRole userRoleEntity)
     {
         userEntity.Uuid = Guid.NewGuid();
         userEntity.PasswordHash = SsoPasswordHasher.Hash(request, request.Password);
@@ -221,11 +235,11 @@ public static class SsoHelperMethods
         return pendingUserEntity;
     }
 
-    public static SsoLoginResponse SetCustomValuesSsoLoginResponse(User userEntity, SsoJwtDetails ssoJwtDetails)
+    public static SsoLoginResponse SetCustomValuesSsoLoginResponse(User userEntity, JwtClaimDetails jwtClaimDetails)
     {
         return new SsoLoginResponse
         {
-            AccessToken = CreateUserJwtAccessToken(userEntity, ssoJwtDetails),
+            AccessToken = CreateUserJwtAccessToken(userEntity, jwtClaimDetails),
             RefreshToken = CreateUserJwtRefreshToken()
         };
     }
@@ -241,12 +255,12 @@ public static class SsoHelperMethods
         };
     }
 
-    public static SsoRequestAccessTokenChangeResponse SetCustomValuesSsoRequestAccessTokenChangeResponse(
-        User userEntity, SsoJwtDetails ssoJwtDetails)
+    public static SsoAccessTokenChangeResponse SetCustomValuesSsoRequestAccessTokenChangeResponse(
+        User userEntity, JwtClaimDetails jwtClaimDetails)
     {
-        return new SsoRequestAccessTokenChangeResponse
+        return new SsoAccessTokenChangeResponse
         {
-            UserAccessToken = CreateUserJwtAccessToken(userEntity, ssoJwtDetails),
+            UserAccessToken = CreateUserJwtAccessToken(userEntity, jwtClaimDetails),
         };
     }
 
@@ -278,12 +292,13 @@ public static class SsoHelperMethods
         await context.SaveChangesAsync();
     }
 
-    public static async Task UpdateUsersPassword(this SsoRequestPasswordChange request, JoyModelsDbContext context)
+    public static async Task UpdateUsersPassword(this SsoPasswordChangeRequest passwordChangeRequest,
+        JoyModelsDbContext context)
     {
         await context.Users
-            .Where(x => x.Uuid == request.UserUuid && x.UserRoleUu.RoleName != nameof(UserRoleEnum.Unverified))
+            .Where(x => x.Uuid == passwordChangeRequest.UserUuid)
             .ExecuteUpdateAsync(y => y.SetProperty(z => z.PasswordHash,
-                z => SsoPasswordHasher.Hash(request, request.NewPassword)));
+                z => SsoPasswordHasher.Hash(passwordChangeRequest, passwordChangeRequest.NewPassword)));
         await context.SaveChangesAsync();
     }
 
@@ -322,7 +337,7 @@ public static class SsoHelperMethods
         await context.SaveChangesAsync();
     }
 
-    private static string CreateUserJwtAccessToken(User user, SsoJwtDetails ssoJwtDetails)
+    private static string CreateUserJwtAccessToken(User user, JwtClaimDetails jwtClaimDetails)
     {
         var claims = new List<Claim>
         {
@@ -331,11 +346,11 @@ public static class SsoHelperMethods
             new(ClaimTypes.Role, user.UserRoleUu.RoleName)
         };
 
-        var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(ssoJwtDetails.JwtSigningKey));
+        var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtClaimDetails.JwtSigningKey));
         var signingCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha512);
         var signingKeyDescriptor = new JwtSecurityToken(
-            issuer: ssoJwtDetails.JwtIssuer,
-            audience: ssoJwtDetails.JwtAudience,
+            issuer: jwtClaimDetails.JwtIssuer,
+            audience: jwtClaimDetails.JwtAudience,
             claims: claims,
             expires: DateTime.Now.AddMinutes(15),
             signingCredentials: signingCredentials
@@ -372,8 +387,6 @@ public static class SsoHelperMethods
     {
         var userExists = await context.Users
             .AsNoTracking()
-            .Include(x => x.UserRoleUu)
-            .Where(x => x.UserRoleUu.RoleName != nameof(UserRoleEnum.Unverified))
             .AnyAsync(x => x.Uuid == userUuid);
 
         if (!userExists)

@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace JoyModels.Models.DataTransferObjects.Sso;
+namespace JoyModels.Models.DataTransferObjects.RequestTypes.Sso;
 
-public class SsoRequestNewOtpCode
+public class SsoNewOtpCodeRequest
 {
     [Required] public Guid UserUuid { get; set; }
 }

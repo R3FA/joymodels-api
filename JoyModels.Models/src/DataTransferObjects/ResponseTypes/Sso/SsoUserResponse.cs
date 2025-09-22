@@ -1,8 +1,8 @@
 using JoyModels.Models.DataTransferObjects.UserRole;
 
-namespace JoyModels.Models.DataTransferObjects.Sso;
+namespace JoyModels.Models.DataTransferObjects.ResponseTypes.Sso;
 
-public class SsoUserGet
+public class SsoUserResponse
 {
     public Guid Uuid { get; set; }
     public string FirstName { get; set; } = null!;

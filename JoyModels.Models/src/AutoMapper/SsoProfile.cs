@@ -1,7 +1,8 @@
 using AutoMapper;
 using JoyModels.Models.Database.Entities;
-using JoyModels.Models.DataTransferObjects.CustomResponseTypes;
-using JoyModels.Models.DataTransferObjects.Sso;
+using JoyModels.Models.DataTransferObjects.RequestTypes.Sso;
+using JoyModels.Models.DataTransferObjects.ResponseTypes;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.Sso;
 using JoyModels.Models.DataTransferObjects.UserRole;
 using JoyModels.Models.Pagination;
 
@@ -11,18 +12,14 @@ public class SsoProfile : Profile
 {
     public SsoProfile()
     {
-        CreateMap<PendingUser, SsoReturn>()
+        CreateMap<PendingUser, SsoResponse>()
             .ForMember(dest => dest.User,
                 opt => opt.MapFrom(src => src.UserUu));
-
-        CreateMap<User, SsoUserGet>()
+        CreateMap<User, SsoUserResponse>()
             .ForMember(dest => dest.UserRole,
                 opt => opt.MapFrom(src => src.UserRoleUu));
-
         CreateMap<UserRole, UserRoleGet>();
-
-        CreateMap<SsoUserCreate, User>();
-
+        CreateMap<SsoUserCreateRequest, User>();
         CreateMap<User, User>()
             .AfterMap((_, dest, context) =>
             {
@@ -33,17 +30,11 @@ public class SsoProfile : Profile
                     dest.UserRoleUu = userRole;
                 }
             });
-
         CreateMap<User, PendingUser>()
             .ForMember(dest => dest.UserUuid, opt => opt.MapFrom(src => src.Uuid));
-
         CreateMap<Guid, PendingUser>()
             .ForMember(dest => dest.UserUuid, opt => opt.MapFrom(src => src));
-
-        CreateMap<SsoVerify, SsoGetByUuid>();
-
         CreateMap(typeof(PaginationBase<>), typeof(PaginationResponse<>));
-
-        CreateMap<SsoRequestAccessTokenChangeRequest, SsoLogoutRequest>();
+        CreateMap<SsoAccessTokenChangeRequest, SsoLogoutRequest>();
     }
 }

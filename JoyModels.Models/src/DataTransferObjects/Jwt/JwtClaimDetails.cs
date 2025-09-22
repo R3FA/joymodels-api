@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace JoyModels.Models.DataTransferObjects.Sso;
+namespace JoyModels.Models.DataTransferObjects.Jwt;
 
-public class SsoJwtDetails
+public class JwtClaimDetails
 {
     [Required] public string JwtSigningKey { get; set; } = string.Empty;
     [Required] public string JwtIssuer { get; set; } = string.Empty;

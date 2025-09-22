@@ -1,5 +1,6 @@
-using JoyModels.Models.DataTransferObjects.CustomResponseTypes;
-using JoyModels.Models.DataTransferObjects.Sso;
+using JoyModels.Models.DataTransferObjects.RequestTypes.Sso;
+using JoyModels.Models.DataTransferObjects.ResponseTypes;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.Sso;
 using JoyModels.Services.Services.Sso;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,71 +19,75 @@ public class SsoController : ControllerBase
     }
 
     [Authorize(Policy = "HeadStaff")]
-    [HttpGet("GetByUuid")]
-    public async Task<ActionResult<SsoReturn>> GetByUuid([FromQuery] SsoGetByUuid request)
+    [HttpGet("Get/{userUuid:guid}")]
+    public async Task<ActionResult<SsoResponse>> GetByUuid([FromQuery] Guid userUuid)
     {
-        return await _service.GetByUuid(request);
+        return await _service.GetByUuid(userUuid);
     }
 
     [Authorize(Policy = "HeadStaff")]
     [HttpGet("Search")]
-    public async Task<ActionResult<PaginationResponse<SsoReturn>>> Search([FromQuery] SsoSearch request)
+    public async Task<ActionResult<PaginationResponse<SsoResponse>>> Search([FromQuery] SsoSearchRequest request)
     {
         return await _service.Search(request);
     }
 
     [HttpPost("Create")]
-    public async Task<ActionResult<SsoUserGet>> Create([FromBody] SsoUserCreate request)
+    public async Task<ActionResult<SsoUserResponse>> Create([FromBody] SsoUserCreateRequest request)
     {
         return await _service.Create(request);
     }
 
-    [HttpPost("Verify")]
-    public async Task<ActionResult<SsoUserGet>> Verify([FromBody] SsoVerify request)
+    [Authorize(Policy = "UnverifiedUsers")]
+    [HttpPost("Verify/{userUuid:guid}")]
+    public async Task<ActionResult<SsoUserResponse>> Verify([FromQuery] Guid userUuid,
+        [FromBody] SsoVerifyRequest request)
     {
-        return await _service.Verify(request);
+        return await _service.Verify(userUuid, request);
     }
 
-    [HttpPost("RequestNewOtpCode")]
-    public async Task<ActionResult<SuccessResponse>> RequestNewOtpCode(
-        [FromBody] SsoRequestNewOtpCode request)
+    [Authorize(Policy = "UnverifiedUsers")]
+    [HttpPost("RequestNewOtpCode/{userUuid:guid}")]
+    public async Task<ActionResult<SuccessResponse>> RequestNewOtpCode([FromQuery] Guid userUuid,
+        [FromBody] SsoNewOtpCodeRequest newOtpCodeRequest)
     {
-        return await _service.RequestNewOtpCode(request);
+        return await _service.RequestNewOtpCode(userUuid, newOtpCodeRequest);
     }
 
     [HttpPost("Login")]
-    public async Task<ActionResult<SsoLoginResponse>> Login([FromBody] SsoLogin request)
+    public async Task<ActionResult<SsoLoginResponse>> Login([FromBody] SsoLoginRequest request)
     {
         return await _service.Login(request);
     }
 
     [Authorize(Policy = "VerifiedUsers")]
-    [HttpPost("RequestAccessTokenChange")]
-    public async Task<ActionResult<SsoRequestAccessTokenChangeResponse>> RequestAccessTokenChange(
-        SsoRequestAccessTokenChangeRequest request)
+    [HttpPost("RequestAccessTokenChange/{userUuid:guid}")]
+    public async Task<ActionResult<SsoAccessTokenChangeResponse>> RequestAccessTokenChange(
+        [FromQuery] Guid userUuid, [FromBody] SsoAccessTokenChangeRequest accessTokenChangeRequest)
     {
-        return await _service.RequestAccessTokenChange(request);
+        return await _service.RequestAccessTokenChange(userUuid, accessTokenChangeRequest);
     }
 
     [Authorize(Policy = "VerifiedUsers")]
-    [HttpPost("Logout")]
-    public async Task<ActionResult<SuccessResponse>> Logout([FromBody] SsoLogoutRequest request)
+    [HttpPost("Logout/{userUuid:guid}")]
+    public async Task<ActionResult<SuccessResponse>> Logout([FromQuery] Guid userUuid,
+        [FromBody] SsoLogoutRequest request)
     {
-        return await _service.Logout(request);
+        return await _service.Logout(userUuid, request);
     }
 
     [Authorize(Policy = "VerifiedUsers")]
-    [HttpPatch("RequestPasswordChange")]
-    public async Task<ActionResult<SuccessResponse>> RequestPasswordChange(
-        [FromBody] SsoRequestPasswordChange request)
+    [HttpPatch("RequestPasswordChange/{userUuid:guid}")]
+    public async Task<ActionResult<SuccessResponse>> RequestPasswordChange([FromQuery] Guid userUuid,
+        [FromBody] SsoPasswordChangeRequest passwordChangeRequest)
     {
-        return await _service.RequestPasswordChange(request);
+        return await _service.RequestPasswordChange(userUuid, passwordChangeRequest);
     }
 
     [Authorize(Policy = "HeadStaff")]
-    [HttpDelete("Delete")]
-    public async Task<ActionResult<SuccessResponse>> Delete([FromQuery] SsoDelete request)
+    [HttpDelete("Delete/{userUuid:guid}")]
+    public async Task<ActionResult<SuccessResponse>> Delete([FromQuery] Guid userUuid)
     {
-        return await _service.Delete(request);
+        return await _service.Delete(userUuid);
     }
 }

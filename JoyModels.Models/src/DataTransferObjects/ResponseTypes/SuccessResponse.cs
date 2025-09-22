@@ -1,4 +1,4 @@
-namespace JoyModels.Models.DataTransferObjects.CustomResponseTypes;
+namespace JoyModels.Models.DataTransferObjects.ResponseTypes;
 
 public class SuccessResponse
 {
