@@ -201,19 +201,6 @@ public static class SsoHelperMethods
                throw new KeyNotFoundException("User with sent values is not found.");
     }
 
-    public static async Task CheckIfUserIsUnverified(JoyModelsDbContext context, Guid userUuid)
-    {
-        var userExists = await context.Users
-            .AsNoTracking()
-            .Include(x => x.UserRoleUu)
-            .Where(x => x.UserRoleUu.RoleName == nameof(UserRoleEnum.Unverified))
-            .AnyAsync(x => x.Uuid == userUuid);
-
-        if (!userExists)
-            throw new KeyNotFoundException(
-                $"Unverified user with UUID `{userUuid}` either is verified or does not exist.");
-    }
-
     public static User SetCustomValuesUserEntity(this User userEntity, SsoUserCreateRequest request,
         UserRole userRoleEntity)
     {

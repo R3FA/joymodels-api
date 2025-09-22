@@ -117,8 +117,6 @@ public class SsoService : ISsoService
         SsoHelperMethods.ValidateRequestUserUuids(userUuid, newOtpCodeRequest.UserUuid);
         SsoHelperMethods.ValidateAuthUserRequest(_userAuthValidation.GetAuthUserUuid(), newOtpCodeRequest.UserUuid);
 
-        await SsoHelperMethods.CheckIfUserIsUnverified(_context, newOtpCodeRequest.UserUuid);
-
         var pendingUserEntity = _mapper.Map<PendingUser>(newOtpCodeRequest.UserUuid);
         pendingUserEntity.SetCustomValuesPendingUserEntity();
 
