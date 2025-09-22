@@ -20,7 +20,7 @@ public class SsoController : ControllerBase
 
     [Authorize(Policy = "HeadStaff")]
     [HttpGet("Get/{userUuid:guid}")]
-    public async Task<ActionResult<SsoResponse>> GetByUuid([FromQuery] Guid userUuid)
+    public async Task<ActionResult<SsoResponse>> GetByUuid([FromRoute] Guid userUuid)
     {
         return await _service.GetByUuid(userUuid);
     }
@@ -40,7 +40,7 @@ public class SsoController : ControllerBase
 
     [Authorize(Policy = "UnverifiedUsers")]
     [HttpPost("Verify/{userUuid:guid}")]
-    public async Task<ActionResult<SsoUserResponse>> Verify([FromQuery] Guid userUuid,
+    public async Task<ActionResult<SsoUserResponse>> Verify([FromRoute] Guid userUuid,
         [FromBody] SsoVerifyRequest request)
     {
         return await _service.Verify(userUuid, request);
@@ -48,7 +48,7 @@ public class SsoController : ControllerBase
 
     [Authorize(Policy = "UnverifiedUsers")]
     [HttpPost("RequestNewOtpCode/{userUuid:guid}")]
-    public async Task<ActionResult<SuccessResponse>> RequestNewOtpCode([FromQuery] Guid userUuid,
+    public async Task<ActionResult<SuccessResponse>> RequestNewOtpCode([FromRoute] Guid userUuid,
         [FromBody] SsoNewOtpCodeRequest newOtpCodeRequest)
     {
         return await _service.RequestNewOtpCode(userUuid, newOtpCodeRequest);
@@ -63,14 +63,14 @@ public class SsoController : ControllerBase
     [Authorize(Policy = "VerifiedUsers")]
     [HttpPost("RequestAccessTokenChange/{userUuid:guid}")]
     public async Task<ActionResult<SsoAccessTokenChangeResponse>> RequestAccessTokenChange(
-        [FromQuery] Guid userUuid, [FromBody] SsoAccessTokenChangeRequest accessTokenChangeRequest)
+        [FromRoute] Guid userUuid, [FromBody] SsoAccessTokenChangeRequest accessTokenChangeRequest)
     {
         return await _service.RequestAccessTokenChange(userUuid, accessTokenChangeRequest);
     }
 
     [Authorize(Policy = "VerifiedUsers")]
     [HttpPost("Logout/{userUuid:guid}")]
-    public async Task<ActionResult<SuccessResponse>> Logout([FromQuery] Guid userUuid,
+    public async Task<ActionResult<SuccessResponse>> Logout([FromRoute] Guid userUuid,
         [FromBody] SsoLogoutRequest request)
     {
         return await _service.Logout(userUuid, request);
@@ -78,7 +78,7 @@ public class SsoController : ControllerBase
 
     [Authorize(Policy = "VerifiedUsers")]
     [HttpPatch("RequestPasswordChange/{userUuid:guid}")]
-    public async Task<ActionResult<SuccessResponse>> RequestPasswordChange([FromQuery] Guid userUuid,
+    public async Task<ActionResult<SuccessResponse>> RequestPasswordChange([FromRoute] Guid userUuid,
         [FromBody] SsoPasswordChangeRequest passwordChangeRequest)
     {
         return await _service.RequestPasswordChange(userUuid, passwordChangeRequest);
@@ -86,7 +86,7 @@ public class SsoController : ControllerBase
 
     [Authorize(Policy = "HeadStaff")]
     [HttpDelete("Delete/{userUuid:guid}")]
-    public async Task<ActionResult<SuccessResponse>> Delete([FromQuery] Guid userUuid)
+    public async Task<ActionResult<SuccessResponse>> Delete([FromRoute] Guid userUuid)
     {
         return await _service.Delete(userUuid);
     }
