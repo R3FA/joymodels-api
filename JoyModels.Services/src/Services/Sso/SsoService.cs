@@ -149,7 +149,7 @@ public class SsoService : ISsoService
 
     public async Task<SsoLoginResponse> Login(SsoLoginRequest request)
     {
-        request.ValidateUserLoginArguments();
+        request.ValidateUserLoginRequestArguments();
 
         var userEntity = await SsoHelperMethods.GetUserEntity(_context, null, request.Nickname);
         request.ValidateUsersPassword(userEntity);
@@ -202,7 +202,7 @@ public class SsoService : ISsoService
         SsoHelperMethods.ValidateAuthUserRequest(_userAuthValidation.GetAuthUserUuid(), passwordChangeRequest.UserUuid);
         SsoHelperMethods.ValidateRequestUserUuids(userUuid, passwordChangeRequest.UserUuid);
 
-        await passwordChangeRequest.ValidateUserRequestPasswordChangeArguments(_context);
+        await passwordChangeRequest.ValidateUserPasswordChangeRequestArguments(_context);
         await passwordChangeRequest.UpdateUsersPassword(_context);
 
         return new SuccessResponse
