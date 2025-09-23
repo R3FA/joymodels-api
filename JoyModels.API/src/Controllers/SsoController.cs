@@ -49,9 +49,9 @@ public class SsoController : ControllerBase
     [Authorize(Policy = "UnverifiedUsers")]
     [HttpPost("RequestNewOtpCode/{userUuid:guid}")]
     public async Task<ActionResult<SuccessResponse>> RequestNewOtpCode([FromRoute] Guid userUuid,
-        [FromBody] SsoNewOtpCodeRequest newOtpCodeRequest)
+        [FromBody] SsoNewOtpCodeRequest request)
     {
-        return await _service.RequestNewOtpCode(userUuid, newOtpCodeRequest);
+        return await _service.RequestNewOtpCode(userUuid, request);
     }
 
     [HttpPost("Login")]
@@ -63,9 +63,9 @@ public class SsoController : ControllerBase
     [Authorize(Policy = "VerifiedUsers")]
     [HttpPost("RequestAccessTokenChange/{userUuid:guid}")]
     public async Task<ActionResult<SsoAccessTokenChangeResponse>> RequestAccessTokenChange(
-        [FromRoute] Guid userUuid, [FromBody] SsoAccessTokenChangeRequest accessTokenChangeRequest)
+        [FromRoute] Guid userUuid, [FromBody] SsoAccessTokenChangeRequest request)
     {
-        return await _service.RequestAccessTokenChange(userUuid, accessTokenChangeRequest);
+        return await _service.RequestAccessTokenChange(userUuid, request);
     }
 
     [Authorize(Policy = "VerifiedUsers")]
@@ -79,9 +79,17 @@ public class SsoController : ControllerBase
     [Authorize(Policy = "VerifiedUsers")]
     [HttpPatch("RequestPasswordChange/{userUuid:guid}")]
     public async Task<ActionResult<SuccessResponse>> RequestPasswordChange([FromRoute] Guid userUuid,
-        [FromBody] SsoPasswordChangeRequest passwordChangeRequest)
+        [FromBody] SsoPasswordChangeRequest request)
     {
-        return await _service.RequestPasswordChange(userUuid, passwordChangeRequest);
+        return await _service.RequestPasswordChange(userUuid, request);
+    }
+
+    [Authorize(Policy = "HeadStaff")]
+    [HttpPatch("SetRole/{userUuid:guid}")]
+    public async Task<ActionResult<SuccessResponse>> SetRole([FromRoute] Guid userUuid,
+        [FromBody] SsoSetRoleRequest request)
+    {
+        return await _service.SetRole(userUuid, request);
     }
 
     [Authorize(Policy = "HeadStaff")]

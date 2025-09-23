@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using UserRoleEnum = JoyModels.Models.Enums.UserRole;
 
-namespace JoyModels.Services.Services.Sso;
+namespace JoyModels.Services.Services.Sso.HelperMethods;
 
 public static class SsoHelperMethods
 {
@@ -101,6 +101,13 @@ public static class SsoHelperMethods
         if (!userExists)
             throw new KeyNotFoundException(
                 $"User with UUID `{userUuid}` either is unverified or does not exist.");
+    }
+
+    public static void CheckIfUserIsUnverified(this User userEntity)
+    {
+        if (userEntity.UserRoleUu.RoleName is nameof(UserRoleEnum.Undefined)
+            or nameof(UserRoleEnum.Unverified))
+            throw new ApplicationException("User is unverified.");
     }
 
     public static User SetCustomValuesUserEntity(this User userEntity, SsoUserCreateRequest request,
