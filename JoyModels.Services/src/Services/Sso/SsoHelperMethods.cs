@@ -238,7 +238,7 @@ public static class SsoHelperMethods
             Uuid = Guid.NewGuid(),
             UserUuid = userEntity.Uuid,
             RefreshToken = ssoLoginResponse.RefreshToken,
-            TokenExpirationDate = DateTime.Now.AddDays(7)
+            TokenExpirationDate = DateTime.Now.AddDays(30)
         };
     }
 
