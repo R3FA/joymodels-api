@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace JoyModels.Services.Services.Sso;
+namespace JoyModels.Services.Services.Sso.HelperMethods;
 
 public static class SsoPasswordHasher
 {

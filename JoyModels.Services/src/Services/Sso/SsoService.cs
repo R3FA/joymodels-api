@@ -6,7 +6,9 @@ using JoyModels.Models.DataTransferObjects.Jwt;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Sso;
 using JoyModels.Models.DataTransferObjects.ResponseTypes;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Sso;
+using JoyModels.Services.Services.Sso.HelperMethods;
 using JoyModels.Services.Validation;
+using JoyModels.Services.Validation.Sso;
 using Microsoft.AspNetCore.Http;
 using UserRoleEnum = JoyModels.Models.Enums.UserRole;
 
@@ -53,7 +55,7 @@ public class SsoService : ISsoService
         request.ValidateUserCreationArguments();
         await request.ValidateUserCreationDuplicatedFields(_context);
 
-        var userRoleEntity = await SsoHelperMethods.GetUserRoleEntity(_context, nameof(UserRoleEnum.Unverified));
+        var userRoleEntity = await SsoHelperMethods.GetUserRoleEntity(_context, null, nameof(UserRoleEnum.Unverified));
 
         var userEntity = _mapper.Map<User>(request);
         userEntity.SetCustomValuesUserEntity(request, userRoleEntity);
@@ -80,24 +82,24 @@ public class SsoService : ISsoService
 
     public async Task<SsoUserResponse> Verify(Guid userUuid, SsoVerifyRequest request)
     {
-        SsoHelperMethods.ValidateAuthUserRequest(_userAuthValidation.GetAuthUserUuid(), request.UserUuid);
-        SsoHelperMethods.ValidateRequestUserUuids(userUuid, request.UserUuid);
-        SsoHelperMethods.ValidateOtpCodeValueFormat(request.OtpCode);
+        SsoValidation.ValidateAuthUserRequest(_userAuthValidation.GetAuthUserUuid(), request.UserUuid);
+        SsoValidation.ValidateRequestUserUuids(userUuid, request.UserUuid);
+        SsoValidation.ValidateOtpCodeValueFormat(request.OtpCode);
         var accessTokenChangeRequest = _mapper.Map<SsoAccessTokenChangeRequest>(request);
         await accessTokenChangeRequest.ValidateUserRefreshToken(_context, _mapper);
 
         var pendingUserEntity = await SsoHelperMethods
             .GetPendingUserEntity(_context, request.UserUuid);
 
-        SsoHelperMethods.ValidateOtpCodeForUserVerification(pendingUserEntity, request);
+        SsoValidation.ValidateOtpCodeForUserVerification(pendingUserEntity, request);
 
-        var userRoleEntity = await SsoHelperMethods.GetUserRoleEntity(_context, nameof(UserRoleEnum.User));
+        var userRoleEntity = await SsoHelperMethods.GetUserRoleEntity(_context, null, nameof(UserRoleEnum.User));
 
         var transaction = await _context.Database.BeginTransactionAsync();
         try
         {
             await SsoHelperMethods.DeleteAllPendingUserData(_context, request.UserUuid);
-            await SsoHelperMethods.UpdateUsersRoleAfterVerification(_context, pendingUserEntity.UserUuid,
+            await SsoHelperMethods.UpdateUsersRole(_context, pendingUserEntity.UserUuid,
                 userRoleEntity.Uuid);
 
             await transaction.CommitAsync();
@@ -116,12 +118,12 @@ public class SsoService : ISsoService
         return verifiedUser;
     }
 
-    public async Task<SuccessResponse> RequestNewOtpCode(Guid userUuid, SsoNewOtpCodeRequest newOtpCodeRequest)
+    public async Task<SuccessResponse> RequestNewOtpCode(Guid userUuid, SsoNewOtpCodeRequest request)
     {
-        SsoHelperMethods.ValidateAuthUserRequest(_userAuthValidation.GetAuthUserUuid(), newOtpCodeRequest.UserUuid);
-        SsoHelperMethods.ValidateRequestUserUuids(userUuid, newOtpCodeRequest.UserUuid);
+        SsoValidation.ValidateAuthUserRequest(_userAuthValidation.GetAuthUserUuid(), request.UserUuid);
+        SsoValidation.ValidateRequestUserUuids(userUuid, request.UserUuid);
 
-        var pendingUserEntity = _mapper.Map<PendingUser>(newOtpCodeRequest.UserUuid);
+        var pendingUserEntity = _mapper.Map<PendingUser>(request.UserUuid);
         pendingUserEntity.SetCustomValuesPendingUserEntity();
 
         var transaction = await _context.Database.BeginTransactionAsync();
@@ -163,15 +165,15 @@ public class SsoService : ISsoService
     }
 
     public async Task<SsoAccessTokenChangeResponse> RequestAccessTokenChange(Guid userUuid,
-        SsoAccessTokenChangeRequest accessTokenChangeRequest)
+        SsoAccessTokenChangeRequest request)
     {
-        SsoHelperMethods.ValidateAuthUserRequest(_userAuthValidation.GetAuthUserUuid(),
-            accessTokenChangeRequest.UserUuid);
-        SsoHelperMethods.ValidateRequestUserUuids(userUuid, accessTokenChangeRequest.UserUuid);
+        SsoValidation.ValidateAuthUserRequest(_userAuthValidation.GetAuthUserUuid(),
+            request.UserUuid);
+        SsoValidation.ValidateRequestUserUuids(userUuid, request.UserUuid);
 
-        await accessTokenChangeRequest.ValidateUserRefreshToken(_context, _mapper);
+        await request.ValidateUserRefreshToken(_context, _mapper);
 
-        var userEntity = await SsoHelperMethods.GetUserEntity(_context, accessTokenChangeRequest.UserUuid, null);
+        var userEntity = await SsoHelperMethods.GetUserEntity(_context, request.UserUuid, null);
 
         var ssoAccessTokenChangeResponse =
             SsoHelperMethods.SetCustomValuesSsoAccessTokenChangeResponse(userEntity, _jwtClaimDetails);
@@ -181,8 +183,8 @@ public class SsoService : ISsoService
 
     public async Task<SuccessResponse> Logout(Guid userUuid, SsoLogoutRequest request)
     {
-        SsoHelperMethods.ValidateAuthUserRequest(_userAuthValidation.GetAuthUserUuid(), request.UserUuid);
-        SsoHelperMethods.ValidateRequestUserUuids(userUuid, request.UserUuid);
+        SsoValidation.ValidateAuthUserRequest(_userAuthValidation.GetAuthUserUuid(), request.UserUuid);
+        SsoValidation.ValidateRequestUserUuids(userUuid, request.UserUuid);
 
         await request.DeleteUserRefreshToken(_context);
 
@@ -197,19 +199,45 @@ public class SsoService : ISsoService
     }
 
     public async Task<SuccessResponse> RequestPasswordChange(Guid userUuid,
-        SsoPasswordChangeRequest passwordChangeRequest)
+        SsoPasswordChangeRequest request)
     {
-        SsoHelperMethods.ValidateAuthUserRequest(_userAuthValidation.GetAuthUserUuid(), passwordChangeRequest.UserUuid);
-        SsoHelperMethods.ValidateRequestUserUuids(userUuid, passwordChangeRequest.UserUuid);
+        SsoValidation.ValidateAuthUserRequest(_userAuthValidation.GetAuthUserUuid(), request.UserUuid);
+        SsoValidation.ValidateRequestUserUuids(userUuid, request.UserUuid);
+        request.ValidateUserPasswordChangeRequestArguments();
 
-        await passwordChangeRequest.ValidateUserPasswordChangeRequestArguments(_context);
-        await passwordChangeRequest.UpdateUsersPassword(_context);
+        await SsoHelperMethods.CheckIfUserExists(_context, request.UserUuid);
+        await request.UpdateUsersPassword(_context);
 
         return new SuccessResponse
         {
             Type = "Success",
             Title = "Patched",
             Detail = "You have successfully changed your password.",
+            Status = StatusCodes.Status200OK.ToString(),
+            Instance = _httpContext.HttpContext.Request.Path.ToString()
+        };
+    }
+
+    public async Task<SuccessResponse> SetRole(Guid userUuid, SsoSetRoleRequest request)
+    {
+        SsoValidation.ValidateRequestUserUuids(userUuid, request.UserUuid);
+
+        var userEntity = await SsoHelperMethods.GetUserEntity(_context, request.UserUuid, null);
+        userEntity.CheckIfUserIsUnverified();
+
+        var userRoleEntity =
+            await SsoHelperMethods.GetUserRoleEntity(_context, request.DesignatedUserRoleUuid, null);
+
+        userEntity.ValidateIfUserHasSameRole(userRoleEntity);
+
+        await SsoHelperMethods.UpdateUsersRole(_context, request.UserUuid, userRoleEntity.Uuid);
+
+        return new SuccessResponse
+        {
+            Type = "Success",
+            Title = "Patched",
+            Detail =
+                $"Role `{userRoleEntity.RoleName}` is set for user `{request.UserUuid}`. Role changes will be affected through 15 minutes.",
             Status = StatusCodes.Status200OK.ToString(),
             Instance = _httpContext.HttpContext.Request.Path.ToString()
         };
