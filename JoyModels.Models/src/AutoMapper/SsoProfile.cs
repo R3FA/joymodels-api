@@ -17,7 +17,16 @@ public class SsoProfile : Profile
                 opt => opt.MapFrom(src => src.UserUu));
         CreateMap<User, SsoUserResponse>()
             .ForMember(dest => dest.UserRole,
-                opt => opt.MapFrom(src => src.UserRoleUu));
+                opt => opt.MapFrom(src => src.UserRoleUu))
+            .AfterMap((_, dest, context) =>
+            {
+                if (context.TryGetItems(out var items) &&
+                    items.TryGetValue("UserAccessToken", out var userAccessTokenObject) &&
+                    userAccessTokenObject is string userAccessToken)
+                {
+                    dest.UserAccessToken = userAccessToken;
+                }
+            });
         CreateMap<UserRole, UserRoleGet>();
         CreateMap<SsoUserCreateRequest, User>();
         CreateMap<User, User>()
@@ -36,5 +45,6 @@ public class SsoProfile : Profile
             .ForMember(dest => dest.UserUuid, opt => opt.MapFrom(src => src));
         CreateMap(typeof(PaginationBase<>), typeof(PaginationResponse<>));
         CreateMap<SsoAccessTokenChangeRequest, SsoLogoutRequest>();
+        CreateMap<SsoVerifyRequest, SsoAccessTokenChangeRequest>();
     }
 }

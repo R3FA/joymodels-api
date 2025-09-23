@@ -6,4 +6,5 @@ public class SsoVerifyRequest
 {
     [Required] public Guid UserUuid { get; set; }
     [Required] public string OtpCode { get; set; } = null!;
+    [Required] public string UserRefreshToken { get; set; } = null!;
 }

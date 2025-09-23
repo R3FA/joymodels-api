@@ -23,7 +23,8 @@ public static class JwtSetup
                     ValidAudience = ssoJwtDetails.JwtAudience,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(ssoJwtDetails.JwtSigningKey))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(ssoJwtDetails.JwtSigningKey)),
+                    ClockSkew = TimeSpan.Zero
                 };
             });
 
@@ -31,7 +32,6 @@ public static class JwtSetup
         {
             options.AddPolicy("UnverifiedUsers", policy =>
                 policy.RequireRole(
-                    nameof(UserRoleEnum.Undefined),
                     nameof(UserRoleEnum.Unverified)
                 ));
 

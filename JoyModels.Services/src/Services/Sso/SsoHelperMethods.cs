@@ -124,7 +124,7 @@ public static class SsoHelperMethods
                 x.RefreshToken == accessTokenChangeRequest.UserRefreshToken);
 
         if (userTokenEntity == null)
-            throw new KeyNotFoundException("Users token token does not exist.");
+            throw new KeyNotFoundException("Users refresh token does not exist.");
 
         if (DateTime.Now >= userTokenEntity.TokenExpirationDate)
         {
@@ -242,7 +242,7 @@ public static class SsoHelperMethods
         };
     }
 
-    public static SsoAccessTokenChangeResponse SetCustomValuesSsoRequestAccessTokenChangeResponse(
+    public static SsoAccessTokenChangeResponse SetCustomValuesSsoAccessTokenChangeResponse(
         User userEntity, JwtClaimDetails jwtClaimDetails)
     {
         return new SsoAccessTokenChangeResponse
@@ -339,7 +339,7 @@ public static class SsoHelperMethods
             issuer: jwtClaimDetails.JwtIssuer,
             audience: jwtClaimDetails.JwtAudience,
             claims: claims,
-            expires: DateTime.Now.AddMinutes(15),
+            expires: DateTime.Now.AddDays(1),
             signingCredentials: signingCredentials
         );
 
