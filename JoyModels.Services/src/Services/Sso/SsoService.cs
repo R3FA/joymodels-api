@@ -99,7 +99,7 @@ public class SsoService : ISsoService
         try
         {
             await SsoHelperMethods.DeleteAllPendingUserData(_context, request.UserUuid);
-            await SsoHelperMethods.UpdateUsersRoleAfterVerification(_context, pendingUserEntity.UserUuid,
+            await SsoHelperMethods.UpdateUsersRole(_context, pendingUserEntity.UserUuid,
                 userRoleEntity.Uuid);
 
             await transaction.CommitAsync();
@@ -230,7 +230,7 @@ public class SsoService : ISsoService
 
         userEntity.ValidateIfUserHasSameRole(userRoleEntity);
 
-        await SsoHelperMethods.UpdateUsersRoleAfterVerification(_context, request.UserUuid, userRoleEntity.Uuid);
+        await SsoHelperMethods.UpdateUsersRole(_context, request.UserUuid, userRoleEntity.Uuid);
 
         return new SuccessResponse
         {

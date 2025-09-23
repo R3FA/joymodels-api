@@ -178,7 +178,7 @@ public static class SsoHelperMethods
         await context.SaveChangesAsync();
     }
 
-    public static async Task UpdateUsersRoleAfterVerification(JoyModelsDbContext context, Guid userUuid,
+    public static async Task UpdateUsersRole(JoyModelsDbContext context, Guid userUuid,
         Guid userRoleUuid)
     {
         await context.Users
