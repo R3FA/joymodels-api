@@ -1,18 +1,22 @@
-using JoyModels.Models.DataTransferObjects.CustomResponseTypes;
-using JoyModels.Models.DataTransferObjects.Sso;
+using JoyModels.Models.DataTransferObjects.RequestTypes.Sso;
+using JoyModels.Models.DataTransferObjects.ResponseTypes;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.Sso;
 
 namespace JoyModels.Services.Services.Sso;
 
 public interface ISsoService
 {
-    Task<SsoReturn> GetByUuid(SsoGetByUuid request);
-    Task<PaginationResponse<SsoReturn>> Search(SsoSearch request);
-    Task<SsoUserGet> Create(SsoUserCreate request);
-    Task<SsoUserGet> Verify(SsoVerify request);
-    Task<SuccessResponse> RequestNewOtpCode(SsoRequestNewOtpCode request);
-    Task<SsoLoginResponse> Login(SsoLogin request);
-    Task<SsoRequestAccessTokenChangeResponse> RequestAccessTokenChange(SsoRequestAccessTokenChangeRequest request);
-    Task<SuccessResponse> Logout(SsoLogoutRequest request);
-    Task<SuccessResponse> RequestPasswordChange(SsoRequestPasswordChange request);
-    Task<SuccessResponse> Delete(SsoDelete request);
+    Task<SsoResponse> GetByUuid(Guid userUuid);
+    Task<PaginationResponse<SsoResponse>> Search(SsoSearchRequest request);
+    Task<SsoUserResponse> Create(SsoUserCreateRequest request);
+    Task<SsoUserResponse> Verify(Guid userUuid, SsoVerifyRequest request);
+    Task<SuccessResponse> RequestNewOtpCode(Guid userUuid, SsoNewOtpCodeRequest newOtpCodeRequest);
+    Task<SsoLoginResponse> Login(SsoLoginRequest request);
+
+    Task<SsoAccessTokenChangeResponse> RequestAccessTokenChange(Guid userUuid,
+        SsoAccessTokenChangeRequest accessTokenChangeRequest);
+
+    Task<SuccessResponse> Logout(Guid userUuid, SsoLogoutRequest request);
+    Task<SuccessResponse> RequestPasswordChange(Guid userUuid, SsoPasswordChangeRequest passwordChangeRequest);
+    Task<SuccessResponse> Delete(Guid userUuid);
 }
