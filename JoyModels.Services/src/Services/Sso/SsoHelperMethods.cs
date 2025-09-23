@@ -87,7 +87,7 @@ public static class SsoHelperMethods
             ValidateEmail(request.Email);
     }
 
-    public static async Task ValidateUserRequestPasswordChangeArguments(
+    public static async Task ValidateUserPasswordChangeRequestArguments(
         this SsoPasswordChangeRequest passwordChangeRequest,
         JoyModelsDbContext context)
     {
@@ -99,7 +99,7 @@ public static class SsoHelperMethods
         ValidatePassword(passwordChangeRequest.NewPassword);
     }
 
-    public static void ValidateUserLoginArguments(this SsoLoginRequest request)
+    public static void ValidateUserLoginRequestArguments(this SsoLoginRequest request)
     {
         ValidateNickname(request.Nickname);
         ValidatePassword(request.Password);
