@@ -14,9 +14,10 @@ public sealed class UserAuthValidation
 
     public Guid GetAuthUserUuid()
     {
-        var userRefUuid = _httpContext.HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+        var userNameIdentifierClaim =
+            _httpContext.HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
 
-        if (userRefUuid != null && Guid.TryParse(userRefUuid.Value, out var userUuid))
+        if (userNameIdentifierClaim != null && Guid.TryParse(userNameIdentifierClaim.Value, out var userUuid))
             return userUuid;
 
         throw new ApplicationException("Error getting user uuid from access token!");
