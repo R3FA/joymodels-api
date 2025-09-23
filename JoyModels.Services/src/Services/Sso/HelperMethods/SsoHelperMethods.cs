@@ -1,17 +1,14 @@
-using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using AutoMapper;
 using JoyModels.Models.Database;
 using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.Jwt;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Sso;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Sso;
 using JoyModels.Models.Pagination;
-using JoyModels.Services.Validation;
-using Microsoft.AspNetCore.Identity;
+using JoyModels.Services.Validation.Sso;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using UserRoleEnum = JoyModels.Models.Enums.UserRole;
@@ -20,120 +17,6 @@ namespace JoyModels.Services.Services.Sso;
 
 public static class SsoHelperMethods
 {
-    public static void ValidateRequestUserUuids(Guid queryUserUuid, Guid requestUserUuid)
-    {
-        if (queryUserUuid != requestUserUuid)
-            throw new ArgumentException("User uuid query parameter doesn't match the user uuid in request body");
-    }
-
-    public static void ValidateAuthUserRequest(Guid authUserUuid, Guid requestUserUuid)
-    {
-        if (authUserUuid != requestUserUuid)
-            throw new ApplicationException("You are not authorized for this request.");
-    }
-
-    public static void ValidateUserCreationArguments(this SsoUserCreateRequest request)
-    {
-        if (!RegularExpressionValidation.IsStringValid(request.FirstName))
-            throw new ArgumentException(
-                "First name must begin with a capital letter and contain only lowercase letters after.");
-
-        if (request.LastName != null)
-            if (!RegularExpressionValidation.IsStringValid(request.LastName))
-                throw new ArgumentException(
-                    "Last name must begin with a capital letter and contain only lowercase letters after.");
-
-        ValidateNickname(request.Nickname);
-        ValidateEmail(request.Email);
-        ValidatePassword(request.Password);
-    }
-
-    public static async Task ValidateUserCreationDuplicatedFields(this SsoUserCreateRequest request,
-        JoyModelsDbContext context)
-    {
-        var isNicknameDuplicated = await context.Users.AnyAsync(x => x.NickName == request.Nickname);
-        var isEmailDuplicated = await context.Users.AnyAsync(x => x.Email == request.Email);
-
-        if (isNicknameDuplicated)
-            throw new DuplicateNameException($"Nickname `{request.Nickname}` is already registered in our database.");
-
-        if (isEmailDuplicated)
-            throw new DuplicateNameException($"Email `{request.Email}` is already registered in our database.");
-    }
-
-    public static void ValidateOtpCodeValueFormat(string otpCode)
-    {
-        if (!RegularExpressionValidation.IsOtpCodeValid(otpCode))
-            throw new ArgumentException("OTP code must be 12 characters, using only uppercase letters and numbers.");
-    }
-
-    public static void ValidateOtpCodeForUserVerification(PendingUser pendingUserEntity,
-        SsoVerifyRequest request)
-    {
-        if (pendingUserEntity.OtpCode != request.OtpCode)
-            throw new ArgumentException("Invalid OTP code.");
-
-        if (DateTime.Now > pendingUserEntity.OtpExpirationDate)
-            throw new ArgumentException(
-                "Sent OTP Code has expired. Click on resend verification button to regenerate a new OTP code.");
-    }
-
-    public static void ValidateUserSearchArguments(this SsoSearchRequest request)
-    {
-        if (request.Nickname != null)
-            ValidateNickname(request.Nickname);
-
-        if (request.Email != null)
-            ValidateEmail(request.Email);
-    }
-
-    public static async Task ValidateUserPasswordChangeRequestArguments(
-        this SsoPasswordChangeRequest passwordChangeRequest,
-        JoyModelsDbContext context)
-    {
-        await CheckIfUserExists(context, passwordChangeRequest.UserUuid);
-
-        if (passwordChangeRequest.NewPassword != passwordChangeRequest.ConfirmNewPassword)
-            throw new ArgumentException("New password and confirm password do not match.");
-
-        ValidatePassword(passwordChangeRequest.NewPassword);
-    }
-
-    public static void ValidateUserLoginRequestArguments(this SsoLoginRequest request)
-    {
-        ValidateNickname(request.Nickname);
-        ValidatePassword(request.Password);
-    }
-
-    public static void ValidateUsersPassword(this SsoLoginRequest request, User userEntity)
-    {
-        var passwordVerificationResult =
-            SsoPasswordHasher.Verify(userEntity, userEntity.PasswordHash, request.Password);
-
-        if (passwordVerificationResult is PasswordVerificationResult.Failed)
-            throw new ArgumentException("User password is incorrect");
-    }
-
-    public static async Task ValidateUserRefreshToken(this SsoAccessTokenChangeRequest accessTokenChangeRequest,
-        JoyModelsDbContext context, IMapper mapper)
-    {
-        var userTokenEntity = await context.UserTokens
-            .AsNoTracking()
-            .FirstOrDefaultAsync(x =>
-                x.UserUuid == accessTokenChangeRequest.UserUuid &&
-                x.RefreshToken == accessTokenChangeRequest.UserRefreshToken);
-
-        if (userTokenEntity == null)
-            throw new KeyNotFoundException("Users refresh token does not exist.");
-
-        if (DateTime.Now >= userTokenEntity.TokenExpirationDate)
-        {
-            var ssoLogoutRequest = mapper.Map<SsoLogoutRequest>(accessTokenChangeRequest);
-            await ssoLogoutRequest.DeleteUserRefreshToken(context);
-            throw new ArgumentException("Refresh token is expired. Logging user out of the application.");
-        }
-    }
-
     public static async Task<PendingUser> GetPendingUserEntity(JoyModelsDbContext context, Guid userUuid)
     {
         var pendingUserEntity = await context.PendingUsers
@@ -170,14 +53,22 @@ public static class SsoHelperMethods
         return pendingUsersEntity;
     }
 
-    public static async Task<UserRole> GetUserRoleEntity(JoyModelsDbContext context, string roleName)
+    public static async Task<UserRole> GetUserRoleEntity(JoyModelsDbContext context, Guid? roleUuid, string? roleName)
     {
-        var userRoleEntity = await context.UserRoles
-            .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.RoleName == roleName);
+        var baseQuery = context.UserRoles.AsNoTracking();
+
+        var userRoleEntity = (roleUuid, roleName) switch
+        {
+            (not null, null) => await baseQuery.FirstOrDefaultAsync(x => x.Uuid == roleUuid),
+            (null, not null) => await baseQuery.FirstOrDefaultAsync(x => x.RoleName == roleName),
+            (not null, not null) => await baseQuery.FirstOrDefaultAsync(x =>
+                x.Uuid == roleUuid &&
+                x.RoleName == roleName),
+            _ => throw new ArgumentException("Invalid arguments")
+        };
 
         return userRoleEntity ??
-               throw new KeyNotFoundException($"User role `{roleName}` is not found.");
+               throw new KeyNotFoundException("User role is not found.");
     }
 
     public static async Task<User> GetUserEntity(JoyModelsDbContext context, Guid? userUuid,
@@ -199,6 +90,17 @@ public static class SsoHelperMethods
 
         return userEntity ??
                throw new KeyNotFoundException("User with sent values is not found.");
+    }
+
+    public static async Task CheckIfUserExists(JoyModelsDbContext context, Guid userUuid)
+    {
+        var userExists = await context.Users
+            .AsNoTracking()
+            .AnyAsync(x => x.Uuid == userUuid);
+
+        if (!userExists)
+            throw new KeyNotFoundException(
+                $"User with UUID `{userUuid}` either is unverified or does not exist.");
     }
 
     public static User SetCustomValuesUserEntity(this User userEntity, SsoUserCreateRequest request,
@@ -339,7 +241,7 @@ public static class SsoHelperMethods
             issuer: jwtClaimDetails.JwtIssuer,
             audience: jwtClaimDetails.JwtAudience,
             claims: claims,
-            expires: DateTime.Now.AddDays(1),
+            expires: DateTime.Now.AddMinutes(10),
             signingCredentials: signingCredentials
         );
 
@@ -366,39 +268,7 @@ public static class SsoHelperMethods
             chars[i] = otpAlphabet[randomBytes[i] % otpAlphabet.Length];
 
         var otpCode = new string(chars);
-        ValidateOtpCodeValueFormat(otpCode);
+        SsoValidation.ValidateOtpCodeValueFormat(otpCode);
         return otpCode;
-    }
-
-    private static async Task CheckIfUserExists(JoyModelsDbContext context, Guid userUuid)
-    {
-        var userExists = await context.Users
-            .AsNoTracking()
-            .AnyAsync(x => x.Uuid == userUuid);
-
-        if (!userExists)
-            throw new KeyNotFoundException(
-                $"User with UUID `{userUuid}` either is unverified or does not exist.");
-    }
-
-    private static void ValidateNickname(string nickname)
-    {
-        if (!RegularExpressionValidation.IsNicknameValid(nickname))
-            throw new ArgumentException(
-                "Nickname must have at least 3 characters and may only contain lowercase letters and numbers.");
-    }
-
-    private static void ValidateEmail(string email)
-    {
-        if (!RegularExpressionValidation.IsEmailValid(email))
-            throw new ArgumentException(
-                "Email must contain the '@' symbol, followed by a domain with a dot. Value has to be without spaces or blank characters.");
-    }
-
-    private static void ValidatePassword(string password)
-    {
-        if (!RegularExpressionValidation.IsPasswordValid(password))
-            throw new ArgumentException(
-                "Password must have at least 8 characters, one uppercase letter, one number, and one special character (!@#$%^&*).");
     }
 }
