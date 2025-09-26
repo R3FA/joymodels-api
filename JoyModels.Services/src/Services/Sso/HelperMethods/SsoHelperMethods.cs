@@ -248,7 +248,7 @@ public static class SsoHelperMethods
             issuer: jwtClaimDetails.JwtIssuer,
             audience: jwtClaimDetails.JwtAudience,
             claims: claims,
-            expires: DateTime.Now.AddMinutes(10),
+            expires: DateTime.Now.AddDays(1),
             signingCredentials: signingCredentials
         );
 

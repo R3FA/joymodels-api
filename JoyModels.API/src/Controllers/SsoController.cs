@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace JoyModels.API.Controllers;
 
-[Route("api/[controller]")]
 [ApiController]
+[Route("api/sso/")]
 public class SsoController : ControllerBase
 {
     private readonly ISsoService _service;
@@ -19,27 +19,27 @@ public class SsoController : ControllerBase
     }
 
     [Authorize(Policy = "HeadStaff")]
-    [HttpGet("Get/{userUuid:guid}")]
+    [HttpGet("get/{userUuid:guid}")]
     public async Task<ActionResult<SsoResponse>> GetByUuid([FromRoute] Guid userUuid)
     {
         return await _service.GetByUuid(userUuid);
     }
 
     [Authorize(Policy = "HeadStaff")]
-    [HttpGet("Search")]
+    [HttpGet("search")]
     public async Task<ActionResult<PaginationResponse<SsoResponse>>> Search([FromQuery] SsoSearchRequest request)
     {
         return await _service.Search(request);
     }
 
-    [HttpPost("Create")]
+    [HttpPost("create")]
     public async Task<ActionResult<SsoUserResponse>> Create([FromBody] SsoUserCreateRequest request)
     {
         return await _service.Create(request);
     }
 
     [Authorize(Policy = "UnverifiedUsers")]
-    [HttpPost("Verify/{userUuid:guid}")]
+    [HttpPost("verify/{userUuid:guid}")]
     public async Task<ActionResult<SsoUserResponse>> Verify([FromRoute] Guid userUuid,
         [FromBody] SsoVerifyRequest request)
     {
@@ -47,21 +47,22 @@ public class SsoController : ControllerBase
     }
 
     [Authorize(Policy = "UnverifiedUsers")]
-    [HttpPost("RequestNewOtpCode/{userUuid:guid}")]
-    public async Task<ActionResult<SuccessResponse>> RequestNewOtpCode([FromRoute] Guid userUuid,
+    [HttpPost("request-new-otp-code/{userUuid:guid}")]
+    public async Task<ActionResult> RequestNewOtpCode([FromRoute] Guid userUuid,
         [FromBody] SsoNewOtpCodeRequest request)
     {
-        return await _service.RequestNewOtpCode(userUuid, request);
+        await _service.RequestNewOtpCode(userUuid, request);
+        return Created();
     }
 
-    [HttpPost("Login")]
+    [HttpPost("login")]
     public async Task<ActionResult<SsoLoginResponse>> Login([FromBody] SsoLoginRequest request)
     {
         return await _service.Login(request);
     }
 
     [Authorize(Policy = "VerifiedUsers")]
-    [HttpPost("RequestAccessTokenChange/{userUuid:guid}")]
+    [HttpPost("request-access-token-change/{userUuid:guid}")]
     public async Task<ActionResult<SsoAccessTokenChangeResponse>> RequestAccessTokenChange(
         [FromRoute] Guid userUuid, [FromBody] SsoAccessTokenChangeRequest request)
     {
@@ -69,33 +70,37 @@ public class SsoController : ControllerBase
     }
 
     [Authorize(Policy = "VerifiedUsers")]
-    [HttpPost("Logout/{userUuid:guid}")]
-    public async Task<ActionResult<SuccessResponse>> Logout([FromRoute] Guid userUuid,
+    [HttpPost("logout/{userUuid:guid}")]
+    public async Task<ActionResult> Logout([FromRoute] Guid userUuid,
         [FromBody] SsoLogoutRequest request)
     {
-        return await _service.Logout(userUuid, request);
+        await _service.Logout(userUuid, request);
+        return NoContent();
     }
 
     [Authorize(Policy = "VerifiedUsers")]
-    [HttpPatch("RequestPasswordChange/{userUuid:guid}")]
-    public async Task<ActionResult<SuccessResponse>> RequestPasswordChange([FromRoute] Guid userUuid,
+    [HttpPatch("request-password-change/{userUuid:guid}")]
+    public async Task<ActionResult> RequestPasswordChange([FromRoute] Guid userUuid,
         [FromBody] SsoPasswordChangeRequest request)
     {
-        return await _service.RequestPasswordChange(userUuid, request);
+        await _service.RequestPasswordChange(userUuid, request);
+        return NoContent();
     }
 
     [Authorize(Policy = "HeadStaff")]
-    [HttpPatch("SetRole/{userUuid:guid}")]
-    public async Task<ActionResult<SuccessResponse>> SetRole([FromRoute] Guid userUuid,
+    [HttpPatch("set-role/{userUuid:guid}")]
+    public async Task<ActionResult> SetRole([FromRoute] Guid userUuid,
         [FromBody] SsoSetRoleRequest request)
     {
-        return await _service.SetRole(userUuid, request);
+        await _service.SetRole(userUuid, request);
+        return NoContent();
     }
 
     [Authorize(Policy = "HeadStaff")]
-    [HttpDelete("Delete/{userUuid:guid}")]
-    public async Task<ActionResult<SuccessResponse>> Delete([FromRoute] Guid userUuid)
+    [HttpDelete("delete/{userUuid:guid}")]
+    public async Task<ActionResult> Delete([FromRoute] Guid userUuid)
     {
-        return await _service.Delete(userUuid);
+        await _service.Delete(userUuid);
+        return NoContent();
     }
 }
