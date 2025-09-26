@@ -9,7 +9,6 @@ using JoyModels.Models.DataTransferObjects.ResponseTypes.Sso;
 using JoyModels.Services.Services.Sso.HelperMethods;
 using JoyModels.Services.Validation;
 using JoyModels.Services.Validation.Sso;
-using Microsoft.AspNetCore.Http;
 using UserRoleEnum = JoyModels.Models.Enums.UserRole;
 
 namespace JoyModels.Services.Services.Sso;
@@ -18,16 +17,14 @@ public class SsoService : ISsoService
 {
     private readonly JoyModelsDbContext _context;
     private readonly IMapper _mapper;
-    private readonly IHttpContextAccessor _httpContext;
     private readonly JwtClaimDetails _jwtClaimDetails;
     private readonly UserAuthValidation _userAuthValidation;
 
-    public SsoService(JoyModelsDbContext context, IMapper mapper, IHttpContextAccessor httpContext,
-        JwtClaimDetails jwtClaimDetails, UserAuthValidation userAuthValidation)
+    public SsoService(JoyModelsDbContext context, IMapper mapper, JwtClaimDetails jwtClaimDetails,
+        UserAuthValidation userAuthValidation)
     {
         _context = context;
         _mapper = mapper;
-        _httpContext = httpContext;
         _jwtClaimDetails = jwtClaimDetails;
         _userAuthValidation = userAuthValidation;
     }
@@ -118,7 +115,7 @@ public class SsoService : ISsoService
         return verifiedUser;
     }
 
-    public async Task<SuccessResponse> RequestNewOtpCode(Guid userUuid, SsoNewOtpCodeRequest request)
+    public async Task RequestNewOtpCode(Guid userUuid, SsoNewOtpCodeRequest request)
     {
         SsoValidation.ValidateAuthUserRequest(_userAuthValidation.GetAuthUserUuid(), request.UserUuid);
         SsoValidation.ValidateRequestUserUuids(userUuid, request.UserUuid);
@@ -138,15 +135,6 @@ public class SsoService : ISsoService
         {
             throw new TransactionException(ex.InnerException!.Message);
         }
-
-        return new SuccessResponse()
-        {
-            Type = "Success",
-            Title = "Created",
-            Detail = "Otp code has been generated and sent to your email.",
-            Status = StatusCodes.Status200OK.ToString(),
-            Instance = _httpContext.HttpContext.Request.Path.ToString()
-        };
     }
 
     public async Task<SsoLoginResponse> Login(SsoLoginRequest request)
@@ -181,24 +169,15 @@ public class SsoService : ISsoService
         return ssoAccessTokenChangeResponse;
     }
 
-    public async Task<SuccessResponse> Logout(Guid userUuid, SsoLogoutRequest request)
+    public async Task Logout(Guid userUuid, SsoLogoutRequest request)
     {
         SsoValidation.ValidateAuthUserRequest(_userAuthValidation.GetAuthUserUuid(), request.UserUuid);
         SsoValidation.ValidateRequestUserUuids(userUuid, request.UserUuid);
 
         await request.DeleteUserRefreshToken(_context);
-
-        return new SuccessResponse
-        {
-            Type = "Success",
-            Title = "Deleted",
-            Detail = "You have successfully logged out of your account.",
-            Status = StatusCodes.Status200OK.ToString(),
-            Instance = _httpContext.HttpContext.Request.Path.ToString()
-        };
     }
 
-    public async Task<SuccessResponse> RequestPasswordChange(Guid userUuid,
+    public async Task RequestPasswordChange(Guid userUuid,
         SsoPasswordChangeRequest request)
     {
         SsoValidation.ValidateAuthUserRequest(_userAuthValidation.GetAuthUserUuid(), request.UserUuid);
@@ -207,18 +186,9 @@ public class SsoService : ISsoService
 
         await SsoHelperMethods.CheckIfUserExists(_context, request.UserUuid);
         await request.UpdateUsersPassword(_context);
-
-        return new SuccessResponse
-        {
-            Type = "Success",
-            Title = "Patched",
-            Detail = "You have successfully changed your password.",
-            Status = StatusCodes.Status200OK.ToString(),
-            Instance = _httpContext.HttpContext.Request.Path.ToString()
-        };
     }
 
-    public async Task<SuccessResponse> SetRole(Guid userUuid, SsoSetRoleRequest request)
+    public async Task SetRole(Guid userUuid, SsoSetRoleRequest request)
     {
         SsoValidation.ValidateRequestUserUuids(userUuid, request.UserUuid);
 
@@ -231,29 +201,10 @@ public class SsoService : ISsoService
         userEntity.ValidateIfUserHasSameRole(userRoleEntity);
 
         await SsoHelperMethods.UpdateUsersRole(_context, request.UserUuid, userRoleEntity.Uuid);
-
-        return new SuccessResponse
-        {
-            Type = "Success",
-            Title = "Patched",
-            Detail =
-                $"Role `{userRoleEntity.RoleName}` is set for user `{request.UserUuid}`. Role changes will be affected through 15 minutes.",
-            Status = StatusCodes.Status200OK.ToString(),
-            Instance = _httpContext.HttpContext.Request.Path.ToString()
-        };
     }
 
-    public async Task<SuccessResponse> Delete(Guid userUuid)
+    public async Task Delete(Guid userUuid)
     {
         await SsoHelperMethods.DeleteAllUnverifiedUserData(_context, userUuid);
-
-        return new SuccessResponse
-        {
-            Type = "Success",
-            Title = "Deleted",
-            Detail = $"Unverified user with UUID `{userUuid}` has been successfully deleted from our database.",
-            Status = StatusCodes.Status200OK.ToString(),
-            Instance = _httpContext.HttpContext.Request.Path.ToString()
-        };
     }
 }
