@@ -8,6 +8,7 @@ using JoyModels.Models.DataTransferObjects.Jwt;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Sso;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Sso;
 using JoyModels.Models.Pagination;
+using JoyModels.Services.Extensions;
 using JoyModels.Services.Validation.Sso;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -46,9 +47,12 @@ public static class SsoHelperMethods
             _ => baseQuery
         };
 
+        filteredQuery = GlobalHelperMethods<PendingUser>.OrderBy(filteredQuery, ssoSearchRequestDto.OrderBy);
+
         var pendingUsersEntity = await PaginationBase<PendingUser>.CreateAsync(filteredQuery,
             ssoSearchRequestDto.PageNumber,
-            ssoSearchRequestDto.PageSize);
+            ssoSearchRequestDto.PageSize,
+            ssoSearchRequestDto.OrderBy);
 
         return pendingUsersEntity;
     }

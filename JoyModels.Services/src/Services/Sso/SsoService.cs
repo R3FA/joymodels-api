@@ -29,20 +29,23 @@ public class SsoService : ISsoService
         _userAuthValidation = userAuthValidation;
     }
 
-    public async Task<SsoResponse> GetByUuid(Guid userUuid)
+    public async Task<SsoUserResponse> GetByUuid(Guid userUuid)
     {
         var pendingUserEntity = await SsoHelperMethods.GetPendingUserEntity(_context, userUuid);
-        var pendingUser = _mapper.Map<SsoResponse>(pendingUserEntity);
+        var pendingUser = _mapper.Map<SsoUserResponse>(pendingUserEntity.UserUu);
 
         return pendingUser;
     }
 
-    public async Task<PaginationResponse<SsoResponse>> Search(SsoSearchRequest request)
+    public async Task<PaginationResponse<SsoUserResponse>> Search(SsoSearchRequest request)
     {
         request.ValidateUserSearchArguments();
 
         var pendingUsersEntity = await SsoHelperMethods.SearchPendingUserEntities(_context, request);
-        var pendingUsers = _mapper.Map<PaginationResponse<SsoResponse>>(pendingUsersEntity);
+
+        var pendingUsers = _mapper.Map<PaginationResponse<SsoUserResponse>>(pendingUsersEntity);
+        for (var i = 0; i < pendingUsersEntity.Data.Count; i++)
+            pendingUsers.Data[i] = _mapper.Map<SsoUserResponse>(pendingUsersEntity.Data[i].UserUu);
 
         return pendingUsers;
     }

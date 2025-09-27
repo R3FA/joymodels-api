@@ -6,8 +6,8 @@ namespace JoyModels.Services.Services.Sso;
 
 public interface ISsoService
 {
-    Task<SsoResponse> GetByUuid(Guid userUuid);
-    Task<PaginationResponse<SsoResponse>> Search(SsoSearchRequest request);
+    Task<SsoUserResponse> GetByUuid(Guid userUuid);
+    Task<PaginationResponse<SsoUserResponse>> Search(SsoSearchRequest request);
     Task<SsoUserResponse> Create(SsoUserCreateRequest request);
     Task<SsoUserResponse> Verify(Guid userUuid, SsoVerifyRequest request);
     Task RequestNewOtpCode(Guid userUuid, SsoNewOtpCodeRequest request);
