@@ -10,5 +10,6 @@ public class PaginationResponse<T>
     [Required] public int TotalPages { get; set; }
     [Required] public bool HasPreviousPage { get; set; }
     [Required] public bool HasNextPage { get; set; }
+    [Required] public string? OrderBy { get; set; }
     [Required] public List<T> Data { get; set; } = null!;
 }
