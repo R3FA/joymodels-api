@@ -20,14 +20,14 @@ public class SsoController : ControllerBase
 
     [Authorize(Policy = "HeadStaff")]
     [HttpGet("get/{userUuid:guid}")]
-    public async Task<ActionResult<SsoResponse>> GetByUuid([FromRoute] Guid userUuid)
+    public async Task<ActionResult<SsoUserResponse>> GetByUuid([FromRoute] Guid userUuid)
     {
         return await _service.GetByUuid(userUuid);
     }
 
     [Authorize(Policy = "HeadStaff")]
     [HttpGet("search")]
-    public async Task<ActionResult<PaginationResponse<SsoResponse>>> Search([FromQuery] SsoSearchRequest request)
+    public async Task<ActionResult<PaginationResponse<SsoUserResponse>>> Search([FromQuery] SsoSearchRequest request)
     {
         return await _service.Search(request);
     }
