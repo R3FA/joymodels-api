@@ -18,7 +18,7 @@ public class UsersController(IUsersService service) : ControllerBase
         return await service.GetByUuid(userUuid);
     }
 
-    // [Authorize(Policy = "VerifiedUsers")]
+    [Authorize(Policy = "VerifiedUsers")]
     [HttpGet("search")]
     public async Task<ActionResult<PaginationResponse<UsersResponse>>> Search([FromQuery] UsersSearchRequest request)
     {
