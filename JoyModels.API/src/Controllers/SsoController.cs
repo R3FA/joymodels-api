@@ -9,33 +9,26 @@ namespace JoyModels.API.Controllers;
 
 [ApiController]
 [Route("api/sso/")]
-public class SsoController : ControllerBase
+public class SsoController(ISsoService service) : ControllerBase
 {
-    private readonly ISsoService _service;
-
-    public SsoController(ISsoService service)
-    {
-        _service = service;
-    }
-
     [Authorize(Policy = "HeadStaff")]
     [HttpGet("get/{userUuid:guid}")]
     public async Task<ActionResult<SsoUserResponse>> GetByUuid([FromRoute] Guid userUuid)
     {
-        return await _service.GetByUuid(userUuid);
+        return await service.GetByUuid(userUuid);
     }
 
     [Authorize(Policy = "HeadStaff")]
     [HttpGet("search")]
     public async Task<ActionResult<PaginationResponse<SsoUserResponse>>> Search([FromQuery] SsoSearchRequest request)
     {
-        return await _service.Search(request);
+        return await service.Search(request);
     }
 
     [HttpPost("create")]
     public async Task<ActionResult<SsoUserResponse>> Create([FromBody] SsoUserCreateRequest request)
     {
-        return await _service.Create(request);
+        return await service.Create(request);
     }
 
     [Authorize(Policy = "UnverifiedUsers")]
@@ -43,7 +36,7 @@ public class SsoController : ControllerBase
     public async Task<ActionResult<SsoUserResponse>> Verify([FromRoute] Guid userUuid,
         [FromBody] SsoVerifyRequest request)
     {
-        return await _service.Verify(userUuid, request);
+        return await service.Verify(userUuid, request);
     }
 
     [Authorize(Policy = "UnverifiedUsers")]
@@ -51,14 +44,14 @@ public class SsoController : ControllerBase
     public async Task<ActionResult> RequestNewOtpCode([FromRoute] Guid userUuid,
         [FromBody] SsoNewOtpCodeRequest request)
     {
-        await _service.RequestNewOtpCode(userUuid, request);
+        await service.RequestNewOtpCode(userUuid, request);
         return Created();
     }
 
     [HttpPost("login")]
     public async Task<ActionResult<SsoLoginResponse>> Login([FromBody] SsoLoginRequest request)
     {
-        return await _service.Login(request);
+        return await service.Login(request);
     }
 
     [Authorize(Policy = "VerifiedUsers")]
@@ -66,7 +59,7 @@ public class SsoController : ControllerBase
     public async Task<ActionResult<SsoAccessTokenChangeResponse>> RequestAccessTokenChange(
         [FromRoute] Guid userUuid, [FromBody] SsoAccessTokenChangeRequest request)
     {
-        return await _service.RequestAccessTokenChange(userUuid, request);
+        return await service.RequestAccessTokenChange(userUuid, request);
     }
 
     [Authorize(Policy = "VerifiedUsers")]
@@ -74,7 +67,7 @@ public class SsoController : ControllerBase
     public async Task<ActionResult> Logout([FromRoute] Guid userUuid,
         [FromBody] SsoLogoutRequest request)
     {
-        await _service.Logout(userUuid, request);
+        await service.Logout(userUuid, request);
         return NoContent();
     }
 
@@ -83,7 +76,7 @@ public class SsoController : ControllerBase
     public async Task<ActionResult> RequestPasswordChange([FromRoute] Guid userUuid,
         [FromBody] SsoPasswordChangeRequest request)
     {
-        await _service.RequestPasswordChange(userUuid, request);
+        await service.RequestPasswordChange(userUuid, request);
         return NoContent();
     }
 
@@ -92,7 +85,7 @@ public class SsoController : ControllerBase
     public async Task<ActionResult> SetRole([FromRoute] Guid userUuid,
         [FromBody] SsoSetRoleRequest request)
     {
-        await _service.SetRole(userUuid, request);
+        await service.SetRole(userUuid, request);
         return NoContent();
     }
 
@@ -100,7 +93,7 @@ public class SsoController : ControllerBase
     [HttpDelete("delete/{userUuid:guid}")]
     public async Task<ActionResult> Delete([FromRoute] Guid userUuid)
     {
-        await _service.Delete(userUuid);
+        await service.Delete(userUuid);
         return NoContent();
     }
 }

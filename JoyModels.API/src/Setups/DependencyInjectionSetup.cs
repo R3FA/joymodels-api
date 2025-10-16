@@ -2,6 +2,7 @@ using System.Reflection;
 using JoyModels.API.Handlers;
 using JoyModels.Models.Database;
 using JoyModels.Services.Services.Sso;
+using JoyModels.Services.Services.Users;
 using JoyModels.Services.Validation;
 using Microsoft.OpenApi.Models;
 
@@ -54,10 +55,13 @@ public static class DependencyInjectionSetup
             cfg.AddMaps(dataAccessAssembly);
         });
 
-        // Custom Defined Services
+        // JWT Stuff DI
         services.AddSingleton(JwtSetup.RegisterJwtDetails(configuration));
         services.AddTransient<UserAuthValidation>();
+
+        // Custom Defined Services
         services.AddTransient<ISsoService, SsoService>();
+        services.AddTransient<IUsersService, UsersService>();
 
         services.AddControllers();
 
