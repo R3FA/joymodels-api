@@ -11,18 +11,6 @@ namespace JoyModels.Services.Validation.Sso;
 
 public static class SsoValidation
 {
-    public static void ValidateRequestUserUuids(Guid queryUserUuid, Guid requestUserUuid)
-    {
-        if (queryUserUuid != requestUserUuid)
-            throw new ArgumentException("User uuid query parameter doesn't match the user uuid in request body.");
-    }
-
-    public static void ValidateAuthUserRequest(Guid authUserUuid, Guid requestUserUuid)
-    {
-        if (authUserUuid != requestUserUuid)
-            throw new ApplicationException("You are not authorized for this request.");
-    }
-
     public static void ValidateUserCreationArguments(this SsoUserCreateRequest request)
     {
         if (!RegularExpressionValidation.IsStringValid(request.FirstName))
