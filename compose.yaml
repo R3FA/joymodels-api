@@ -1,11 +1,22 @@
 ﻿services:
-  joymodels-mariadb:
+  mariadb:
     image: mariadb:lts
     restart: always
     environment:
       MARIADB_DATABASE: joymodels-db
       MARIADB_ROOT_PASSWORD: password
     ports:
-      - 3306:3306
+      - "3306:3306"
     volumes:
       - ./JoyModels.Models/src/Database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+  
+  rabbitmq:
+    image: rabbitmq:management-alpine
+    restart: always
+    environment:
+      - RABBITMQ_DEFAULT_USER=joymodels-admin
+      - RABBITMQ_DEFAULT_PASS=password
+      - RABBITMQ_DEFAULT_VHOST=joymodels-admin
+    ports:
+      - "5672:5672"
+      - "15672:15672"
