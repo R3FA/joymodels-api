@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JoyModels.Models", "JoyMode
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JoyModels.Services", "JoyModels.Services\JoyModels.Services.csproj", "{803214E4-CB27-44C8-AA93-906E04C65030}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JoyModels.Utilities", "JoyModels.Utilities\JoyModels.Utilities.csproj", "{FCF220B2-452B-4D49-A102-CD9276517C45}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,5 +31,9 @@ Global
 		{803214E4-CB27-44C8-AA93-906E04C65030}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{803214E4-CB27-44C8-AA93-906E04C65030}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{803214E4-CB27-44C8-AA93-906E04C65030}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FCF220B2-452B-4D49-A102-CD9276517C45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FCF220B2-452B-4D49-A102-CD9276517C45}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FCF220B2-452B-4D49-A102-CD9276517C45}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FCF220B2-452B-4D49-A102-CD9276517C45}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
