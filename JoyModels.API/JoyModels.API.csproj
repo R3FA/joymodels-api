@@ -27,6 +27,7 @@
     <ItemGroup>
         <ProjectReference Include="..\JoyModels.Models\JoyModels.Models.csproj"/>
         <ProjectReference Include="..\JoyModels.Services\JoyModels.Services.csproj"/>
+        <ProjectReference Include="..\JoyModels.Utilities\JoyModels.Utilities.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
