@@ -8,10 +8,17 @@
 
     <ItemGroup>
         <PackageReference Include="RabbitMQ.Client" Version="7.1.2"/>
+        <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="9.0.10"/>
     </ItemGroup>
 
     <ItemGroup>
         <Folder Include="src\"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="Microsoft.Extensions.Logging.Abstractions">
+            <HintPath>..\..\..\..\.nuget\packages\microsoft.extensions.logging.abstractions\9.0.10\lib\net8.0\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+        </Reference>
     </ItemGroup>
 
 </Project>
