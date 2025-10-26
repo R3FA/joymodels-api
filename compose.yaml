@@ -14,9 +14,9 @@
     image: rabbitmq:management-alpine
     restart: always
     environment:
-      - RABBITMQ_DEFAULT_USER=joymodels-admin
-      - RABBITMQ_DEFAULT_PASS=password
-      - RABBITMQ_DEFAULT_VHOST=joymodels-admin
+      - RABBITMQ_DEFAULT_USER=root
+      - RABBITMQ_DEFAULT_PASS=YgN*iGXg7pbU3Mkh4UU%
+      - RABBITMQ_DEFAULT_VHOST=root
     ports:
       - "5672:5672"
       - "15672:15672"
