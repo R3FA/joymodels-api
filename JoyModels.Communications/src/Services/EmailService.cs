@@ -1,7 +1,6 @@
 using JoyModels.Models.DataTransferObjects.RequestTypes.Email;
 using MailKit.Net.Smtp;
 using MailKit.Security;
-using Microsoft.Extensions.Configuration;
 using MimeKit;
 using MimeKit.Text;
 
