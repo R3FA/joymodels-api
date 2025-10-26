@@ -9,6 +9,8 @@ using JoyModels.Models.DataTransferObjects.ResponseTypes.Sso;
 using JoyModels.Services.Services.Sso.HelperMethods;
 using JoyModels.Services.Validation;
 using JoyModels.Services.Validation.Sso;
+using JoyModels.Utilities.RabbitMQ.MessageProducer;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UserRoleEnum = JoyModels.Models.Enums.UserRole;
 
 namespace JoyModels.Services.Services.Sso;
@@ -17,7 +19,8 @@ public class SsoService(
     JoyModelsDbContext context,
     IMapper mapper,
     JwtClaimDetails jwtClaimDetails,
-    UserAuthValidation userAuthValidation)
+    UserAuthValidation userAuthValidation,
+    IMessageProducer messageProducer)
     : ISsoService
 {
     public async Task<SsoUserResponse> GetByUuid(Guid userUuid)
@@ -52,7 +55,7 @@ public class SsoService(
         userEntity.SetCustomValuesUserEntity(request, userRoleEntity);
 
         var pendingUserEntity = mapper.Map<PendingUser>(userEntity);
-        pendingUserEntity.SetCustomValuesPendingUserEntity();
+        pendingUserEntity.SetCustomValuesPendingUserEntity(userEntity, messageProducer);
 
         var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -115,7 +118,8 @@ public class SsoService(
         userAuthValidation.ValidateUserRequestUuids(userUuid, request.UserUuid);
 
         var pendingUserEntity = mapper.Map<PendingUser>(request.UserUuid);
-        pendingUserEntity.SetCustomValuesPendingUserEntity();
+        // TODO: Modifikuj kad uspijes napravit slanje mail-a
+        // pendingUserEntity.SetCustomValuesPendingUserEntity(messageProducer);
 
         var transaction = await context.Database.BeginTransactionAsync();
         try

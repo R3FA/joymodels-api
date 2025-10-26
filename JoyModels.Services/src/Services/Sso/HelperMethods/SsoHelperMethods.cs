@@ -5,11 +5,13 @@ using System.Text;
 using JoyModels.Models.Database;
 using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.Jwt;
+using JoyModels.Models.DataTransferObjects.RequestTypes.Email;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Sso;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Sso;
 using JoyModels.Models.Pagination;
 using JoyModels.Services.Extensions;
 using JoyModels.Services.Validation.Sso;
+using JoyModels.Utilities.RabbitMQ.MessageProducer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using UserRoleEnum = JoyModels.Models.Enums.UserRole;
@@ -125,12 +127,16 @@ public static class SsoHelperMethods
         return userEntity;
     }
 
-    public static PendingUser SetCustomValuesPendingUserEntity(this PendingUser pendingUserEntity)
+    public static PendingUser SetCustomValuesPendingUserEntity(this PendingUser pendingUserEntity,
+        User userEntity,
+        IMessageProducer messageProducer)
     {
         pendingUserEntity.Uuid = Guid.NewGuid();
         pendingUserEntity.OtpCode = GenerateOtpCode();
         pendingUserEntity.OtpCreatedAt = DateTime.Now;
         pendingUserEntity.OtpExpirationDate = DateTime.Now.AddMinutes(60);
+
+        SendEmail(pendingUserEntity, userEntity, messageProducer);
 
         return pendingUserEntity;
     }
@@ -281,5 +287,16 @@ public static class SsoHelperMethods
         var otpCode = new string(chars);
         SsoValidation.ValidateOtpCodeValueFormat(otpCode);
         return otpCode;
+    }
+
+    private static void SendEmail(PendingUser pendingUserEntity, User userEntity, IMessageProducer messageProducer)
+    {
+        messageProducer.SendMessage("send_email", new EmailSendRequest
+        {
+            To = userEntity.Email,
+            Subject = "JoyModels - Email verification",
+            Body =
+                $"Your OTP code is: {pendingUserEntity.OtpCode} and it lasts until: ${pendingUserEntity.OtpExpirationDate}"
+        });
     }
 }

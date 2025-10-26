@@ -9,9 +9,8 @@ public class MessageProducer(ILogger<MessageProducer> logger) : IMessageProducer
 {
     public async Task SendMessage<T>(string queue, T message)
     {
-        var factory = new ConnectionFactory { HostName = "localhost" };
-        using var connection = await factory.CreateConnectionAsync();
-        using var channel = await connection.CreateChannelAsync();
+        var factory = await RabbitMqService.CreateConnectionAsync();
+        using var channel = await factory.CreateChannelAsync();
 
         await channel.QueueDeclareAsync(
             queue,

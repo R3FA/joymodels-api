@@ -1,6 +1,5 @@
 using System.Reflection;
 using JoyModels.API.Handlers;
-using JoyModels.Communications.Services;
 using JoyModels.Models.Database;
 using JoyModels.Services.Services.Sso;
 using JoyModels.Services.Services.Users;
@@ -67,7 +66,6 @@ public static class DependencyInjectionSetup
         services.AddTransient<IUsersService, UsersService>();
         services.AddTransient<IMessageProducer, MessageProducer>();
         services.AddTransient<IMessageConsumer, MessageConsumer>();
-        services.AddTransient<IEmailService, EmailService>();
 
         services.AddControllers();
 

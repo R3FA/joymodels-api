@@ -10,7 +10,7 @@ public class EmailService(IConfiguration configuration) : IEmailService
 {
     public async Task SendEmailAsync(EmailSendRequest request)
     {
-        var emailServiceDetails = configuration.GetSection("Email");
+        var emailServiceDetails = configuration.GetSection("Connection:Email");
 
         var email = new MimeMessage();
         email.From.Add(MailboxAddress.Parse(emailServiceDetails["Auth:Username"]));

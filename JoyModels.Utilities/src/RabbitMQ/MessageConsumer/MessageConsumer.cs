@@ -7,11 +7,10 @@ namespace JoyModels.Utilities.RabbitMQ.MessageConsumer;
 
 public class MessageConsumer(ILogger<MessageConsumer> logger) : IMessageConsumer
 {
-    public async Task ReceiveMessage(string queue)
+    public async Task ReceiveMessage(string queue, MessageReceivedCallback callback)
     {
-        var factory = new ConnectionFactory { HostName = "localhost" };
-        using var connection = await factory.CreateConnectionAsync();
-        using var channel = await connection.CreateChannelAsync();
+        var factory = await RabbitMqService.CreateConnectionAsync();
+        using var channel = await factory.CreateChannelAsync();
 
         await channel.QueueDeclareAsync(
             queue,
@@ -26,6 +25,7 @@ public class MessageConsumer(ILogger<MessageConsumer> logger) : IMessageConsumer
             var body = eventArgs.Body.ToArray();
             var message = Encoding.UTF8.GetString(body);
 
+            await callback(message);
             await ((AsyncEventingBasicConsumer)sender)
                 .Channel
                 .BasicAckAsync(eventArgs.DeliveryTag, multiple: false);
