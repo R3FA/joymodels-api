@@ -1,16 +1,27 @@
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 
 namespace JoyModels.Utilities.RabbitMQ.MessageProducer;
 
-public class MessageProducer(ILogger<MessageProducer> logger) : IMessageProducer
+public class MessageProducer(ILogger<MessageProducer> logger, IConfiguration configuration) : IMessageProducer
 {
     public async Task SendMessage<T>(string queue, T message)
     {
-        var factory = await RabbitMqService.CreateConnectionAsync();
-        using var channel = await factory.CreateChannelAsync();
+        // TODO: Popravljaj ova govna
+        // Za koji kurac ovo ne radi?
+        var rabbitMqDetails = configuration.GetSection("Connection:RabbitMQ");
+        var factory = new ConnectionFactory
+        {
+            HostName = rabbitMqDetails["Host"]!,
+            UserName = rabbitMqDetails["User"]!,
+            VirtualHost = rabbitMqDetails["VirtualHost"]!,
+            Password = rabbitMqDetails["Password"]!
+        };
+        using var connection = await factory.CreateConnectionAsync();
+        using var channel = await connection.CreateChannelAsync();
 
         await channel.QueueDeclareAsync(
             queue,
