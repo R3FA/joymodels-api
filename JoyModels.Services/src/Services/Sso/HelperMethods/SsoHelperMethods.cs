@@ -127,16 +127,12 @@ public static class SsoHelperMethods
         return userEntity;
     }
 
-    public static PendingUser SetCustomValuesPendingUserEntity(this PendingUser pendingUserEntity,
-        User userEntity,
-        IMessageProducer messageProducer)
+    public static PendingUser SetCustomValuesPendingUserEntity(this PendingUser pendingUserEntity)
     {
         pendingUserEntity.Uuid = Guid.NewGuid();
         pendingUserEntity.OtpCode = GenerateOtpCode();
         pendingUserEntity.OtpCreatedAt = DateTime.Now;
         pendingUserEntity.OtpExpirationDate = DateTime.Now.AddMinutes(60);
-
-        SendEmail(pendingUserEntity, userEntity, messageProducer);
 
         return pendingUserEntity;
     }
@@ -243,6 +239,18 @@ public static class SsoHelperMethods
         await context.SaveChangesAsync();
     }
 
+    public static void SendEmail(EmailSendUserDetailsRequest emailSendUserDetailsRequest,
+        IMessageProducer messageProducer)
+    {
+        messageProducer.SendMessage("send_email", new EmailSendRequest
+        {
+            To = emailSendUserDetailsRequest.Email,
+            Subject = "JoyModels - Email verification",
+            Body =
+                $"Your OTP code is: {emailSendUserDetailsRequest.OtpCode} and it lasts until: ${emailSendUserDetailsRequest.OtpExpirationDate}"
+        });
+    }
+
     private static string CreateUserJwtAccessToken(User user, JwtClaimDetails jwtClaimDetails)
     {
         var claims = new List<Claim>
@@ -287,16 +295,5 @@ public static class SsoHelperMethods
         var otpCode = new string(chars);
         SsoValidation.ValidateOtpCodeValueFormat(otpCode);
         return otpCode;
-    }
-
-    private static void SendEmail(PendingUser pendingUserEntity, User userEntity, IMessageProducer messageProducer)
-    {
-        messageProducer.SendMessage("send_email", new EmailSendRequest
-        {
-            To = userEntity.Email,
-            Subject = "JoyModels - Email verification",
-            Body =
-                $"Your OTP code is: {pendingUserEntity.OtpCode} and it lasts until: ${pendingUserEntity.OtpExpirationDate}"
-        });
     }
 }
