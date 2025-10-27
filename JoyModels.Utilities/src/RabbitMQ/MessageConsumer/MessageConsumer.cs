@@ -17,8 +17,8 @@ public class MessageConsumer(ILogger<MessageConsumer> logger, RabbitMqDetails ra
             VirtualHost = rabbitMqDetails.VirtualHost,
             Password = rabbitMqDetails.Password,
         };
-        using var connection = await factory.CreateConnectionAsync();
-        using var channel = await connection.CreateChannelAsync();
+        var connection = await factory.CreateConnectionAsync();
+        var channel = await connection.CreateChannelAsync();
 
         await channel.QueueDeclareAsync(
             queue,
