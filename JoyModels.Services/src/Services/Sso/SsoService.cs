@@ -10,7 +10,6 @@ using JoyModels.Services.Services.Sso.HelperMethods;
 using JoyModels.Services.Validation;
 using JoyModels.Services.Validation.Sso;
 using JoyModels.Utilities.RabbitMQ.MessageProducer;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UserRoleEnum = JoyModels.Models.Enums.UserRole;
 
 namespace JoyModels.Services.Services.Sso;
