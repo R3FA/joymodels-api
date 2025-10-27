@@ -3,12 +3,14 @@ using AutoMapper;
 using JoyModels.Models.Database;
 using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.Jwt;
+using JoyModels.Models.DataTransferObjects.RequestTypes.Email;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Sso;
 using JoyModels.Models.DataTransferObjects.ResponseTypes;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Sso;
 using JoyModels.Services.Services.Sso.HelperMethods;
 using JoyModels.Services.Validation;
 using JoyModels.Services.Validation.Sso;
+using JoyModels.Utilities.RabbitMQ.MessageProducer;
 using UserRoleEnum = JoyModels.Models.Enums.UserRole;
 
 namespace JoyModels.Services.Services.Sso;
@@ -17,7 +19,8 @@ public class SsoService(
     JoyModelsDbContext context,
     IMapper mapper,
     JwtClaimDetails jwtClaimDetails,
-    UserAuthValidation userAuthValidation)
+    UserAuthValidation userAuthValidation,
+    IMessageProducer messageProducer)
     : ISsoService
 {
     public async Task<SsoUserResponse> GetByUuid(Guid userUuid)
@@ -54,11 +57,14 @@ public class SsoService(
         var pendingUserEntity = mapper.Map<PendingUser>(userEntity);
         pendingUserEntity.SetCustomValuesPendingUserEntity();
 
+        var emailSendUserDetailsRequest = mapper.Map<EmailSendUserDetailsRequest>((pendingUserEntity, userEntity));
+
         var transaction = await context.Database.BeginTransactionAsync();
         try
         {
             await userEntity.CreateUser(context);
             await pendingUserEntity.CreatePendingUser(context);
+            SsoHelperMethods.SendEmail(emailSendUserDetailsRequest, messageProducer);
 
             await transaction.CommitAsync();
         }
@@ -114,14 +120,20 @@ public class SsoService(
         userAuthValidation.ValidateUserAuthRequest(request.UserUuid);
         userAuthValidation.ValidateUserRequestUuids(userUuid, request.UserUuid);
 
+        var userEntity = await SsoHelperMethods.GetUserEntity(context, request.UserUuid, null);
+
         var pendingUserEntity = mapper.Map<PendingUser>(request.UserUuid);
         pendingUserEntity.SetCustomValuesPendingUserEntity();
+
+        var emailSendUserDetailsRequest =
+            mapper.Map<EmailSendUserDetailsRequest>((pendingUserEntity, userEntity));
 
         var transaction = await context.Database.BeginTransactionAsync();
         try
         {
             await SsoHelperMethods.DeleteAllPendingUserData(context, pendingUserEntity.UserUuid);
             await pendingUserEntity.CreatePendingUser(context);
+            SsoHelperMethods.SendEmail(emailSendUserDetailsRequest, messageProducer);
 
             await transaction.CommitAsync();
         }

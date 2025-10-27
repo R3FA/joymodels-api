@@ -5,11 +5,13 @@ using System.Text;
 using JoyModels.Models.Database;
 using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.Jwt;
+using JoyModels.Models.DataTransferObjects.RequestTypes.Email;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Sso;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Sso;
 using JoyModels.Models.Pagination;
 using JoyModels.Services.Extensions;
 using JoyModels.Services.Validation.Sso;
+using JoyModels.Utilities.RabbitMQ.MessageProducer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using UserRoleEnum = JoyModels.Models.Enums.UserRole;
@@ -235,6 +237,18 @@ public static class SsoHelperMethods
                 "Logout process failed.");
 
         await context.SaveChangesAsync();
+    }
+
+    public static void SendEmail(EmailSendUserDetailsRequest emailSendUserDetailsRequest,
+        IMessageProducer messageProducer)
+    {
+        messageProducer.SendMessage("send_email", new EmailSendRequest
+        {
+            To = emailSendUserDetailsRequest.Email,
+            Subject = "JoyModels - Email verification",
+            Body =
+                $"Your OTP code is: {emailSendUserDetailsRequest.OtpCode} and it lasts until: ${emailSendUserDetailsRequest.OtpExpirationDate}"
+        });
     }
 
     private static string CreateUserJwtAccessToken(User user, JwtClaimDetails jwtClaimDetails)

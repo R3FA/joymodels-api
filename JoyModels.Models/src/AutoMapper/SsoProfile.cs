@@ -1,10 +1,9 @@
 using AutoMapper;
 using JoyModels.Models.Database.Entities;
+using JoyModels.Models.DataTransferObjects.RequestTypes.Email;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Sso;
-using JoyModels.Models.DataTransferObjects.ResponseTypes;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Sso;
 using JoyModels.Models.DataTransferObjects.UserRole;
-using JoyModels.Models.Pagination;
 
 namespace JoyModels.Models.AutoMapper;
 
@@ -43,8 +42,11 @@ public class SsoProfile : Profile
             .ForMember(dest => dest.UserUuid, opt => opt.MapFrom(src => src.Uuid));
         CreateMap<Guid, PendingUser>()
             .ForMember(dest => dest.UserUuid, opt => opt.MapFrom(src => src));
-        CreateMap(typeof(PaginationBase<>), typeof(PaginationResponse<>));
         CreateMap<SsoAccessTokenChangeRequest, SsoLogoutRequest>();
         CreateMap<SsoVerifyRequest, SsoAccessTokenChangeRequest>();
+        CreateMap<(PendingUser, User), EmailSendUserDetailsRequest>()
+            .ForMember(x => x.Email, o => o.MapFrom(z => z.Item2.Email))
+            .ForMember(x => x.OtpCode, o => o.MapFrom(z => z.Item1.OtpCode))
+            .ForMember(x => x.OtpExpirationDate, o => o.MapFrom(z => z.Item1.OtpExpirationDate));
     }
 }

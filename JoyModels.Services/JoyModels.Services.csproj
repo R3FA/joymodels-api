@@ -8,11 +8,12 @@
 
     <ItemGroup>
         <ProjectReference Include="..\JoyModels.Models\JoyModels.Models.csproj"/>
+        <ProjectReference Include="..\JoyModels.Utilities\JoyModels.Utilities.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.1"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
