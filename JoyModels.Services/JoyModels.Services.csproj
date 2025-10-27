@@ -8,7 +8,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\JoyModels.Models\JoyModels.Models.csproj"/>
-        <ProjectReference Include="..\JoyModels.Utilities\JoyModels.Utilities.csproj" />
+        <ProjectReference Include="..\JoyModels.Utilities\JoyModels.Utilities.csproj"/>
     </ItemGroup>
 
     <ItemGroup>

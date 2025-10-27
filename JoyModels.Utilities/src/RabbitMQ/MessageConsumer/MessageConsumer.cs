@@ -1,22 +1,21 @@
 using System.Text;
-using Microsoft.Extensions.Configuration;
+using JoyModels.Models.DataTransferObjects.RabbitMq;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
 namespace JoyModels.Utilities.RabbitMQ.MessageConsumer;
 
-public class MessageConsumer(ILogger<MessageConsumer> logger, IConfiguration configuration) : IMessageConsumer
+public class MessageConsumer(ILogger<MessageConsumer> logger, RabbitMqDetails rabbitMqDetails) : IMessageConsumer
 {
     public async Task ReceiveMessage(string queue, MessageReceivedCallback callback)
     {
-        var rabbitMqDetails = configuration.GetSection("Connection:RabbitMQ");
         var factory = new ConnectionFactory
         {
-            HostName = rabbitMqDetails["Host"]!,
-            UserName = rabbitMqDetails["User"]!,
-            VirtualHost = rabbitMqDetails["VirtualHost"]!,
-            Password = rabbitMqDetails["Password"]!
+            HostName = rabbitMqDetails.Host,
+            UserName = rabbitMqDetails.User,
+            VirtualHost = rabbitMqDetails.VirtualHost,
+            Password = rabbitMqDetails.Password,
         };
         using var connection = await factory.CreateConnectionAsync();
         using var channel = await connection.CreateChannelAsync();

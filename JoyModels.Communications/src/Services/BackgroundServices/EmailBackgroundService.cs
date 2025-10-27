@@ -13,6 +13,9 @@ public class EmailBackgroundService(
     {
         logger.LogDebug("Starting background service for email operations...");
         await messageConsumer.ReceiveMessage("send_email", HandleSendingEmail);
+
+        while (!stoppingToken.IsCancellationRequested)
+            await Task.Delay(Timeout.Infinite, stoppingToken);
     }
 
     private async Task HandleSendingEmail(string message)

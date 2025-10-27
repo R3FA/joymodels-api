@@ -1,13 +1,14 @@
-using JoyModels.Communications.Services;
-using JoyModels.Communications.Services.BackgroundServices;
-using JoyModels.Utilities.RabbitMQ.MessageConsumer;
+using JoyModels.Communications.Setups;
 
 var builder = Host.CreateDefaultBuilder()
-    .ConfigureServices((_, services) =>
+    .ConfigureAppConfiguration(configuration =>
     {
-        services.AddTransient<IMessageConsumer, MessageConsumer>();
-        services.AddTransient<IEmailService, EmailService>();
-        services.AddHostedService<EmailBackgroundService>();
+        configuration.AddJsonFile("appsettings.json", optional: false);
+        configuration.AddJsonFile("appsettings.Development.json", optional: true);
+    })
+    .ConfigureServices((hostContext, services) =>
+    {
+        services.RegisterDependencyInjectionServices(hostContext.Configuration);
     })
     .UseConsoleLifetime()
     .Build();

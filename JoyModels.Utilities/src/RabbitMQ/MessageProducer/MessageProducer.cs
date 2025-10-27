@@ -1,24 +1,21 @@
 using System.Text;
 using System.Text.Json;
-using Microsoft.Extensions.Configuration;
+using JoyModels.Models.DataTransferObjects.RabbitMq;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 
 namespace JoyModels.Utilities.RabbitMQ.MessageProducer;
 
-public class MessageProducer(ILogger<MessageProducer> logger, IConfiguration configuration) : IMessageProducer
+public class MessageProducer(ILogger<MessageProducer> logger, RabbitMqDetails rabbitMqDetails) : IMessageProducer
 {
     public async Task SendMessage<T>(string queue, T message)
     {
-        // TODO: Popravljaj ova govna
-        // Za koji kurac ovo ne radi?
-        var rabbitMqDetails = configuration.GetSection("Connection:RabbitMQ");
         var factory = new ConnectionFactory
         {
-            HostName = rabbitMqDetails["Host"]!,
-            UserName = rabbitMqDetails["User"]!,
-            VirtualHost = rabbitMqDetails["VirtualHost"]!,
-            Password = rabbitMqDetails["Password"]!
+            HostName = rabbitMqDetails.Host,
+            UserName = rabbitMqDetails.User,
+            VirtualHost = rabbitMqDetails.VirtualHost,
+            Password = rabbitMqDetails.Password,
         };
         using var connection = await factory.CreateConnectionAsync();
         using var channel = await connection.CreateChannelAsync();
@@ -27,7 +24,8 @@ public class MessageProducer(ILogger<MessageProducer> logger, IConfiguration con
             queue,
             durable: true,
             exclusive: false,
-            autoDelete: false, arguments: null);
+            autoDelete: false,
+            arguments: null);
 
         var jsonString = JsonSerializer.Serialize(message);
         var body = Encoding.UTF8.GetBytes(jsonString);

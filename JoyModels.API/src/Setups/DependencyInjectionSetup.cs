@@ -1,5 +1,6 @@
 using System.Reflection;
 using JoyModels.API.Handlers;
+using JoyModels.Communications.Setups;
 using JoyModels.Models.Database;
 using JoyModels.Services.Services.Sso;
 using JoyModels.Services.Services.Users;
@@ -57,9 +58,12 @@ public static class DependencyInjectionSetup
             cfg.AddMaps(dataAccessAssembly);
         });
 
-        // JWT Stuff DI
+        // JWT DI
         services.AddSingleton(JwtSetup.RegisterJwtDetails(configuration));
         services.AddTransient<UserAuthValidation>();
+
+        // RabbitMQ DI
+        services.AddSingleton(RabbitMqSetup.RegisterRabbitMqDetails(configuration));
 
         // Custom Defined Services
         services.AddTransient<ISsoService, SsoService>();
