@@ -63,4 +63,16 @@ public static class UsersHelperMethods
 
         await context.SaveChangesAsync();
     }
+
+    public static async Task DeleteUserEntity(JoyModelsDbContext context, Guid userUuid)
+    {
+        var numberOfDeletedRows = await context.Users
+            .Where(x => x.Uuid == userUuid)
+            .ExecuteDeleteAsync();
+        await context.SaveChangesAsync();
+
+        if (numberOfDeletedRows == 0)
+            throw new KeyNotFoundException(
+                $"Unverified user with UUID `{userUuid}` either is verified or does not exist.");
+    }
 }

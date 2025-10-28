@@ -32,4 +32,12 @@ public class UsersController(IUsersService service) : ControllerBase
     {
         return await service.Patch(userUuid, request);
     }
+
+    [Authorize(Policy = "VerifiedUsers")]
+    [HttpDelete("delete/{userUuid:guid}")]
+    public async Task<ActionResult> Delete([FromRoute] Guid userUuid)
+    {
+        await service.Delete(userUuid);
+        return NoContent();
+    }
 }

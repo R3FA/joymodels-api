@@ -41,4 +41,9 @@ public class UsersService(JoyModelsDbContext context, IMapper mapper, UserAuthVa
 
         return await GetByUuid(userUuid);
     }
+
+    public async Task Delete(Guid userUuid)
+    {
+        await UsersHelperMethods.DeleteUserEntity(context, userUuid);
+    }
 }
