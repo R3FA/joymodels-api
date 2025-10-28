@@ -37,7 +37,7 @@ public static class UsersValidation
 
     public static void ValidateUserSearchArguments(this UsersSearchRequest request)
     {
-        if (request.Nickname != null)
+        if (!string.IsNullOrWhiteSpace(request.Nickname))
             ValidateNickname(request.Nickname);
     }
 
