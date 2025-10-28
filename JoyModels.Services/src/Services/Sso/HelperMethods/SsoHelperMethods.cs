@@ -218,12 +218,11 @@ public static class SsoHelperMethods
             .Include(x => x.UserRoleUu)
             .Where(x => x.Uuid == userUuid && x.UserRoleUu.RoleName == nameof(UserRoleEnum.Unverified))
             .ExecuteDeleteAsync();
+        await context.SaveChangesAsync();
 
         if (numberOfDeletedRows == 0)
             throw new KeyNotFoundException(
                 $"Unverified user with UUID `{userUuid}` either is verified or does not exist.");
-
-        await context.SaveChangesAsync();
     }
 
     public static async Task DeleteUserRefreshToken(this SsoLogoutRequest request, JoyModelsDbContext context)
