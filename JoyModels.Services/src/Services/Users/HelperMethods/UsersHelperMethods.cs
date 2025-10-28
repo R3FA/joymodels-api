@@ -46,4 +46,21 @@ public static class UsersHelperMethods
 
         return userEntities;
     }
+
+    public static async Task PatchUserEntity(this UsersPatchRequest request, JoyModelsDbContext context)
+    {
+        if (!string.IsNullOrWhiteSpace(request.FirstName))
+            await context.Users.ExecuteUpdateAsync(x => x.SetProperty(z => z.FirstName, request.FirstName));
+
+        if (!string.IsNullOrWhiteSpace(request.LastName))
+            await context.Users.ExecuteUpdateAsync(x => x.SetProperty(z => z.LastName, request.LastName));
+
+        if (!string.IsNullOrWhiteSpace(request.Nickname))
+            await context.Users.ExecuteUpdateAsync(x => x.SetProperty(z => z.NickName, request.Nickname));
+
+        if (!string.IsNullOrWhiteSpace(request.Email))
+            await context.Users.ExecuteUpdateAsync(x => x.SetProperty(z => z.Email, request.Email));
+
+        await context.SaveChangesAsync();
+    }
 }
