@@ -64,7 +64,6 @@ public class SsoService(
         {
             await userEntity.CreateUser(context);
             await pendingUserEntity.CreatePendingUser(context);
-            SsoHelperMethods.SendEmail(emailSendUserDetailsRequest, messageProducer);
 
             await transaction.CommitAsync();
         }
@@ -72,6 +71,8 @@ public class SsoService(
         {
             throw new TransactionException(ex.InnerException!.Message);
         }
+
+        SsoHelperMethods.SendEmail(emailSendUserDetailsRequest, messageProducer);
 
         var updatedUserEntity = mapper.Map<User>(userEntity, opt => { opt.Items["UserRole"] = userRoleEntity; });
         return mapper.Map<SsoUserResponse>(updatedUserEntity);
@@ -133,7 +134,6 @@ public class SsoService(
         {
             await SsoHelperMethods.DeleteAllPendingUserData(context, pendingUserEntity.UserUuid);
             await pendingUserEntity.CreatePendingUser(context);
-            SsoHelperMethods.SendEmail(emailSendUserDetailsRequest, messageProducer);
 
             await transaction.CommitAsync();
         }
@@ -141,6 +141,8 @@ public class SsoService(
         {
             throw new TransactionException(ex.InnerException!.Message);
         }
+
+        SsoHelperMethods.SendEmail(emailSendUserDetailsRequest, messageProducer);
     }
 
     public async Task<SsoLoginResponse> Login(SsoLoginRequest request)
