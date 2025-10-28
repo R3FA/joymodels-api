@@ -8,4 +8,6 @@ public interface IUsersService
 {
     Task<UsersResponse> GetByUuid(Guid userUuid);
     Task<PaginationResponse<UsersResponse>> Search(UsersSearchRequest request);
+    Task<UsersResponse> Patch(Guid userUuid, UsersPatchRequest request);
+    Task Delete(Guid userUuid);
 }

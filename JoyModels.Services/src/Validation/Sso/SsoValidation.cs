@@ -17,7 +17,7 @@ public static class SsoValidation
             throw new ArgumentException(
                 "First name must begin with a capital letter and contain only lowercase letters after.");
 
-        if (request.LastName != null)
+        if (!string.IsNullOrWhiteSpace(request.LastName))
             if (!RegularExpressionValidation.IsStringValid(request.LastName))
                 throw new ArgumentException(
                     "Last name must begin with a capital letter and contain only lowercase letters after.");
@@ -59,10 +59,10 @@ public static class SsoValidation
 
     public static void ValidateUserSearchArguments(this SsoSearchRequest request)
     {
-        if (request.Nickname != null)
+        if (!string.IsNullOrWhiteSpace(request.Nickname))
             ValidateNickname(request.Nickname);
 
-        if (request.Email != null)
+        if (!string.IsNullOrWhiteSpace(request.Email))
             ValidateEmail(request.Email);
     }
 

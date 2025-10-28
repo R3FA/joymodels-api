@@ -12,11 +12,11 @@ public static class RabbitMqSetup
         var rabbitMqVirtualHost = rabbitMqDetails["VirtualHost"];
         var rabbitMqPassword = rabbitMqDetails["Password"];
 
-        if (string.IsNullOrEmpty(rabbitMqHost)
-            || string.IsNullOrEmpty(rabbitMqUser)
-            || string.IsNullOrEmpty(rabbitMqVirtualHost)
-            || string.IsNullOrEmpty(rabbitMqPassword))
-            throw new ApplicationException("RabbitMQ details are not configured!");
+        if (string.IsNullOrWhiteSpace(rabbitMqHost)
+            || string.IsNullOrWhiteSpace(rabbitMqUser)
+            || string.IsNullOrWhiteSpace(rabbitMqVirtualHost)
+            || string.IsNullOrWhiteSpace(rabbitMqPassword))
+            throw new ApplicationException("RabbitMQ credentials are not configured!");
 
         return new RabbitMqDetails()
         {

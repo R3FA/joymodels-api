@@ -29,4 +29,21 @@ public class UsersService(JoyModelsDbContext context, IMapper mapper, UserAuthVa
 
         return usersResponse;
     }
+
+    public async Task<UsersResponse> Patch(Guid userUuid, UsersPatchRequest request)
+    {
+        userAuthValidation.ValidateUserAuthRequest(userUuid);
+        userAuthValidation.ValidateUserRequestUuids(userUuid, request.UserUuid);
+        request.ValidateUserPatchArguments();
+        await request.ValidateUserPatchArgumentsDuplicatedFields(context);
+
+        await request.PatchUserEntity(context);
+
+        return await GetByUuid(userUuid);
+    }
+
+    public async Task Delete(Guid userUuid)
+    {
+        await UsersHelperMethods.DeleteUserEntity(context, userUuid);
+    }
 }

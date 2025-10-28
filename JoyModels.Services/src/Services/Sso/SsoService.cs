@@ -80,7 +80,7 @@ public class SsoService(
 
     public async Task<SsoUserResponse> Verify(Guid userUuid, SsoVerifyRequest request)
     {
-        userAuthValidation.ValidateUserAuthRequest(request.UserUuid);
+        userAuthValidation.ValidateUserAuthRequest(userUuid);
         userAuthValidation.ValidateUserRequestUuids(userUuid, request.UserUuid);
         SsoValidation.ValidateOtpCodeValueFormat(request.OtpCode);
         var accessTokenChangeRequest = mapper.Map<SsoAccessTokenChangeRequest>(request);
@@ -118,7 +118,7 @@ public class SsoService(
 
     public async Task RequestNewOtpCode(Guid userUuid, SsoNewOtpCodeRequest request)
     {
-        userAuthValidation.ValidateUserAuthRequest(request.UserUuid);
+        userAuthValidation.ValidateUserAuthRequest(userUuid);
         userAuthValidation.ValidateUserRequestUuids(userUuid, request.UserUuid);
 
         var userEntity = await SsoHelperMethods.GetUserEntity(context, request.UserUuid, null);
@@ -163,7 +163,7 @@ public class SsoService(
     public async Task<SsoAccessTokenChangeResponse> RequestAccessTokenChange(Guid userUuid,
         SsoAccessTokenChangeRequest request)
     {
-        userAuthValidation.ValidateUserAuthRequest(request.UserUuid);
+        userAuthValidation.ValidateUserAuthRequest(userUuid);
         userAuthValidation.ValidateUserRequestUuids(userUuid, request.UserUuid);
 
         await request.ValidateUserRefreshToken(context, mapper);
@@ -178,7 +178,7 @@ public class SsoService(
 
     public async Task Logout(Guid userUuid, SsoLogoutRequest request)
     {
-        userAuthValidation.ValidateUserAuthRequest(request.UserUuid);
+        userAuthValidation.ValidateUserAuthRequest(userUuid);
         userAuthValidation.ValidateUserRequestUuids(userUuid, request.UserUuid);
 
         await request.DeleteUserRefreshToken(context);
@@ -187,7 +187,7 @@ public class SsoService(
     public async Task RequestPasswordChange(Guid userUuid,
         SsoPasswordChangeRequest request)
     {
-        userAuthValidation.ValidateUserAuthRequest(request.UserUuid);
+        userAuthValidation.ValidateUserAuthRequest(userUuid);
         userAuthValidation.ValidateUserRequestUuids(userUuid, request.UserUuid);
         request.ValidateUserPasswordChangeRequestArguments();
 

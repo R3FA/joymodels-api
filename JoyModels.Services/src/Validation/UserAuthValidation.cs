@@ -16,15 +16,15 @@ public sealed class UserAuthValidation(IHttpContextAccessor httpContext)
         throw new ApplicationException("Error getting user uuid from access token!");
     }
 
-    public void ValidateUserAuthRequest(Guid requestUserUuid)
+    public void ValidateUserAuthRequest(Guid routeUserUuid)
     {
-        if (GetAuthUserUuid() != requestUserUuid)
+        if (GetAuthUserUuid() != routeUserUuid)
             throw new ApplicationException("You are not authorized for this request.");
     }
 
-    public void ValidateUserRequestUuids(Guid queryUserUuid, Guid requestUserUuid)
+    public void ValidateUserRequestUuids(Guid routeUserUuid, Guid requestUserUuid)
     {
-        if (queryUserUuid != requestUserUuid)
+        if (routeUserUuid != requestUserUuid)
             throw new ArgumentException("User uuid query parameter doesn't match the user uuid in request body.");
     }
 }

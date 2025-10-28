@@ -67,10 +67,10 @@ public static class JwtSetup
         var jwtIssuer = jwtDetails["Issuer"];
         var jwtAudience = jwtDetails["Audience"];
 
-        if (string.IsNullOrEmpty(jwtSigningKey)
-            || string.IsNullOrEmpty(jwtIssuer)
-            || string.IsNullOrEmpty(jwtAudience))
-            throw new ApplicationException("JWT Signing Key or Issuer or Audience are not configured!");
+        if (string.IsNullOrWhiteSpace(jwtSigningKey)
+            || string.IsNullOrWhiteSpace(jwtIssuer)
+            || string.IsNullOrWhiteSpace(jwtAudience))
+            throw new ApplicationException("JWT credentials are not configured!");
 
         return new JwtClaimDetails()
         {
