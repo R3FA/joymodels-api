@@ -28,6 +28,8 @@ public class ModelService(JoyModelsDbContext context, IMapper mapper) : IModelSe
         return modelsResponse;
     }
 
+    // TODO: Implementirati prvo ModelCategories, ModelFaqSections, ModelReviews, UserModelLikes pa tek onda ovo
+    // TODO: Takodjer namjesti ModelCreateRequest DTO
     public Task<ModelResponse> Create(ModelCreateRequest request)
     {
         throw new NotImplementedException();
