@@ -74,6 +74,38 @@ public partial class JoyModelsDbContext : DbContext
             entity.Property(e => e.CategoryName)
                 .HasMaxLength(50)
                 .HasColumnName("category_name");
+
+            entity.HasData(
+                new Category { Uuid = Guid.NewGuid(), CategoryName = "Characters" },
+                new Category { Uuid = Guid.NewGuid(), CategoryName = "Humans" },
+                new Category { Uuid = Guid.NewGuid(), CategoryName = "Robots & Mechanics" },
+                new Category { Uuid = Guid.NewGuid(), CategoryName = "Animals" },
+                new Category { Uuid = Guid.NewGuid(), CategoryName = "Plants & Vegetation" },
+                new Category { Uuid = Guid.NewGuid(), CategoryName = "Rocks & Minerals" },
+                new Category { Uuid = Guid.NewGuid(), CategoryName = "Terrain & Landscapes" },
+                new Category { Uuid = Guid.NewGuid(), CategoryName = "Buildings" },
+                new Category { Uuid = Guid.NewGuid(), CategoryName = "Interiors" },
+                new Category { Uuid = Guid.NewGuid(), CategoryName = "Props" },
+                new Category { Uuid = Guid.NewGuid(), CategoryName = "Industrial & Factory" },
+                new Category { Uuid = Guid.NewGuid(), CategoryName = "Tools & Hardware" },
+                new Category { Uuid = Guid.NewGuid(), CategoryName = "Electronics & Gadgets" },
+                new Category { Uuid = Guid.NewGuid(), CategoryName = "Clothing & Accessories" },
+                new Category { Uuid = Guid.NewGuid(), CategoryName = "Jewelry" },
+                new Category { Uuid = Guid.NewGuid(), CategoryName = "Sports & Fitness" },
+                new Category { Uuid = Guid.NewGuid(), CategoryName = "Medical & Anatomy" },
+                new Category { Uuid = Guid.NewGuid(), CategoryName = "Military" },
+                new Category { Uuid = Guid.NewGuid(), CategoryName = "Sci‑Fi" },
+                new Category { Uuid = Guid.NewGuid(), CategoryName = "Fantasy" },
+                new Category { Uuid = Guid.NewGuid(), CategoryName = "Horror" },
+                new Category { Uuid = Guid.NewGuid(), CategoryName = "Musical Instruments" },
+                new Category { Uuid = Guid.NewGuid(), CategoryName = "Office & Education" },
+                new Category { Uuid = Guid.NewGuid(), CategoryName = "Boats & Ships" },
+                new Category { Uuid = Guid.NewGuid(), CategoryName = "Aircraft & Drones" },
+                new Category { Uuid = Guid.NewGuid(), CategoryName = "Spacecraft" },
+                new Category { Uuid = Guid.NewGuid(), CategoryName = "Trains & Rail" },
+                new Category { Uuid = Guid.NewGuid(), CategoryName = "Nature Elements" },
+                new Category { Uuid = Guid.NewGuid(), CategoryName = "History" }
+            );
         });
 
         modelBuilder.Entity<CommunityPost>(entity =>
@@ -584,6 +616,15 @@ public partial class JoyModelsDbContext : DbContext
             entity.Property(e => e.RoleName)
                 .HasMaxLength(50)
                 .HasColumnName("role_name");
+
+            entity.HasData(
+                new UserRole { Uuid = new Guid("6aa5d268-c259-4054-b604-ff545eaa2f1e"), RoleName = "Undefined" },
+                new UserRole { Uuid = new Guid("2107d612-ac38-4390-aeb6-276cf55b42bb"), RoleName = "Unverified" },
+                new UserRole { Uuid = new Guid("efd09239-1461-4740-86ae-94ed49137a36"), RoleName = "User" },
+                new UserRole { Uuid = new Guid("90051a72-89ea-48ca-8543-43f5843148c8"), RoleName = "Helper" },
+                new UserRole { Uuid = new Guid("44b4be39-2884-462a-98c0-cb3b5eb9c3dd"), RoleName = "Admin" },
+                new UserRole { Uuid = new Guid("c5c8ab92-5933-4122-a804-6533516aeb5d"), RoleName = "Root" }
+            );
         });
 
         modelBuilder.Entity<UserToken>(entity =>
@@ -605,15 +646,6 @@ public partial class JoyModelsDbContext : DbContext
                 .HasForeignKey(d => d.UserUuid)
                 .HasConstraintName("user_tokens_ibfk_1");
         });
-
-        modelBuilder.Entity<UserRole>().HasData(
-            new UserRole { Uuid = new Guid("6aa5d268-c259-4054-b604-ff545eaa2f1e"), RoleName = "Undefined" },
-            new UserRole { Uuid = new Guid("2107d612-ac38-4390-aeb6-276cf55b42bb"), RoleName = "Unverified" },
-            new UserRole { Uuid = new Guid("efd09239-1461-4740-86ae-94ed49137a36"), RoleName = "User" },
-            new UserRole { Uuid = new Guid("90051a72-89ea-48ca-8543-43f5843148c8"), RoleName = "Helper" },
-            new UserRole { Uuid = new Guid("44b4be39-2884-462a-98c0-cb3b5eb9c3dd"), RoleName = "Admin" },
-            new UserRole { Uuid = new Guid("c5c8ab92-5933-4122-a804-6533516aeb5d"), RoleName = "Root" }
-        );
 
         OnModelCreatingPartial(modelBuilder);
     }
