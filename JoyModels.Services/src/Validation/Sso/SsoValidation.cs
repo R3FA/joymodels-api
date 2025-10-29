@@ -13,12 +13,12 @@ public static class SsoValidation
 {
     public static void ValidateUserCreationArguments(this SsoUserCreateRequest request)
     {
-        if (!RegularExpressionValidation.IsStringValid(request.FirstName))
+        if (!RegularExpressionValidation.IsNameValid(request.FirstName))
             throw new ArgumentException(
                 "First name must begin with a capital letter and contain only lowercase letters after.");
 
         if (!string.IsNullOrWhiteSpace(request.LastName))
-            if (!RegularExpressionValidation.IsStringValid(request.LastName))
+            if (!RegularExpressionValidation.IsNameValid(request.LastName))
                 throw new ArgumentException(
                     "Last name must begin with a capital letter and contain only lowercase letters after.");
 

@@ -9,14 +9,14 @@ public static class UsersValidation
 {
     private static void ValidateFirstName(string firstName)
     {
-        if (!RegularExpressionValidation.IsStringValid(firstName))
+        if (!RegularExpressionValidation.IsNameValid(firstName))
             throw new ArgumentException(
                 "First name must begin with a capital letter and contain only lowercase letters after.");
     }
 
     private static void ValidateLastName(string lastName)
     {
-        if (!RegularExpressionValidation.IsStringValid(lastName))
+        if (!RegularExpressionValidation.IsNameValid(lastName))
             throw new ArgumentException(
                 "Last name must begin with a capital letter and contain only lowercase letters after.");
     }
