@@ -27,4 +27,9 @@ public class ModelService(JoyModelsDbContext context, IMapper mapper) : IModelSe
 
         return modelsResponse;
     }
+
+    public Task<ModelResponse> Create(ModelCreateRequest request)
+    {
+        throw new NotImplementedException();
+    }
 }

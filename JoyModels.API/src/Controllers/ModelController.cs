@@ -24,4 +24,11 @@ public class ModelController(IModelService service) : ControllerBase
     {
         return await service.Search(request);
     }
+
+    [Authorize(Policy = "VerifiedUsers")]
+    [HttpPost("create")]
+    public async Task<ActionResult<ModelResponse>> Create([FromBody] ModelCreateRequest request)
+    {
+        return await service.Create(request);
+    }
 }
