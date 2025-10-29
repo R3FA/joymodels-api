@@ -76,35 +76,151 @@ public partial class JoyModelsDbContext : DbContext
                 .HasColumnName("category_name");
 
             entity.HasData(
-                new Category { Uuid = Guid.NewGuid(), CategoryName = "Characters" },
-                new Category { Uuid = Guid.NewGuid(), CategoryName = "Humans" },
-                new Category { Uuid = Guid.NewGuid(), CategoryName = "Robots & Mechanics" },
-                new Category { Uuid = Guid.NewGuid(), CategoryName = "Animals" },
-                new Category { Uuid = Guid.NewGuid(), CategoryName = "Plants & Vegetation" },
-                new Category { Uuid = Guid.NewGuid(), CategoryName = "Rocks & Minerals" },
-                new Category { Uuid = Guid.NewGuid(), CategoryName = "Terrain & Landscapes" },
-                new Category { Uuid = Guid.NewGuid(), CategoryName = "Buildings" },
-                new Category { Uuid = Guid.NewGuid(), CategoryName = "Interiors" },
-                new Category { Uuid = Guid.NewGuid(), CategoryName = "Props" },
-                new Category { Uuid = Guid.NewGuid(), CategoryName = "Industrial & Factory" },
-                new Category { Uuid = Guid.NewGuid(), CategoryName = "Tools & Hardware" },
-                new Category { Uuid = Guid.NewGuid(), CategoryName = "Electronics & Gadgets" },
-                new Category { Uuid = Guid.NewGuid(), CategoryName = "Clothing & Accessories" },
-                new Category { Uuid = Guid.NewGuid(), CategoryName = "Jewelry" },
-                new Category { Uuid = Guid.NewGuid(), CategoryName = "Sports & Fitness" },
-                new Category { Uuid = Guid.NewGuid(), CategoryName = "Medical & Anatomy" },
-                new Category { Uuid = Guid.NewGuid(), CategoryName = "Military" },
-                new Category { Uuid = Guid.NewGuid(), CategoryName = "Sci‑Fi" },
-                new Category { Uuid = Guid.NewGuid(), CategoryName = "Fantasy" },
-                new Category { Uuid = Guid.NewGuid(), CategoryName = "Horror" },
-                new Category { Uuid = Guid.NewGuid(), CategoryName = "Musical Instruments" },
-                new Category { Uuid = Guid.NewGuid(), CategoryName = "Office & Education" },
-                new Category { Uuid = Guid.NewGuid(), CategoryName = "Boats & Ships" },
-                new Category { Uuid = Guid.NewGuid(), CategoryName = "Aircraft & Drones" },
-                new Category { Uuid = Guid.NewGuid(), CategoryName = "Spacecraft" },
-                new Category { Uuid = Guid.NewGuid(), CategoryName = "Trains & Rail" },
-                new Category { Uuid = Guid.NewGuid(), CategoryName = "Nature Elements" },
-                new Category { Uuid = Guid.NewGuid(), CategoryName = "History" }
+                new Category
+                {
+                    Uuid = new Guid("d4363787-30b2-4cf9-b7ce-26dd2dce81ad"),
+                    CategoryName = "Characters"
+                },
+                new Category
+                {
+                    Uuid = new Guid("c72086e6-fe8c-480a-a918-f02cf632865e"),
+                    CategoryName = "Humans"
+                },
+                new Category
+                {
+                    Uuid = new Guid("8c76c6ad-d49d-4620-835b-333bf8996517"),
+                    CategoryName = "Robots & Mechanics"
+                },
+                new Category
+                {
+                    Uuid = new Guid("5457c9f7-a077-41c8-82cf-57cfd024b940"),
+                    CategoryName = "Animals"
+                },
+                new Category
+                {
+                    Uuid = new Guid("b4806536-be2d-4528-8548-1e7969efd599"),
+                    CategoryName = "Plants & Vegetation"
+                },
+                new Category
+                {
+                    Uuid = new Guid("e6a53e54-39af-4345-8cb1-3ba3650e85e8"),
+                    CategoryName = "Rocks & Minerals"
+                },
+                new Category
+                {
+                    Uuid = new Guid("5c76a1da-3881-4b95-8497-abea4c565a86"),
+                    CategoryName = "Terrain & Landscapes"
+                },
+                new Category
+                {
+                    Uuid = new Guid("228c1335-eef0-4c0c-b518-a36cfd237b00"),
+                    CategoryName = "Buildings"
+                },
+                new Category
+                {
+                    Uuid = new Guid("af71e3b2-7628-4492-a83d-36983526bfc3"),
+                    CategoryName = "Interiors"
+                },
+                new Category
+                {
+                    Uuid = new Guid("6f916b5b-2ca7-4174-a37f-04e4d203dfe8"),
+                    CategoryName = "Props"
+                },
+                new Category
+                {
+                    Uuid = new Guid("56aa06ec-c42b-4fb7-ac5e-322cf5dd5925"),
+                    CategoryName = "Industrial & Factory"
+                },
+                new Category
+                {
+                    Uuid = new Guid("0c09b371-eee6-4c1d-91e9-c0888f62545e"),
+                    CategoryName = "Tools & Hardware"
+                },
+                new Category
+                {
+                    Uuid = new Guid("6f8f81ea-232b-4fd7-8f90-fe5e61f2c87f"),
+                    CategoryName = "Electronics & Gadgets"
+                },
+                new Category
+                {
+                    Uuid = new Guid("81463c5f-aac3-4f99-bf8c-2b909b8b5c47"),
+                    CategoryName = "Clothing & Accessories"
+                },
+                new Category
+                {
+                    Uuid = new Guid("08edf884-994b-4f1c-9344-189a18904e9a"),
+                    CategoryName = "Jewelry"
+                },
+                new Category
+                {
+                    Uuid = new Guid("09798ef5-3756-4b3b-afbb-1d539efe0f35"),
+                    CategoryName = "Sports & Fitness"
+                },
+                new Category
+                {
+                    Uuid = new Guid("f4d84098-e750-4ca5-b71c-0c46b0b060f4"),
+                    CategoryName = "Medical & Anatomy"
+                },
+                new Category
+                {
+                    Uuid = new Guid("18ab38b1-7dee-4e4d-84ba-e3c6eb69d453"),
+                    CategoryName = "Military"
+                },
+                new Category
+                {
+                    Uuid = new Guid("b3d581f7-d746-4978-9c17-efe9002623d4"),
+                    CategoryName = "Sci‑Fi"
+                },
+                new Category
+                {
+                    Uuid = new Guid("3f838fcc-d267-4b46-999c-0f3e1bedc5d9"),
+                    CategoryName = "Fantasy"
+                },
+                new Category
+                {
+                    Uuid = new Guid("6362a527-9322-4820-91e7-36b1798913ea"),
+                    CategoryName = "Horror"
+                },
+                new Category
+                {
+                    Uuid = new Guid("056ae18c-6e0f-420b-9583-077cd7a483ff"),
+                    CategoryName = "Musical Instruments"
+                },
+                new Category
+                {
+                    Uuid = new Guid("b29ec84d-3951-4f1c-b881-7deba7c2f87d"),
+                    CategoryName = "Office & Education"
+                },
+                new Category
+                {
+                    Uuid = new Guid("e1d11f5a-f802-42ca-9dc3-981b8eafc4ff"),
+                    CategoryName = "Boats & Ships"
+                },
+                new Category
+                {
+                    Uuid = new Guid("98bfb9ab-cc57-4c13-9e45-9ef265e2092b"),
+                    CategoryName = "Aircraft & Drones"
+                },
+                new Category
+                {
+                    Uuid = new Guid("f34a3545-733c-42fa-8fad-82b3277d486f"),
+                    CategoryName = "Spacecraft"
+                },
+                new Category
+                {
+                    Uuid = new Guid("6aaeb356-5adc-4ceb-82b7-cf6f35e19df2"),
+                    CategoryName = "Trains & Rail"
+                },
+                new Category
+                {
+                    Uuid = new Guid("68737f63-995c-4ee0-8b01-4558e7fc2dd2"),
+                    CategoryName = "Nature Elements"
+                },
+                new Category
+                {
+                    Uuid = new Guid("eedc9940-378f-416b-9127-29f26985d6ed"),
+                    CategoryName = "History"
+                }
             );
         });
 
