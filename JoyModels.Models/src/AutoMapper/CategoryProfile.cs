@@ -12,5 +12,6 @@ public class CategoryProfile : Profile
         CreateMap<Category, CategoryResponse>();
         CreateMap<CategoryCreateRequest, Category>()
             .AfterMap((_, dest) => dest.Uuid = Guid.NewGuid());
+        CreateMap<CategoryPatchRequest, CategoryResponse>();
     }
 }

@@ -32,4 +32,20 @@ public class CategoryController(ICategoryService service) : ControllerBase
     {
         return await service.Create(request);
     }
+
+    // [Authorize(Policy = "HeadStaff")]
+    [HttpPatch("edit-category/{categoryUuid:guid}")]
+    public async Task<ActionResult<CategoryResponse>> Patch([FromRoute] Guid categoryUuid,
+        [FromBody] CategoryPatchRequest request)
+    {
+        return await service.Patch(categoryUuid, request);
+    }
+
+    // [Authorize(Policy = "HeadStaff")]
+    [HttpDelete("delete/{categoryUuid:guid}")]
+    public async Task<ActionResult> Delete([FromRoute] Guid categoryUuid)
+    {
+        await service.Delete(categoryUuid);
+        return NoContent();
+    }
 }

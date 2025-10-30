@@ -45,4 +45,25 @@ public static class CategoryHelperMethods
         await context.Categories.AddAsync(categoryEntity);
         await context.SaveChangesAsync();
     }
+
+    public static async Task PatchCategory(this CategoryPatchRequest request, JoyModelsDbContext context)
+    {
+        await context.Categories
+            .Where(x => x.Uuid == request.Uuid)
+            .ExecuteUpdateAsync(y => y.SetProperty(z => z.CategoryName,
+                z => request.CategoryName));
+        await context.SaveChangesAsync();
+    }
+
+    public static async Task DeleteCategory(JoyModelsDbContext context, Guid categoryUuid)
+    {
+        var numberOfDeletedRows = await context.Categories
+            .Where(x => x.Uuid == categoryUuid)
+            .ExecuteDeleteAsync();
+        await context.SaveChangesAsync();
+
+        if (numberOfDeletedRows == 0)
+            throw new KeyNotFoundException(
+                $"Category with UUID `{categoryUuid}` does not exist.");
+    }
 }

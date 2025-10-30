@@ -22,9 +22,9 @@ public sealed class UserAuthValidation(IHttpContextAccessor httpContext)
             throw new ApplicationException("You are not authorized for this request.");
     }
 
-    public void ValidateUserRequestUuids(Guid routeUserUuid, Guid requestUserUuid)
+    public void ValidateRequestUuids(Guid routeUuid, Guid requestUuid)
     {
-        if (routeUserUuid != requestUserUuid)
-            throw new ArgumentException("User uuid query parameter doesn't match the user uuid in request body.");
+        if (routeUuid != requestUuid)
+            throw new ArgumentException("Route uuid doesn't match with request uuid.");
     }
 }

@@ -22,4 +22,7 @@ public static class CategoryValidation
 
     public static void ValidateCategoryCreateArguments(this CategoryCreateRequest request)
         => ValidateCategoryName(request.CategoryName);
+
+    public static void ValidateCategoryPatchArguments(this CategoryPatchRequest request)
+        => ValidateCategoryName(request.CategoryName);
 }

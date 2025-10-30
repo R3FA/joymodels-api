@@ -33,7 +33,7 @@ public class UsersService(JoyModelsDbContext context, IMapper mapper, UserAuthVa
     public async Task<UsersResponse> Patch(Guid userUuid, UsersPatchRequest request)
     {
         userAuthValidation.ValidateUserAuthRequest(userUuid);
-        userAuthValidation.ValidateUserRequestUuids(userUuid, request.UserUuid);
+        userAuthValidation.ValidateRequestUuids(userUuid, request.UserUuid);
         request.ValidateUserPatchArguments();
         await request.ValidateUserPatchArgumentsDuplicatedFields(context);
 

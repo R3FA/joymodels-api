@@ -5,18 +5,18 @@ using JoyModels.Models.DataTransferObjects.RequestTypes.Categories;
 using JoyModels.Models.DataTransferObjects.ResponseTypes;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Categories;
 using JoyModels.Services.Services.Categories.HelperMethods;
+using JoyModels.Services.Validation;
 using JoyModels.Services.Validation.Categories;
 
 namespace JoyModels.Services.Services.Categories;
 
-public class CategoryService(JoyModelsDbContext context, IMapper mapper) : ICategoryService
+public class CategoryService(JoyModelsDbContext context, IMapper mapper, UserAuthValidation userAuthValidation)
+    : ICategoryService
 {
     public async Task<CategoryResponse> GetByUuid(Guid categoryUuid)
     {
         var categoryEntity = await CategoryHelperMethods.GetCategoryEntity(context, categoryUuid);
-        var categoryResponse = mapper.Map<CategoryResponse>(categoryEntity);
-
-        return categoryResponse;
+        return mapper.Map<CategoryResponse>(categoryEntity);
     }
 
     public async Task<PaginationResponse<CategoryResponse>> Search(CategorySearchRequest request)
@@ -24,9 +24,8 @@ public class CategoryService(JoyModelsDbContext context, IMapper mapper) : ICate
         request.ValidateCategorySearchArguments();
 
         var categoryEntities = await CategoryHelperMethods.SearchCategoryEntities(context, request);
-        var categoriesResponse = mapper.Map<PaginationResponse<CategoryResponse>>(categoryEntities);
 
-        return categoriesResponse;
+        return mapper.Map<PaginationResponse<CategoryResponse>>(categoryEntities);
     }
 
     public async Task<CategoryResponse> Create(CategoryCreateRequest request)
@@ -37,5 +36,20 @@ public class CategoryService(JoyModelsDbContext context, IMapper mapper) : ICate
         await categoryEntity.CreateCategory(context);
 
         return mapper.Map<CategoryResponse>(categoryEntity);
+    }
+
+    public async Task<CategoryResponse> Patch(Guid categoryUuid, CategoryPatchRequest request)
+    {
+        userAuthValidation.ValidateRequestUuids(categoryUuid, request.Uuid);
+        request.ValidateCategoryPatchArguments();
+
+        await request.PatchCategory(context);
+
+        return mapper.Map<CategoryResponse>(request);
+    }
+
+    public async Task Delete(Guid categoryUuid)
+    {
+        await CategoryHelperMethods.DeleteCategory(context, categoryUuid);
     }
 }
