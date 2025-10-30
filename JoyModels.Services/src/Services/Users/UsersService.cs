@@ -15,9 +15,7 @@ public class UsersService(JoyModelsDbContext context, IMapper mapper, UserAuthVa
     public async Task<UsersResponse> GetByUuid(Guid userUuid)
     {
         var userEntity = await UsersHelperMethods.GetUserEntity(context, userUuid);
-        var userResponse = mapper.Map<UsersResponse>(userEntity);
-
-        return userResponse;
+        return mapper.Map<UsersResponse>(userEntity);
     }
 
     public async Task<PaginationResponse<UsersResponse>> Search(UsersSearchRequest request)
@@ -25,9 +23,7 @@ public class UsersService(JoyModelsDbContext context, IMapper mapper, UserAuthVa
         request.ValidateUserSearchArguments();
 
         var userEntities = await UsersHelperMethods.SearchUserEntities(context, request);
-        var usersResponse = mapper.Map<PaginationResponse<UsersResponse>>(userEntities);
-
-        return usersResponse;
+        return mapper.Map<PaginationResponse<UsersResponse>>(userEntities);
     }
 
     public async Task<UsersResponse> Patch(Guid userUuid, UsersPatchRequest request)

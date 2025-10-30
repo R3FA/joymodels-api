@@ -110,10 +110,9 @@ public class SsoService(
         var userEntity = await SsoHelperMethods.GetUserEntity(context, request.UserUuid, null);
         var ssoAccessTokenChangeResponse =
             SsoHelperMethods.SetCustomValuesSsoAccessTokenChangeResponse(userEntity, jwtClaimDetails);
-        var verifiedUser = mapper.Map<SsoUserResponse>(userEntity,
-            opt => { opt.Items["UserAccessToken"] = ssoAccessTokenChangeResponse.UserAccessToken; });
 
-        return verifiedUser;
+        return mapper.Map<SsoUserResponse>(userEntity,
+            opt => { opt.Items["UserAccessToken"] = ssoAccessTokenChangeResponse.UserAccessToken; });
     }
 
     public async Task RequestNewOtpCode(Guid userUuid, SsoNewOtpCodeRequest request)
@@ -170,10 +169,7 @@ public class SsoService(
 
         var userEntity = await SsoHelperMethods.GetUserEntity(context, request.UserUuid, null);
 
-        var ssoAccessTokenChangeResponse =
-            SsoHelperMethods.SetCustomValuesSsoAccessTokenChangeResponse(userEntity, jwtClaimDetails);
-
-        return ssoAccessTokenChangeResponse;
+        return SsoHelperMethods.SetCustomValuesSsoAccessTokenChangeResponse(userEntity, jwtClaimDetails);
     }
 
     public async Task Logout(Guid userUuid, SsoLogoutRequest request)

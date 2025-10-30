@@ -13,9 +13,7 @@ public class ModelService(JoyModelsDbContext context, IMapper mapper) : IModelSe
     public async Task<ModelResponse> GetByUuid(Guid modelUuid)
     {
         var modelEntity = await ModelHelperMethods.GetModelEntity(context, modelUuid);
-        var modelResponse = mapper.Map<ModelResponse>(modelEntity);
-
-        return modelResponse;
+        return mapper.Map<ModelResponse>(modelEntity);
     }
 
     public async Task<PaginationResponse<ModelResponse>> Search(ModelSearchRequest request)
@@ -23,9 +21,8 @@ public class ModelService(JoyModelsDbContext context, IMapper mapper) : IModelSe
         request.ValidateModelSearchArguments();
 
         var modelEntities = await ModelHelperMethods.SearchModelEntities(context, request);
-        var modelsResponse = mapper.Map<PaginationResponse<ModelResponse>>(modelEntities);
 
-        return modelsResponse;
+        return mapper.Map<PaginationResponse<ModelResponse>>(modelEntities);
     }
 
     // TODO: Implementirati prvo ModelCategories, ModelFaqSections, ModelReviews, UserModelLikes pa tek onda ovo

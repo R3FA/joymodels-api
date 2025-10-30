@@ -41,11 +41,11 @@ public static class SsoHelperMethods
 
         var filteredQuery = (ssoSearchRequestDto.Nickname, ssoSearchRequestDto.Email) switch
         {
-            (not null, null) => baseQuery.Where(x => x.UserUu.NickName == ssoSearchRequestDto.Nickname),
-            (null, not null) => baseQuery.Where(x => x.UserUu.Email == ssoSearchRequestDto.Email),
+            (not null, null) => baseQuery.Where(x => x.UserUu.NickName.Contains(ssoSearchRequestDto.Nickname)),
+            (null, not null) => baseQuery.Where(x => x.UserUu.Email.Contains(ssoSearchRequestDto.Email)),
             (not null, not null) => baseQuery.Where(x =>
-                x.UserUu.NickName == ssoSearchRequestDto.Nickname &&
-                x.UserUu.Email == ssoSearchRequestDto.Email),
+                x.UserUu.NickName.Contains(ssoSearchRequestDto.Nickname) &&
+                x.UserUu.Email.Contains(ssoSearchRequestDto.Email)),
             _ => baseQuery
         };
 
