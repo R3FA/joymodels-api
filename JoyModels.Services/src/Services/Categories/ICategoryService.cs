@@ -9,5 +9,5 @@ public interface ICategoryService
     Task<CategoryResponse> GetByUuid(Guid categoryUuid);
 
     Task<PaginationResponse<CategoryResponse>> Search(CategorySearchRequest request);
-    // Task<CategoryResponse> Create(ModelCreateRequest request);
+    Task<CategoryResponse> Create(CategoryCreateRequest request);
 }

@@ -39,4 +39,10 @@ public static class CategoryHelperMethods
 
         return categoryEntities;
     }
+
+    public static async Task CreateCategory(this Category categoryEntity, JoyModelsDbContext context)
+    {
+        await context.Categories.AddAsync(categoryEntity);
+        await context.SaveChangesAsync();
+    }
 }

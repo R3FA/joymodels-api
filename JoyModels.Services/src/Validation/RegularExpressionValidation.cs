@@ -59,7 +59,7 @@ public static class RegularExpressionValidation
         if (string.IsNullOrWhiteSpace(input))
             throw new ArgumentException("Input cannot be empty string");
 
-        const string pattern = @"^[\p{L}\p{Nd}:.,\-]{1,100}$";
+        const string pattern = @"^[\p{L}\p{Nd}:.,\- ]{1,100}$";
 
         return Regex.IsMatch(input, pattern);
     }
