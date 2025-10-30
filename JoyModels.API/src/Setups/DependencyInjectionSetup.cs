@@ -2,6 +2,7 @@ using System.Reflection;
 using JoyModels.API.Handlers;
 using JoyModels.Communications.Setups;
 using JoyModels.Models.Database;
+using JoyModels.Services.Services.Categories;
 using JoyModels.Services.Services.Models;
 using JoyModels.Services.Services.Sso;
 using JoyModels.Services.Services.Users;
@@ -72,6 +73,7 @@ public static class DependencyInjectionSetup
         services.AddTransient<ISsoService, SsoService>();
         services.AddTransient<IUsersService, UsersService>();
         services.AddTransient<IModelService, ModelService>();
+        services.AddTransient<ICategoryService, CategoryService>();
 
         services.AddControllers();
 
