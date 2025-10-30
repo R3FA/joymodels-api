@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using JoyModels.Models.DataTransferObjects.UserRole;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.UserRole;
 
 namespace JoyModels.Models.DataTransferObjects.ResponseTypes.Users;
 
@@ -12,5 +12,5 @@ public class UsersResponse
     [Required] public string Email { get; set; } = null!;
     [Required] public DateTime CreatedAt { get; set; }
     [Required] public Guid UserRoleUuid { get; set; }
-    [Required] public virtual UserRoleGet UserRole { get; set; } = null!;
+    [Required] public virtual UserRoleResponse UserRole { get; set; } = null!;
 }

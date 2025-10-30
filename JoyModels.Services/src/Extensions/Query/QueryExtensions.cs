@@ -29,7 +29,7 @@ public static class QueryExtensions
         var methodCallExpression = Expression.Call(
             typeof(Queryable),
             methodName,
-            new[] { typeof(TEntity), propertyAccess.Type },
+            [typeof(TEntity), propertyAccess.Type],
             query.Expression,
             Expression.Quote(lambda)
         );

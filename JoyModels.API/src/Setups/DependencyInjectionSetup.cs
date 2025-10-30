@@ -2,6 +2,8 @@ using System.Reflection;
 using JoyModels.API.Handlers;
 using JoyModels.Communications.Setups;
 using JoyModels.Models.Database;
+using JoyModels.Services.Services.Categories;
+using JoyModels.Services.Services.Models;
 using JoyModels.Services.Services.Sso;
 using JoyModels.Services.Services.Users;
 using JoyModels.Services.Validation;
@@ -64,12 +66,14 @@ public static class DependencyInjectionSetup
 
         // RabbitMQ DI
         services.AddSingleton(RabbitMqSetup.RegisterRabbitMqDetails(configuration));
+        services.AddTransient<IMessageProducer, MessageProducer>();
+        services.AddTransient<IMessageConsumer, MessageConsumer>();
 
         // Custom Defined Services
         services.AddTransient<ISsoService, SsoService>();
         services.AddTransient<IUsersService, UsersService>();
-        services.AddTransient<IMessageProducer, MessageProducer>();
-        services.AddTransient<IMessageConsumer, MessageConsumer>();
+        services.AddTransient<IModelService, ModelService>();
+        services.AddTransient<ICategoryService, CategoryService>();
 
         services.AddControllers();
 

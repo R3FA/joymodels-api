@@ -4,6 +4,7 @@ using JoyModels.Models.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JoyModels.Models.src.Database.Migrations
 {
     [DbContext(typeof(JoyModelsDbContext))]
-    partial class JoyModelsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251029182619_CreateModelCategories")]
+    partial class CreateModelCategories
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -486,23 +489,6 @@ namespace JoyModels.Models.src.Database.Migrations
                         .IsUnique();
 
                     b.ToTable("model_availability", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Uuid = new Guid("65dcc8bf-4a87-4cc3-83e9-ee9dfdc937d9"),
-                            AvailabilityName = "Hidden"
-                        },
-                        new
-                        {
-                            Uuid = new Guid("cc462d60-2532-49e4-8fb4-4bf44e3d1e04"),
-                            AvailabilityName = "Community"
-                        },
-                        new
-                        {
-                            Uuid = new Guid("e1a7390c-ca8c-4914-83f2-15b0b3b96391"),
-                            AvailabilityName = "Store"
-                        });
                 });
 
             modelBuilder.Entity("JoyModels.Models.Database.Entities.ModelCategory", b =>

@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using JoyModels.Models.DataTransferObjects.UserRole;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.UserRole;
 
 namespace JoyModels.Models.DataTransferObjects.ResponseTypes.Sso;
 
@@ -13,5 +13,5 @@ public class SsoUserResponse
     [Required] public DateTime CreatedAt { get; set; }
     [Required] public string UserAccessToken { get; set; } = null!;
     [Required] public Guid UserRoleUuid { get; set; }
-    [Required] public virtual UserRoleGet UserRole { get; set; } = null!;
+    [Required] public virtual UserRoleResponse UserRole { get; set; } = null!;
 }

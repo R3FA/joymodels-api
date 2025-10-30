@@ -31,8 +31,4 @@
         <ProjectReference Include="..\JoyModels.Utilities\JoyModels.Utilities.csproj"/>
     </ItemGroup>
 
-    <ItemGroup>
-        <Folder Include="src\Controllers\"/>
-    </ItemGroup>
-
 </Project>

@@ -33,7 +33,7 @@ public static class UsersHelperMethods
 
         var filteredQuery = usersSearchRequestDto.Nickname switch
         {
-            not null => baseQuery.Where(x => x.NickName == usersSearchRequestDto.Nickname),
+            not null => baseQuery.Where(x => x.NickName.Contains(usersSearchRequestDto.Nickname)),
             _ => baseQuery
         };
 
