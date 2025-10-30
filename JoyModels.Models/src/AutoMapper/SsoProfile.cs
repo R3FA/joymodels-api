@@ -3,7 +3,7 @@ using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Email;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Sso;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Sso;
-using JoyModels.Models.DataTransferObjects.UserRole;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.UserRole;
 
 namespace JoyModels.Models.AutoMapper;
 
@@ -26,7 +26,7 @@ public class SsoProfile : Profile
                     dest.UserAccessToken = userAccessToken;
                 }
             });
-        CreateMap<UserRole, UserRoleGet>();
+        CreateMap<UserRole, UserRoleResponse>();
         CreateMap<SsoUserCreateRequest, User>();
         CreateMap<User, User>()
             .AfterMap((_, dest, context) =>
