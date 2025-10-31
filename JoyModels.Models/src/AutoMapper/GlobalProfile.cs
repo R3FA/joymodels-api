@@ -1,5 +1,5 @@
 using AutoMapper;
-using JoyModels.Models.DataTransferObjects.ResponseTypes;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Models.Pagination;
 
 namespace JoyModels.Models.AutoMapper;

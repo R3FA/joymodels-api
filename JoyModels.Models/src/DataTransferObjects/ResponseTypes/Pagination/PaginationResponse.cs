@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace JoyModels.Models.DataTransferObjects.ResponseTypes;
+namespace JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 
 public class PaginationResponse<T>
 {

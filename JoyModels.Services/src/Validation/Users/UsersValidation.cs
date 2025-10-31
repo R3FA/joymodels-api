@@ -28,13 +28,6 @@ public static class UsersValidation
                 "Nickname must have at least 3 characters and may only contain lowercase letters and numbers.");
     }
 
-    private static void ValidateEmail(string email)
-    {
-        if (!RegularExpressionValidation.IsEmailValid(email))
-            throw new ArgumentException(
-                "Email must contain the '@' symbol, followed by a domain with a dot. Value has to be without spaces or blank characters.");
-    }
-
     public static void ValidateUserSearchArguments(this UsersSearchRequest request)
     {
         if (!string.IsNullOrWhiteSpace(request.Nickname))
@@ -45,8 +38,7 @@ public static class UsersValidation
     {
         if (string.IsNullOrWhiteSpace(request.FirstName)
             && string.IsNullOrWhiteSpace(request.LastName)
-            && string.IsNullOrWhiteSpace(request.Nickname)
-            && string.IsNullOrWhiteSpace(request.Email))
+            && string.IsNullOrWhiteSpace(request.Nickname))
             throw new ArgumentException("You cannot send an empty request!");
 
         if (!string.IsNullOrWhiteSpace(request.FirstName))
@@ -57,9 +49,6 @@ public static class UsersValidation
 
         if (!string.IsNullOrWhiteSpace(request.Nickname))
             ValidateNickname(request.Nickname);
-
-        if (!string.IsNullOrWhiteSpace(request.Email))
-            ValidateEmail(request.Email);
     }
 
     public static async Task ValidateUserPatchArgumentsDuplicatedFields(this UsersPatchRequest request,
@@ -71,13 +60,6 @@ public static class UsersValidation
             if (isNicknameDuplicated)
                 throw new DuplicateNameException(
                     $"Nickname `{request.Nickname}` is already registered in our database.");
-        }
-
-        if (!string.IsNullOrWhiteSpace(request.Email))
-        {
-            var isEmailDuplicated = await context.Users.AnyAsync(x => x.Email == request.Email);
-            if (isEmailDuplicated)
-                throw new DuplicateNameException($"Email `{request.Email}` is already registered in our database.");
         }
     }
 }
