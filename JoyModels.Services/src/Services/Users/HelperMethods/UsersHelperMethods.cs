@@ -58,9 +58,6 @@ public static class UsersHelperMethods
         if (!string.IsNullOrWhiteSpace(request.Nickname))
             await context.Users.ExecuteUpdateAsync(x => x.SetProperty(z => z.NickName, request.Nickname));
 
-        if (!string.IsNullOrWhiteSpace(request.Email))
-            await context.Users.ExecuteUpdateAsync(x => x.SetProperty(z => z.Email, request.Email));
-
         await context.SaveChangesAsync();
     }
 
