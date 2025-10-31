@@ -20,6 +20,52 @@ namespace JoyModels.Services.Services.Sso.HelperMethods;
 
 public static class SsoHelperMethods
 {
+    private static string CreateUserJwtAccessToken(User user, JwtClaimDetails jwtClaimDetails)
+    {
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.NameIdentifier, user.Uuid.ToString()),
+            new(ClaimTypes.Name, user.NickName),
+            new(ClaimTypes.Role, user.UserRoleUu.RoleName)
+        };
+
+        var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtClaimDetails.JwtSigningKey));
+        var signingCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha512);
+        var signingKeyDescriptor = new JwtSecurityToken(
+            issuer: jwtClaimDetails.JwtIssuer,
+            audience: jwtClaimDetails.JwtAudience,
+            claims: claims,
+            expires: DateTime.Now.AddDays(1),
+            signingCredentials: signingCredentials
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(signingKeyDescriptor);
+    }
+
+    private static string CreateUserJwtRefreshToken()
+    {
+        var randomBytes = new byte[64];
+        RandomNumberGenerator.Create().GetBytes(randomBytes);
+        return Convert.ToBase64String(randomBytes);
+    }
+
+    private static string GenerateOtpCode()
+    {
+        const string otpAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        const int otpCodeLength = 12;
+        var chars = new char[otpCodeLength];
+
+        var randomBytes = new byte[otpCodeLength];
+        RandomNumberGenerator.Fill(randomBytes);
+
+        for (var i = 0; i < otpCodeLength; i++)
+            chars[i] = otpAlphabet[randomBytes[i] % otpAlphabet.Length];
+
+        var otpCode = new string(chars);
+        SsoValidation.ValidateOtpCodeValueFormat(otpCode);
+        return otpCode;
+    }
+
     public static async Task<PendingUser> GetPendingUserEntity(JoyModelsDbContext context, Guid userUuid)
     {
         var pendingUserEntity = await context.PendingUsers
@@ -248,51 +294,5 @@ public static class SsoHelperMethods
             Body =
                 $"Your OTP code is: {emailSendUserDetailsRequest.OtpCode} and it lasts until: ${emailSendUserDetailsRequest.OtpExpirationDate}"
         });
-    }
-
-    private static string CreateUserJwtAccessToken(User user, JwtClaimDetails jwtClaimDetails)
-    {
-        var claims = new List<Claim>
-        {
-            new(ClaimTypes.NameIdentifier, user.Uuid.ToString()),
-            new(ClaimTypes.Name, user.NickName),
-            new(ClaimTypes.Role, user.UserRoleUu.RoleName)
-        };
-
-        var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtClaimDetails.JwtSigningKey));
-        var signingCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha512);
-        var signingKeyDescriptor = new JwtSecurityToken(
-            issuer: jwtClaimDetails.JwtIssuer,
-            audience: jwtClaimDetails.JwtAudience,
-            claims: claims,
-            expires: DateTime.Now.AddDays(1),
-            signingCredentials: signingCredentials
-        );
-
-        return new JwtSecurityTokenHandler().WriteToken(signingKeyDescriptor);
-    }
-
-    private static string CreateUserJwtRefreshToken()
-    {
-        var randomBytes = new byte[64];
-        RandomNumberGenerator.Create().GetBytes(randomBytes);
-        return Convert.ToBase64String(randomBytes);
-    }
-
-    private static string GenerateOtpCode()
-    {
-        const string otpAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        const int otpCodeLength = 12;
-        var chars = new char[otpCodeLength];
-
-        var randomBytes = new byte[otpCodeLength];
-        RandomNumberGenerator.Fill(randomBytes);
-
-        for (var i = 0; i < otpCodeLength; i++)
-            chars[i] = otpAlphabet[randomBytes[i] % otpAlphabet.Length];
-
-        var otpCode = new string(chars);
-        SsoValidation.ValidateOtpCodeValueFormat(otpCode);
-        return otpCode;
     }
 }
