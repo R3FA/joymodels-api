@@ -1,6 +1,6 @@
 using JoyModels.Models.DataTransferObjects.RequestTypes.Models;
-using JoyModels.Models.DataTransferObjects.ResponseTypes;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Models;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 
 namespace JoyModels.Services.Services.Models;
 

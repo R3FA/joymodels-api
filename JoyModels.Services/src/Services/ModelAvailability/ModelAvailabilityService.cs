@@ -1,8 +1,8 @@
 using AutoMapper;
 using JoyModels.Models.Database;
 using JoyModels.Models.DataTransferObjects.RequestTypes.ModelAvailability;
-using JoyModels.Models.DataTransferObjects.ResponseTypes;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.ModelAvailability;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Services.Services.ModelAvailability.HelperMethods;
 using JoyModels.Services.Validation;
 using JoyModels.Services.Validation.ModelAvailability;

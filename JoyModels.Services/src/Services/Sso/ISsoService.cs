@@ -1,5 +1,5 @@
 using JoyModels.Models.DataTransferObjects.RequestTypes.Sso;
-using JoyModels.Models.DataTransferObjects.ResponseTypes;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Sso;
 
 namespace JoyModels.Services.Services.Sso;

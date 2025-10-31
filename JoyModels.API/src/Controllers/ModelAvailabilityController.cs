@@ -1,6 +1,6 @@
 using JoyModels.Models.DataTransferObjects.RequestTypes.ModelAvailability;
-using JoyModels.Models.DataTransferObjects.ResponseTypes;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.ModelAvailability;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Services.Services.ModelAvailability;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

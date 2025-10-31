@@ -1,9 +1,9 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace JoyModels.Models.Pagination;
+namespace JoyModels.Models.DataTransferObjects.RequestTypes.Pagination;
 
-public abstract class PaginationBaseRequest
+public abstract class PaginationRequest
 {
     [Required, DefaultValue(1)] public int PageNumber { get; set; }
     [Required, DefaultValue(5)] public int PageSize { get; set; }

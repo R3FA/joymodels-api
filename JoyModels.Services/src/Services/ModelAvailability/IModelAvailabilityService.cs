@@ -1,6 +1,6 @@
 using JoyModels.Models.DataTransferObjects.RequestTypes.ModelAvailability;
-using JoyModels.Models.DataTransferObjects.ResponseTypes;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.ModelAvailability;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 
 namespace JoyModels.Services.Services.ModelAvailability;
 
