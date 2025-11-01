@@ -1,14 +1,18 @@
+using System.Transactions;
 using AutoMapper;
 using JoyModels.Models.Database;
+using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Models;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Models;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Services.Services.Models.HelperMethods;
+using JoyModels.Services.Validation;
 using JoyModels.Services.Validation.Models;
 
 namespace JoyModels.Services.Services.Models;
 
-public class ModelService(JoyModelsDbContext context, IMapper mapper) : IModelService
+public class ModelService(JoyModelsDbContext context, IMapper mapper, UserAuthValidation userAuthValidation)
+    : IModelService
 {
     public async Task<ModelResponse> GetByUuid(Guid modelUuid)
     {
@@ -25,10 +29,26 @@ public class ModelService(JoyModelsDbContext context, IMapper mapper) : IModelSe
         return mapper.Map<PaginationResponse<ModelResponse>>(modelEntities);
     }
 
-    // TODO: Implementirati prvo ModelCategories, ModelFaqSections, ModelReviews, UserModelLikes pa tek onda ovo
-    // TODO: Takodjer namjesti ModelCreateRequest DTO
-    public Task<ModelResponse> Create(ModelCreateRequest request)
+    public async Task<ModelResponse> Create(ModelCreateRequest request)
     {
-        throw new NotImplementedException();
+        request.ValidateModelCreateArguments();
+
+        var modelEntity = mapper.Map<Model>(request);
+        modelEntity.UserUuid = userAuthValidation.GetAuthUserUuid();
+
+        var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            await modelEntity.CreateModelEntity(context);
+            await modelEntity.CreateModelCategories(context, request);
+
+            await transaction.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            throw new TransactionException(ex.InnerException!.Message);
+        }
+
+        return await GetByUuid(modelEntity.Uuid);
     }
 }

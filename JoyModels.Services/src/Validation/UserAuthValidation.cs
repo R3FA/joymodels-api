@@ -5,7 +5,7 @@ namespace JoyModels.Services.Validation;
 
 public sealed class UserAuthValidation(IHttpContextAccessor httpContext)
 {
-    private Guid GetAuthUserUuid()
+    public Guid GetAuthUserUuid()
     {
         var userNameIdentifierClaim =
             httpContext.HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);

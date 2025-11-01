@@ -14,6 +14,10 @@ public static class ModelHelperMethods
         var modelEntity = await context.Models
             .AsNoTracking()
             .Include(x => x.UserUu)
+            .Include(x => x.UserUu.UserRoleUu)
+            .Include(x => x.ModelAvailabilityUu)
+            .Include(x => x.ModelCategories)
+            .ThenInclude(x => x.CategoryUu)
             .FirstOrDefaultAsync(x => x.Uuid == modelUuid);
 
         return modelEntity ?? throw new KeyNotFoundException("3D model with sent values is not found.");
@@ -24,7 +28,11 @@ public static class ModelHelperMethods
     {
         var baseQuery = context.Models
             .AsNoTracking()
-            .Include(x => x.UserUu);
+            .Include(x => x.UserUu)
+            .Include(x => x.UserUu.UserRoleUu)
+            .Include(x => x.ModelAvailabilityUu)
+            .Include(x => x.ModelCategories)
+            .ThenInclude(x => x.CategoryUu);
 
         var filteredQuery = modelSearchRequestDto.ModelName switch
         {
@@ -40,5 +48,29 @@ public static class ModelHelperMethods
             modelSearchRequestDto.OrderBy);
 
         return modelEntities;
+    }
+
+    public static async Task CreateModelEntity(this Model modelEntity, JoyModelsDbContext context)
+    {
+        await context.Models.AddAsync(modelEntity);
+        await context.SaveChangesAsync();
+    }
+
+    public static async Task CreateModelCategories(this Model modelEntity, JoyModelsDbContext context,
+        ModelCreateRequest request)
+    {
+        foreach (var modelCategoryUuid in request.ModelCategoryUuids)
+        {
+            var modelCategoryEntity = new ModelCategory
+            {
+                Uuid = Guid.NewGuid(),
+                ModelUuid = modelEntity.Uuid,
+                CategoryUuid = modelCategoryUuid
+            };
+
+            await context.ModelCategories.AddAsync(modelCategoryEntity);
+        }
+
+        await context.SaveChangesAsync();
     }
 }
