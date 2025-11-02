@@ -1,4 +1,6 @@
+using JoyModels.Models.DataTransferObjects.ImageSettings;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace JoyModels.Services.Validation.Models;
 
@@ -30,5 +32,21 @@ public static class ModelValidation
 
         if (request.ModelCategoryUuids.Length == 0)
             throw new ArgumentException("ModelCategoryUuids must be specified.");
+    }
+
+    public static void ValidateModelPictureExtension(IFormFile modelPicture, ImageSettingsDetails imageSettingsDetails)
+    {
+        var fileExtension = Path.GetExtension(modelPicture.FileName);
+
+        var counter = 0;
+        foreach (var allowedExtension in imageSettingsDetails.AllowedExtensions)
+        {
+            if (allowedExtension != fileExtension)
+                counter++;
+        }
+
+        if (counter >= imageSettingsDetails.AllowedExtensions.Length)
+            throw new ArgumentException(
+                $"File extension {fileExtension} is not supported. It must be .jpg, .jpeg or .png");
     }
 }
