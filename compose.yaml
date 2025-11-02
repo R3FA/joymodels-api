@@ -9,8 +9,6 @@
       - "3306:3306"
     volumes:
       - ./JoyModels.Models/src/Database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-      - ./JoyModels.API/docker-data/joymodels/uploads/pictures/models:/app/joymodels/uploads/pictures/models
-      - ./JoyModels.API/docker-data/joymodels/uploads/pictures/users:/app/joymodels/uploads/pictures/users
   
   rabbitmq:
     image: rabbitmq:management-alpine
