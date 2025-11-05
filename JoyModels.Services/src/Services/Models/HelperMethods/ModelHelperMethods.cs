@@ -77,10 +77,10 @@ public static class ModelHelperMethods
         await context.SaveChangesAsync();
     }
 
-    public static async Task<List<string>> SaveModelPictures(this IFormFile[] modelPictures,
+    public static async Task<List<string>> SaveModelPictures(this List<IFormFile> modelPictures,
         ImageSettingsDetails imageSettingsDetails, Guid modelUuid)
     {
-        var modelPicturePaths = new List<string>(modelPictures.Length);
+        var modelPicturePaths = new List<string>(modelPictures.Count);
 
         try
         {

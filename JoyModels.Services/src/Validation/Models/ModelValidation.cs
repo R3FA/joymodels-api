@@ -33,7 +33,7 @@ public static class ModelValidation
         if (request.Price <= 0)
             throw new ArgumentException("Price must be a positive number.");
 
-        if (request.ModelCategoryUuids.Length == 0)
+        if (request.ModelCategoryUuids.Count == 0)
             throw new ArgumentException("ModelCategoryUuids must be specified.");
     }
 
