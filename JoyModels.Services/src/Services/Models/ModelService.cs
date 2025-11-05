@@ -48,6 +48,7 @@ public class ModelService(
         {
             await modelEntity.CreateModelEntity(context);
             await modelEntity.CreateModelCategories(context, request);
+            await modelEntity.CreateModelPictures(context, modelPicturePaths);
 
             await transaction.CommitAsync();
         }

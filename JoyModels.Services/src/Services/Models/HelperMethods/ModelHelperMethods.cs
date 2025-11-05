@@ -21,6 +21,7 @@ public static class ModelHelperMethods
             .Include(x => x.ModelAvailabilityUu)
             .Include(x => x.ModelCategories)
             .ThenInclude(x => x.CategoryUu)
+            .Include(x => x.ModelPictures)
             .FirstOrDefaultAsync(x => x.Uuid == modelUuid);
 
         return modelEntity ?? throw new KeyNotFoundException("3D model with sent values is not found.");
@@ -35,7 +36,8 @@ public static class ModelHelperMethods
             .Include(x => x.UserUu.UserRoleUu)
             .Include(x => x.ModelAvailabilityUu)
             .Include(x => x.ModelCategories)
-            .ThenInclude(x => x.CategoryUu);
+            .ThenInclude(x => x.CategoryUu)
+            .Include(x => x.ModelPictures);
 
         var filteredQuery = modelSearchRequestDto.ModelName switch
         {
@@ -72,6 +74,25 @@ public static class ModelHelperMethods
             };
 
             await context.ModelCategories.AddAsync(modelCategoryEntity);
+        }
+
+        await context.SaveChangesAsync();
+    }
+
+    public static async Task CreateModelPictures(this Model modelEntity, JoyModelsDbContext context,
+        List<string> modelPicturePaths)
+    {
+        foreach (var modelPicturePath in modelPicturePaths)
+        {
+            var modelPictureEntity = new ModelPicture
+            {
+                Uuid = Guid.NewGuid(),
+                ModelUuid = modelEntity.Uuid,
+                PictureLocation = modelPicturePath,
+                CreatedAt = DateTime.Now
+            };
+
+            await context.ModelPictures.AddAsync(modelPictureEntity);
         }
 
         await context.SaveChangesAsync();

@@ -2,6 +2,7 @@ using AutoMapper;
 using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Models;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.ModelAvailability;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.ModelPicture;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Models;
 
 namespace JoyModels.Models.AutoMapper;
@@ -21,5 +22,6 @@ public class ModelProfile : Profile
         CreateMap<ModelCreateRequest, Model>()
             .AfterMap((_, dest) => dest.Uuid = Guid.NewGuid())
             .AfterMap((_, dest) => dest.CreatedAt = DateTime.Now);
+        CreateMap<ModelPicture, ModelPictureResponse>();
     }
 }
