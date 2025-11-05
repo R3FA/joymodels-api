@@ -71,7 +71,7 @@ public static class DependencyInjectionSetup
         services.AddTransient<IMessageConsumer, MessageConsumer>();
 
         // ImageSettings DI
-        services.AddSingleton(ImageSettingsSetup.RegisterImageSettingsDetails(configuration));
+        services.AddSingleton(ImageSettingsSetup.RegisterModelImageSettingsDetails(configuration));
 
         // Custom Defined Services
         services.AddTransient<ISsoService, SsoService>();

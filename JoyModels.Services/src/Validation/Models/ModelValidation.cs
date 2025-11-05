@@ -1,6 +1,9 @@
 using JoyModels.Models.DataTransferObjects.ImageSettings;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Models;
 using Microsoft.AspNetCore.Http;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Formats.Png;
 
 namespace JoyModels.Services.Validation.Models;
 
@@ -34,19 +37,31 @@ public static class ModelValidation
             throw new ArgumentException("ModelCategoryUuids must be specified.");
     }
 
-    public static void ValidateModelPictureExtension(IFormFile modelPicture, ImageSettingsDetails imageSettingsDetails)
+    public static async Task ValidateModelPicture(IFormFile modelPicture,
+        ImageSettingsDetails imageSettingsDetails)
     {
-        var fileExtension = Path.GetExtension(modelPicture.FileName);
+        if (modelPicture.Length > imageSettingsDetails.AllowedSize)
+            throw new ArgumentException("Image too large. Maximum size limit is 10MB");
 
-        var counter = 0;
-        foreach (var allowedExtension in imageSettingsDetails.AllowedExtensions)
+        await using (var s1 = modelPicture.OpenReadStream())
         {
-            if (allowedExtension != fileExtension)
-                counter++;
+            var format = await Image.DetectFormatAsync(s1);
+            if (format is null || (format != JpegFormat.Instance && format != PngFormat.Instance))
+                throw new ArgumentException("Unsupported image format. Allowed: .jpg, .jpeg, .png");
         }
 
-        if (counter >= imageSettingsDetails.AllowedExtensions.Length)
+        await using var s2 = modelPicture.OpenReadStream();
+        var info = await Image.IdentifyAsync(s2);
+        if (info == null)
+            throw new ArgumentException("Unsupported or corrupted image.");
+
+        var minWidth = imageSettingsDetails.ImageSettingsResolutionDetails.MinimumWidth;
+        var maxWidth = imageSettingsDetails.ImageSettingsResolutionDetails.MaximumWidth;
+        var minHeight = imageSettingsDetails.ImageSettingsResolutionDetails.MinimumHeight;
+        var maxHeight = imageSettingsDetails.ImageSettingsResolutionDetails.MaximumHeight;
+
+        if (info.Width < minWidth || info.Width > maxWidth || info.Height < minHeight || info.Height > maxHeight)
             throw new ArgumentException(
-                $"File extension {fileExtension} is not supported. It must be .jpg, .jpeg or .png");
+                $"Image error: {info.Width}x{info.Height}. Allowed: width between {minWidth}-{maxWidth}px and height between {minHeight}-{maxHeight}px.");
     }
 }

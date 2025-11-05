@@ -1,8 +1,11 @@
 using JoyModels.Models.Database;
 using JoyModels.Models.Database.Entities;
+using JoyModels.Models.DataTransferObjects.ImageSettings;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Models;
 using JoyModels.Models.Pagination;
 using JoyModels.Services.Extensions;
+using JoyModels.Services.Validation.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace JoyModels.Services.Services.Models.HelperMethods;
@@ -72,5 +75,49 @@ public static class ModelHelperMethods
         }
 
         await context.SaveChangesAsync();
+    }
+
+    public static async Task<List<string>> SaveModelPictures(this IFormFile[] modelPictures,
+        ImageSettingsDetails imageSettingsDetails, Guid modelUuid)
+    {
+        var modelPicturePaths = new List<string>(modelPictures.Length);
+
+        try
+        {
+            foreach (var modelPicture in modelPictures)
+            {
+                await ModelValidation.ValidateModelPicture(modelPicture, imageSettingsDetails);
+
+                var modelPictureName = $"model-{Guid.NewGuid()}{Path.GetExtension(modelPicture.FileName)}";
+
+                var basePath =
+                    Directory.CreateDirectory(Path.Combine(imageSettingsDetails.SavePath, "models",
+                        modelUuid.ToString()));
+                var modelPicturePath = Path.Combine(basePath.FullName, modelPictureName);
+
+                await using var stream = new FileStream(modelPicturePath, FileMode.Create);
+                await modelPicture.CopyToAsync(stream);
+
+                modelPicturePaths.Add(modelPicturePath);
+            }
+        }
+        catch (Exception e)
+        {
+            foreach (var modelPicturePath in modelPicturePaths)
+            {
+                try
+                {
+                    if (File.Exists(modelPicturePath)) File.Delete(modelPicturePath);
+                }
+                catch
+                {
+                    // ignore
+                }
+            }
+
+            throw new ApplicationException($"Failed to save model picture: {e.Message}");
+        }
+
+        return modelPicturePaths;
     }
 }

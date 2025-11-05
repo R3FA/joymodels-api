@@ -10,5 +10,4 @@ public interface IModelService
     Task<ModelResponse> GetByUuid(Guid modelUuid);
     Task<PaginationResponse<ModelResponse>> Search(ModelSearchRequest request);
     Task<ModelResponse> Create(ModelCreateRequest request);
-    Task<string> SaveFile(IFormFile file, Guid modelUuid);
 }
