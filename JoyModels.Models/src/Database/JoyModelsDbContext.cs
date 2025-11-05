@@ -556,15 +556,9 @@ public partial class JoyModelsDbContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
             entity.Property(e => e.ModelUuid).HasColumnName("model_uuid");
-            entity.Property(e => e.PictureHeight)
-                .HasColumnType("int(11)")
-                .HasColumnName("picture_height");
             entity.Property(e => e.PictureLocation)
                 .HasMaxLength(254)
                 .HasColumnName("picture_location");
-            entity.Property(e => e.PictureWidth)
-                .HasColumnType("int(11)")
-                .HasColumnName("picture_width");
 
             entity.HasOne(d => d.ModelUu).WithMany(p => p.ModelPictures)
                 .HasForeignKey(d => d.ModelUuid)
