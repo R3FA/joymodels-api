@@ -57,6 +57,8 @@ public class ModelService(
         }
         catch (Exception ex)
         {
+            ModelHelperMethods.DeleteDockerDataFolderOnException();
+
             throw new TransactionException(ex.InnerException!.Message);
         }
 
