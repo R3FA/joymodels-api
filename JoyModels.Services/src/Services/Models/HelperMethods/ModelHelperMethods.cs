@@ -1,6 +1,7 @@
 using JoyModels.Models.Database;
 using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.ImageSettings;
+using JoyModels.Models.DataTransferObjects.ModelSettings;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Models;
 using JoyModels.Models.Pagination;
 using JoyModels.Services.Extensions;
@@ -109,7 +110,7 @@ public static class ModelHelperMethods
             {
                 await ModelValidation.ValidateModelPicture(modelPicture, imageSettingsDetails);
 
-                var modelPictureName = $"model-{Guid.NewGuid()}{Path.GetExtension(modelPicture.FileName)}";
+                var modelPictureName = $"model-picture-{Guid.NewGuid()}{Path.GetExtension(modelPicture.FileName)}";
 
                 var basePath =
                     Directory.CreateDirectory(Path.Combine(imageSettingsDetails.SavePath, "models",
@@ -133,5 +134,34 @@ public static class ModelHelperMethods
         }
 
         return modelPicturePaths;
+    }
+
+    public static async Task<string> SaveModel(this IFormFile model,
+        ModelSettingsDetails modelSettingsDetails, Guid modelUuid)
+    {
+        var modelPath = "";
+
+        try
+        {
+            ModelValidation.ValidateModel(model, modelSettingsDetails);
+
+            var modelName = $"model-{Guid.NewGuid()}{Path.GetExtension(model.FileName)}";
+
+            var basePath =
+                Directory.CreateDirectory(Path.Combine(modelSettingsDetails.SavePath, "models",
+                    modelUuid.ToString()));
+            modelPath = Path.Combine(basePath.FullName, modelName);
+
+            await using var stream = new FileStream(modelPath, FileMode.Create);
+            await model.CopyToAsync(stream);
+        }
+        catch (Exception e)
+        {
+            if (File.Exists(modelPath)) File.Delete(modelPath);
+
+            throw new ApplicationException($"Failed to save model: {e.Message}");
+        }
+
+        return modelPath;
     }
 }

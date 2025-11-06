@@ -3,6 +3,7 @@ using AutoMapper;
 using JoyModels.Models.Database;
 using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.ImageSettings;
+using JoyModels.Models.DataTransferObjects.ModelSettings;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Models;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Models;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
@@ -16,7 +17,8 @@ public class ModelService(
     JoyModelsDbContext context,
     IMapper mapper,
     UserAuthValidation userAuthValidation,
-    ImageSettingsDetails imageSettingsDetails)
+    ImageSettingsDetails imageSettingsDetails,
+    ModelSettingsDetails modelSettingsDetails)
     : IModelService
 {
     public async Task<ModelResponse> GetByUuid(Guid modelUuid)
@@ -42,6 +44,7 @@ public class ModelService(
         modelEntity.UserUuid = userAuthValidation.GetAuthUserUuid();
 
         var modelPicturePaths = await request.Pictures.SaveModelPictures(imageSettingsDetails, modelEntity.Uuid);
+        var modelPath = await request.Model.SaveModel(modelSettingsDetails, modelEntity.Uuid);
 
         var transaction = await context.Database.BeginTransactionAsync();
         try

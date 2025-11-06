@@ -11,4 +11,5 @@ public class ModelCreateRequest
     [Required] public decimal Price { get; set; }
     [Required] public Guid ModelAvailabilityUuid { get; set; }
     [Required, MinLength(1), MaxLength(5)] public List<Guid> ModelCategoryUuids { get; set; } = null!;
+    [Required, MaxLength(1)] public IFormFile Model { get; set; } = null!;
 }

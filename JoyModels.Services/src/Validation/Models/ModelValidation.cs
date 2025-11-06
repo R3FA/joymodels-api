@@ -1,4 +1,5 @@
 using JoyModels.Models.DataTransferObjects.ImageSettings;
+using JoyModels.Models.DataTransferObjects.ModelSettings;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Models;
 using Microsoft.AspNetCore.Http;
 using SixLabors.ImageSharp;
@@ -63,5 +64,20 @@ public static class ModelValidation
         if (info.Width < minWidth || info.Width > maxWidth || info.Height < minHeight || info.Height > maxHeight)
             throw new ArgumentException(
                 $"Image error: {info.Width}x{info.Height}. Allowed: width between {minWidth}-{maxWidth}px and height between {minHeight}-{maxHeight}px.");
+    }
+
+    public static void ValidateModel(IFormFile model,
+        ModelSettingsDetails modelSettingsDetails)
+    {
+        if (model.Length > modelSettingsDetails.AllowedSize)
+            throw new ArgumentException("Model too large. Maximum size limit is 150MB");
+
+        var format = Path.GetExtension(model.FileName).ToLowerInvariant();
+        if (string.IsNullOrWhiteSpace(format))
+            throw new ArgumentException("Model has no format!");
+
+        if (!modelSettingsDetails.AllowedFormats.Any(x => string.Equals(x, format)))
+            throw new ArgumentException(
+                "Unsupported model format. Allowed: .glb,.gltf,.fbx,.obj,.stl,.blend,.max,.ma,.mb");
     }
 }
