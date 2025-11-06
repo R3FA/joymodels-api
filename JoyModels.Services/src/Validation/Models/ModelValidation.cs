@@ -70,7 +70,7 @@ public static class ModelValidation
         ModelSettingsDetails modelSettingsDetails)
     {
         if (model.Length > modelSettingsDetails.AllowedSize)
-            throw new ArgumentException("Model too large. Maximum size limit is 150MB");
+            throw new ArgumentException("Model too large. Maximum size limit is 30MB");
 
         var format = Path.GetExtension(model.FileName).ToLowerInvariant();
         if (string.IsNullOrWhiteSpace(format))
