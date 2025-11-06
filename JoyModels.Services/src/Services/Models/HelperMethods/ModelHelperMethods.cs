@@ -126,14 +126,7 @@ public static class ModelHelperMethods
         {
             foreach (var modelPicturePath in modelPicturePaths)
             {
-                try
-                {
-                    if (File.Exists(modelPicturePath)) File.Delete(modelPicturePath);
-                }
-                catch
-                {
-                    // ignore
-                }
+                if (File.Exists(modelPicturePath)) File.Delete(modelPicturePath);
             }
 
             throw new ApplicationException($"Failed to save model picture: {e.Message}");
