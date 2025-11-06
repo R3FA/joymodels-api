@@ -430,6 +430,10 @@ public partial class JoyModelsDbContext : DbContext
             entity.Property(e => e.Price)
                 .HasPrecision(10, 2)
                 .HasColumnName("price");
+            entity.Property(e => e.LocationPath)
+                .HasMaxLength(255)
+                .HasColumnName("location_path");
+            entity.HasIndex(e => e.LocationPath, "location_path").IsUnique();
             entity.Property(e => e.UserUuid).HasColumnName("user_uuid");
 
             entity.HasOne(d => d.ModelAvailabilityUu).WithMany(p => p.Models)
