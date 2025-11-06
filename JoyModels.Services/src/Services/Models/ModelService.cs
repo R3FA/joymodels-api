@@ -44,7 +44,8 @@ public class ModelService(
         modelEntity.UserUuid = userAuthValidation.GetAuthUserUuid();
 
         var modelPicturePaths = await request.Pictures.SaveModelPictures(imageSettingsDetails, modelEntity.Uuid);
-        modelEntity.LocationPath = await request.Model.SaveModel(modelSettingsDetails, modelEntity.Uuid);
+        modelEntity.LocationPath =
+            await request.Model.SaveModel(modelSettingsDetails, modelEntity.Uuid, modelPicturePaths);
 
         var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -57,7 +58,8 @@ public class ModelService(
         }
         catch (Exception ex)
         {
-            ModelHelperMethods.DeleteDockerDataFolderOnException();
+            ModelHelperMethods.DeleteModelPictureUuidFolderOnException(modelPicturePaths);
+            ModelHelperMethods.DeleteModelUuidFolderOnException(modelEntity.LocationPath);
 
             throw new TransactionException(ex.InnerException!.Message);
         }

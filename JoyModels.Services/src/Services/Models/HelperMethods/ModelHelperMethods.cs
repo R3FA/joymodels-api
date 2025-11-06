@@ -125,8 +125,6 @@ public static class ModelHelperMethods
         }
         catch (Exception e)
         {
-            DeleteDockerDataFolderOnException();
-
             throw new ApplicationException($"Failed to save model picture: {e.Message}");
         }
 
@@ -134,7 +132,7 @@ public static class ModelHelperMethods
     }
 
     public static async Task<string> SaveModel(this IFormFile model,
-        ModelSettingsDetails modelSettingsDetails, Guid modelUuid)
+        ModelSettingsDetails modelSettingsDetails, Guid modelUuid, List<string> modelPicturePaths)
     {
         string modelPath;
 
@@ -154,7 +152,7 @@ public static class ModelHelperMethods
         }
         catch (Exception e)
         {
-            DeleteDockerDataFolderOnException();
+            DeleteModelPictureUuidFolderOnException(modelPicturePaths);
 
             throw new ApplicationException($"Failed to save model: {e.Message}");
         }
@@ -162,11 +160,15 @@ public static class ModelHelperMethods
         return modelPath;
     }
 
-    public static void DeleteDockerDataFolderOnException()
+    public static void DeleteModelPictureUuidFolderOnException(List<string> modelPicturePaths)
     {
-        var dockerDataPathLocation =
-            Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "docker-data"));
+        var modelPictureFolder = Path.GetFullPath(Path.Combine(modelPicturePaths[0], ".."));
+        if (Directory.Exists(modelPictureFolder)) Directory.Delete(modelPictureFolder, true);
+    }
 
-        if (Directory.Exists(dockerDataPathLocation)) Directory.Delete(dockerDataPathLocation, true);
+    public static void DeleteModelUuidFolderOnException(string modelPath)
+    {
+        var modelFolder = Path.GetFullPath(Path.Combine(modelPath, ".."));
+        if (Directory.Exists(modelFolder)) Directory.Delete(modelFolder, true);
     }
 }
