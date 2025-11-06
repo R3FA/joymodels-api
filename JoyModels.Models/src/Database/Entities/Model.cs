@@ -13,6 +13,7 @@ public partial class Model
     public string Description { get; set; } = null!;
 
     public decimal Price { get; set; }
+    public string LocationPath { get; set; } = null!;
 
     public Guid ModelAvailabilityUuid { get; set; }
 

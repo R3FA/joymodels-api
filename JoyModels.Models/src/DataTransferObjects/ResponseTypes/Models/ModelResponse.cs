@@ -1,23 +1,26 @@
-using System.ComponentModel.DataAnnotations;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.Categories;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.ModelAvailability;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.ModelPicture;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Users;
 
 namespace JoyModels.Models.DataTransferObjects.ResponseTypes.Models;
 
 public class ModelResponse
 {
-    [Required] public Guid Uuid { get; set; }
+    public Guid Uuid { get; set; }
 
-    [Required] public string Name { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
 
-    [Required] public Guid UserUuid { get; set; }
+    public Guid UserUuid { get; set; }
 
-    [Required] public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 
-    [Required] public string Description { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
 
-    [Required] public decimal Price { get; set; }
-
-    [Required] public Guid ModelAvailabilityUuid { get; set; }
-
-    [Required] public virtual UsersResponse User { get; set; } = null!;
+    public decimal Price { get; set; }
+    public string LocationPath { get; set; } = string.Empty;
+    public virtual UsersResponse User { get; set; } = null!;
+    public virtual ModelAvailabilityResponse ModelAvailability { get; set; } = null!;
+    public virtual List<CategoryResponse> ModelCategories { get; set; } = null!;
+    public virtual List<ModelPictureResponse> ModelPictures { get; set; } = null!;
 }

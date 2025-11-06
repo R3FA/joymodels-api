@@ -8,7 +8,7 @@ public static class CategoryValidation
     {
         if (!RegularExpressionValidation.IsStringValid(input))
             throw new ArgumentException(
-                "Invalid value: must be 1–100 characters long and contain only letters (any language), digits, and the following characters: ':', '.', ',', '-'.");
+                "Invalid value: Must contain only letters (any language), digits, and the following characters: ':', '.', ',', '-'.");
     }
 
     private static void ValidateCategoryName(string categoryName)

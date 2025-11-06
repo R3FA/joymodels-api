@@ -1,22 +1,15 @@
+using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
+
 namespace JoyModels.Models.DataTransferObjects.RequestTypes.Models;
 
 public class ModelCreateRequest
 {
-    // TODO: guid ces sam generisat
-    // public Guid Uuid { get; set; }
-
-    public string Name { get; set; } = string.Empty;
-
-    // TODO: Iscupaj userUuid iz tokena
-    // public Guid UserUuid { get; set; }
-
-    // TODO:I ovo sam
-    // public DateTime CreatedAt { get; set; }
-
-    public string Description { get; set; } = string.Empty;
-
-    public decimal Price { get; set; }
-
-    // TODO: I ovo
-    // public Guid ModelAvailabilityUuid { get; set; }
+    [Required] public string Name { get; set; } = string.Empty;
+    [Required, MinLength(1), MaxLength(8)] public List<IFormFile> Pictures { get; set; } = null!;
+    [MaxLength(3000)] [Required] public string Description { get; set; } = string.Empty;
+    [Required] public decimal Price { get; set; }
+    [Required] public Guid ModelAvailabilityUuid { get; set; }
+    [Required, MinLength(1), MaxLength(5)] public List<Guid> ModelCategoryUuids { get; set; } = null!;
+    [Required] public IFormFile Model { get; set; } = null!;
 }

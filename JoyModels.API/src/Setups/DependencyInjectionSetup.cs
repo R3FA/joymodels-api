@@ -70,6 +70,12 @@ public static class DependencyInjectionSetup
         services.AddTransient<IMessageProducer, MessageProducer>();
         services.AddTransient<IMessageConsumer, MessageConsumer>();
 
+        // ImageSettings DI
+        services.AddSingleton(ImageSettingsSetup.RegisterModelImageSettingsDetails(configuration));
+
+        // ModelSettings DI
+        services.AddSingleton(ModelSettingsSetup.RegisterModelSettingsDetails(configuration));
+
         // Custom Defined Services
         services.AddTransient<ISsoService, SsoService>();
         services.AddTransient<IUsersService, UsersService>();

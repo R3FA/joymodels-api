@@ -4,6 +4,7 @@ using JoyModels.Models.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JoyModels.Models.src.Database.Migrations
 {
     [DbContext(typeof(JoyModelsDbContext))]
-    partial class JoyModelsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251105190757_RemoveModelPictureWidthAndHeightCols")]
+    partial class RemoveModelPictureWidthAndHeightCols
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -434,12 +437,6 @@ namespace JoyModels.Models.src.Database.Migrations
                         .HasColumnType("text")
                         .HasColumnName("description");
 
-                    b.Property<string>("LocationPath")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("location_path");
-
                     b.Property<Guid>("ModelAvailabilityUuid")
                         .HasColumnType("char(36)")
                         .HasColumnName("model_availability_uuid");
@@ -461,9 +458,6 @@ namespace JoyModels.Models.src.Database.Migrations
 
                     b.HasKey("Uuid")
                         .HasName("PRIMARY");
-
-                    b.HasIndex(new[] { "LocationPath" }, "location_path")
-                        .IsUnique();
 
                     b.HasIndex(new[] { "ModelAvailabilityUuid" }, "model_availability_uuid");
 
