@@ -18,6 +18,7 @@ public class ModelResponse
     public string Description { get; set; } = string.Empty;
 
     public decimal Price { get; set; }
+    public string LocationPath { get; set; } = string.Empty;
     public virtual UsersResponse User { get; set; } = null!;
     public virtual ModelAvailabilityResponse ModelAvailability { get; set; } = null!;
     public virtual List<CategoryResponse> ModelCategories { get; set; } = null!;

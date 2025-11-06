@@ -44,7 +44,7 @@ public class ModelService(
         modelEntity.UserUuid = userAuthValidation.GetAuthUserUuid();
 
         var modelPicturePaths = await request.Pictures.SaveModelPictures(imageSettingsDetails, modelEntity.Uuid);
-        var modelPath = await request.Model.SaveModel(modelSettingsDetails, modelEntity.Uuid);
+        modelEntity.LocationPath = await request.Model.SaveModel(modelSettingsDetails, modelEntity.Uuid);
 
         var transaction = await context.Database.BeginTransactionAsync();
         try
