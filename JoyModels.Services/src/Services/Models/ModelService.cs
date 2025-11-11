@@ -70,6 +70,7 @@ public class ModelService(
     public async Task Delete(Guid modelUuid)
     {
         var modelEntity = await GetByUuid(modelUuid);
+        userAuthValidation.ValidateUserAuthRequest(modelEntity.UserUuid);
 
         await ModelHelperMethods.DeleteModel(context, modelUuid);
 
