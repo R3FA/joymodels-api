@@ -31,4 +31,12 @@ public class ModelController(IModelService service) : ControllerBase
     {
         return await service.Create(request);
     }
+
+    [Authorize(Policy = "VerifiedUsers")]
+    [HttpDelete("delete/{modelUuid:guid}")]
+    public async Task<ActionResult> Delete([FromRoute] Guid modelUuid)
+    {
+        await service.Delete(modelUuid);
+        return NoContent();
+    }
 }

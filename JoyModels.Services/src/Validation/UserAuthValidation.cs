@@ -5,20 +5,42 @@ namespace JoyModels.Services.Validation;
 
 public sealed class UserAuthValidation(IHttpContextAccessor httpContext)
 {
-    public Guid GetAuthUserUuid()
+    private IEnumerable<Claim> GetUserClaim()
     {
-        var userNameIdentifierClaim =
-            httpContext.HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+        var userClaim =
+            httpContext.HttpContext.User.Claims;
+        return userClaim;
+    }
 
-        if (userNameIdentifierClaim != null && Guid.TryParse(userNameIdentifierClaim.Value, out var userUuid))
-            return userUuid;
+    public Guid GetUserClaimUuid()
+    {
+        var userClaim = GetUserClaim();
 
-        throw new ApplicationException("Error getting user uuid from access token!");
+        var userClaimUuid = userClaim
+            .Where(x => x.Type == ClaimTypes.NameIdentifier)
+            .Select(x => x.Value)
+            .FirstOrDefault();
+
+        return userClaimUuid is null
+            ? throw new ApplicationException("Cannot get user claim uuid from access token!")
+            : Guid.Parse(userClaimUuid);
+    }
+
+    public string GetUserClaimRole()
+    {
+        var userClaim = GetUserClaim();
+
+        var userClaimRole = userClaim
+            .Where(x => x.Type == ClaimTypes.Role)
+            .Select(x => x.Value)
+            .FirstOrDefault();
+
+        return userClaimRole ?? throw new ApplicationException("Cannot get user claim role from access token!");
     }
 
     public void ValidateUserAuthRequest(Guid routeUserUuid)
     {
-        if (GetAuthUserUuid() != routeUserUuid)
+        if (GetUserClaimUuid() != routeUserUuid)
             throw new ApplicationException("You are not authorized for this request.");
     }
 
