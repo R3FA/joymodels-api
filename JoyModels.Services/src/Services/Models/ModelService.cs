@@ -10,6 +10,7 @@ using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Services.Services.Models.HelperMethods;
 using JoyModels.Services.Validation;
 using JoyModels.Services.Validation.Models;
+using UserRoleEnum = JoyModels.Models.Enums.UserRole;
 
 namespace JoyModels.Services.Services.Models;
 
@@ -41,7 +42,7 @@ public class ModelService(
         request.ValidateModelCreateArguments();
 
         var modelEntity = mapper.Map<Model>(request);
-        modelEntity.UserUuid = userAuthValidation.GetAuthUserUuid();
+        modelEntity.UserUuid = userAuthValidation.GetUserClaimUuid();
 
         var modelPicturePaths = await request.Pictures.SaveModelPictures(imageSettingsDetails, modelEntity.Uuid);
         modelEntity.LocationPath =
@@ -70,7 +71,10 @@ public class ModelService(
     public async Task Delete(Guid modelUuid)
     {
         var modelEntity = await GetByUuid(modelUuid);
-        userAuthValidation.ValidateUserAuthRequest(modelEntity.UserUuid);
+
+        if (userAuthValidation.GetUserClaimRole() != nameof(UserRoleEnum.Admin)
+            && userAuthValidation.GetUserClaimRole() != nameof(UserRoleEnum.Root))
+            userAuthValidation.ValidateUserAuthRequest(modelEntity.UserUuid);
 
         await ModelHelperMethods.DeleteModel(context, modelUuid);
 
