@@ -152,7 +152,7 @@ public static class ModelHelperMethods
         }
         catch (Exception e)
         {
-            DeleteModelPictureUuidFolderOnException(modelPicturePaths);
+            DeleteModelPictureUuidFolderOnException(modelPicturePaths[0]);
 
             throw new ApplicationException($"Failed to save model: {e.Message}");
         }
@@ -160,9 +160,24 @@ public static class ModelHelperMethods
         return modelPath;
     }
 
-    public static void DeleteModelPictureUuidFolderOnException(List<string> modelPicturePaths)
+    public static async Task DeleteModel(JoyModelsDbContext context, Guid modelUuid)
     {
-        var modelPictureFolder = Path.GetFullPath(Path.Combine(modelPicturePaths[0], ".."));
+        try
+        {
+            await context.Models
+                .Where(x => x.Uuid == modelUuid)
+                .ExecuteDeleteAsync();
+            await context.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            throw new Exception(e.Message);
+        }
+    }
+
+    public static void DeleteModelPictureUuidFolderOnException(string modelPicturePath)
+    {
+        var modelPictureFolder = Path.GetFullPath(Path.Combine(modelPicturePath, ".."));
         if (Directory.Exists(modelPictureFolder)) Directory.Delete(modelPictureFolder, true);
     }
 

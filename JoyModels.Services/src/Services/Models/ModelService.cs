@@ -58,12 +58,22 @@ public class ModelService(
         }
         catch (Exception ex)
         {
-            ModelHelperMethods.DeleteModelPictureUuidFolderOnException(modelPicturePaths);
+            ModelHelperMethods.DeleteModelPictureUuidFolderOnException(modelPicturePaths[0]);
             ModelHelperMethods.DeleteModelUuidFolderOnException(modelEntity.LocationPath);
 
             throw new TransactionException(ex.InnerException!.Message);
         }
 
         return await GetByUuid(modelEntity.Uuid);
+    }
+
+    public async Task Delete(Guid modelUuid)
+    {
+        var modelEntity = await GetByUuid(modelUuid);
+
+        await ModelHelperMethods.DeleteModel(context, modelUuid);
+
+        ModelHelperMethods.DeleteModelPictureUuidFolderOnException(modelEntity.ModelPictures[0].PictureLocation);
+        ModelHelperMethods.DeleteModelUuidFolderOnException(modelEntity.LocationPath);
     }
 }
