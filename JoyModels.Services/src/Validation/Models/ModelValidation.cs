@@ -1,7 +1,10 @@
+using System.Data;
+using JoyModels.Models.Database;
 using JoyModels.Models.DataTransferObjects.ImageSettings;
 using JoyModels.Models.DataTransferObjects.ModelSettings;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
@@ -79,5 +82,39 @@ public static class ModelValidation
         if (!modelSettingsDetails.AllowedFormats.Any(x => string.Equals(x, format)))
             throw new ArgumentException(
                 "Unsupported model format. Allowed: .glb,.gltf,.fbx,.obj,.stl,.blend,.max,.ma,.mb");
+    }
+
+    public static void ValidateModelPatchArguments(this ModelPatchRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Name)
+            && string.IsNullOrWhiteSpace(request.Description)
+            && request.Price == null
+            && request.ModelAvailabilityUuid == null
+            && (request.ModelCategoriesToDelete == null || request.ModelCategoriesToDelete.Count == 0)
+            && (request.ModelCategoriesToInsert == null || request.ModelCategoriesToInsert.Count == 0)
+            && (request.ModelPictureLocationsToDelete == null || request.ModelPictureLocationsToDelete.Count == 0)
+            && (request.ModelPictureToInsert == null || request.ModelPictureToInsert.Count == 0))
+            throw new ArgumentException("You cannot send an empty request!");
+
+        if (!string.IsNullOrWhiteSpace(request.Name))
+            ValidateModelStringArguments(request.Name);
+
+        if (!string.IsNullOrWhiteSpace(request.Description))
+            ValidateModelStringArguments(request.Description);
+
+        if (request.Price is not null && request.Price <= 0)
+            throw new ArgumentException("Price must be a positive number.");
+    }
+
+    public static async Task ValidateModelPatchArgumentsDuplicatedFields(this ModelPatchRequest request,
+        JoyModelsDbContext context)
+    {
+        if (!string.IsNullOrWhiteSpace(request.Name))
+        {
+            var isModelNameDuplicated = await context.Models.AnyAsync(x => string.Equals(x.Name, request.Name));
+            if (isModelNameDuplicated)
+                throw new DuplicateNameException(
+                    $"Model name `{request.Name}` is already registered in our database.");
+        }
     }
 }

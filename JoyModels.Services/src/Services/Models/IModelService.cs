@@ -9,5 +9,6 @@ public interface IModelService
     Task<ModelResponse> GetByUuid(Guid modelUuid);
     Task<PaginationResponse<ModelResponse>> Search(ModelSearchRequest request);
     Task<ModelResponse> Create(ModelCreateRequest request);
+    Task<ModelResponse> Patch(Guid modelUuid, ModelPatchRequest request);
     Task Delete(Guid modelUuid);
 }
