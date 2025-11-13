@@ -33,6 +33,14 @@ public class ModelController(IModelService service) : ControllerBase
     }
 
     [Authorize(Policy = "VerifiedUsers")]
+    [HttpPatch("edit-model/{modelUuid:guid}")]
+    public async Task<ActionResult<ModelResponse>> Patch([FromRoute] Guid modelUuid,
+        [FromForm] ModelPatchRequest request)
+    {
+        return await service.Patch(modelUuid, request);
+    }
+
+    [Authorize(Policy = "VerifiedUsers")]
     [HttpDelete("delete/{modelUuid:guid}")]
     public async Task<ActionResult> Delete([FromRoute] Guid modelUuid)
     {

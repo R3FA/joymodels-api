@@ -7,9 +7,7 @@ public sealed class UserAuthValidation(IHttpContextAccessor httpContext)
 {
     private IEnumerable<Claim> GetUserClaim()
     {
-        var userClaim =
-            httpContext.HttpContext.User.Claims;
-        return userClaim;
+        return httpContext.HttpContext.User.Claims;
     }
 
     public Guid GetUserClaimUuid()

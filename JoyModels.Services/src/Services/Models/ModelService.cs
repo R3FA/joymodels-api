@@ -53,7 +53,7 @@ public class ModelService(
         {
             await modelEntity.CreateModelEntity(context);
             await modelEntity.CreateModelCategories(context, request);
-            await modelEntity.CreateModelPictures(context, modelPicturePaths);
+            await ModelHelperMethods.CreateModelPictures(modelEntity, context, modelPicturePaths);
 
             await transaction.CommitAsync();
         }
@@ -66,6 +66,29 @@ public class ModelService(
         }
 
         return await GetByUuid(modelEntity.Uuid);
+    }
+
+    public async Task<ModelResponse> Patch(Guid modelUuid, ModelPatchRequest request)
+    {
+        userAuthValidation.ValidateRequestUuids(modelUuid, request.Uuid);
+        var modelResponse = await GetByUuid(modelUuid);
+        userAuthValidation.ValidateUserAuthRequest(modelResponse.UserUuid);
+        request.ValidateModelPatchArguments();
+        await request.ValidateModelPatchArgumentsDuplicatedFields(context);
+
+        var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            await request.PatchModelEntity(modelResponse, imageSettingsDetails, context);
+
+            await transaction.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            throw new TransactionException(ex.Message);
+        }
+
+        return await GetByUuid(modelResponse.Uuid);
     }
 
     public async Task Delete(Guid modelUuid)

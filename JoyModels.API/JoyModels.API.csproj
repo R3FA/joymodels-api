@@ -31,4 +31,8 @@
         <ProjectReference Include="..\JoyModels.Utilities\JoyModels.Utilities.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="docker-data\joymodels\uploads\pictures\models\36e41ba8-e83d-45a8-bbec-1b27a7646140\" />
+    </ItemGroup>
+
 </Project>

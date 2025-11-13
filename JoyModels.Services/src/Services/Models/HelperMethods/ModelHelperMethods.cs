@@ -3,6 +3,7 @@ using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.ImageSettings;
 using JoyModels.Models.DataTransferObjects.ModelSettings;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Models;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.Models;
 using JoyModels.Models.Pagination;
 using JoyModels.Services.Extensions;
 using JoyModels.Services.Validation.Models;
@@ -80,7 +81,7 @@ public static class ModelHelperMethods
         await context.SaveChangesAsync();
     }
 
-    public static async Task CreateModelPictures(this Model modelEntity, JoyModelsDbContext context,
+    public static async Task CreateModelPictures(Model modelEntity, JoyModelsDbContext context,
         List<string> modelPicturePaths)
     {
         foreach (var modelPicturePath in modelPicturePaths)
@@ -158,6 +159,85 @@ public static class ModelHelperMethods
         }
 
         return modelPath;
+    }
+
+    public static async Task PatchModelEntity(
+        this ModelPatchRequest request,
+        ModelResponse modelResponse,
+        ImageSettingsDetails imageSettingsDetails,
+        JoyModelsDbContext context)
+    {
+        if (!string.IsNullOrWhiteSpace(request.Name))
+            await context.Models.ExecuteUpdateAsync(x => x.SetProperty(z => z.Name, request.Name));
+
+        if (!string.IsNullOrWhiteSpace(request.Description))
+            await context.Models.ExecuteUpdateAsync(x => x.SetProperty(z => z.Description, request.Description));
+
+        if (request.Price is not null)
+            await context.Models.ExecuteUpdateAsync(x => x.SetProperty(z => z.Price, request.Price));
+
+        if (request.ModelAvailabilityUuid is not null)
+            await context.Models.ExecuteUpdateAsync(x =>
+                x.SetProperty(z => z.ModelAvailabilityUuid, request.ModelAvailabilityUuid));
+
+        if (request.ModelCategoriesToDelete is not null && request.ModelCategoriesToDelete.Count != 0)
+        {
+            foreach (var modelCategoryUuid in request.ModelCategoriesToDelete.Distinct())
+            {
+                var deletedRows = await context.ModelCategories
+                    .Where(x => x.ModelUuid == modelResponse.Uuid && x.CategoryUuid == modelCategoryUuid)
+                    .ExecuteDeleteAsync();
+
+                if (deletedRows == 0)
+                    throw new ArgumentException($"Cannot delete non existent model category: {modelCategoryUuid}");
+            }
+        }
+
+        if (request.ModelCategoriesToInsert is not null && request.ModelCategoriesToInsert.Count != 0)
+        {
+            foreach (var modelCategoryUuid in request.ModelCategoriesToInsert.Distinct())
+            {
+                var isModelCategoryDuplicated = modelResponse.ModelCategories.Any(x => x.Uuid == modelCategoryUuid);
+                if (isModelCategoryDuplicated)
+                    throw new ArgumentException($"Cannot insert duplicated model category: {modelCategoryUuid}");
+
+                var modelCategoryEntity = new ModelCategory
+                {
+                    Uuid = Guid.NewGuid(),
+                    ModelUuid = modelResponse.Uuid,
+                    CategoryUuid = modelCategoryUuid
+                };
+
+                await context.ModelCategories.AddAsync(modelCategoryEntity);
+            }
+        }
+
+        if (request.ModelPictureToInsert is not null && request.ModelPictureToInsert.Count != 0)
+        {
+            var maxNumberOfPhotos = modelResponse.ModelPictures.Count + request.ModelPictureToInsert.Count;
+            if (maxNumberOfPhotos >= 8)
+                throw new ArgumentException("You can upload maximum of 8 pictures per model!");
+
+            var modelPicturePaths =
+                await request.ModelPictureToInsert.SaveModelPictures(imageSettingsDetails, modelResponse.Uuid);
+
+            await CreateModelPictures(new Model { Uuid = modelResponse.Uuid }, context, modelPicturePaths);
+        }
+
+        if (request.ModelPictureLocationsToDelete is not null && request.ModelPictureLocationsToDelete.Count != 0)
+        {
+            for (var i = 0; i < request.ModelPictureLocationsToDelete.Distinct().Count(); i++)
+            {
+                await context.ModelPictures
+                    .Where(x => string.Equals(x.PictureLocation, modelResponse.ModelPictures[i].PictureLocation))
+                    .ExecuteDeleteAsync();
+
+                if (File.Exists(request.ModelPictureLocationsToDelete[i]))
+                    File.Delete(request.ModelPictureLocationsToDelete[i]);
+            }
+        }
+
+        await context.SaveChangesAsync();
     }
 
     public static async Task DeleteModel(JoyModelsDbContext context, Guid modelUuid)
