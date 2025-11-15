@@ -22,9 +22,11 @@ public class ModelService(
     ModelSettingsDetails modelSettingsDetails)
     : IModelService
 {
-    public async Task<ModelResponse> GetByUuid(Guid modelUuid)
+    public async Task<ModelResponse> GetByUuid(Guid modelUuid, bool arePrivateUserModelsSearched = false)
     {
-        var modelEntity = await ModelHelperMethods.GetModelEntity(context, modelUuid);
+        var modelEntity =
+            await ModelHelperMethods.GetModelEntity(context, modelUuid, arePrivateUserModelsSearched,
+                userAuthValidation);
         return mapper.Map<ModelResponse>(modelEntity);
     }
 
@@ -32,7 +34,7 @@ public class ModelService(
     {
         request.ValidateModelSearchArguments();
 
-        var modelEntities = await ModelHelperMethods.SearchModelEntities(context, request);
+        var modelEntities = await ModelHelperMethods.SearchModelEntities(context, request, userAuthValidation);
 
         return mapper.Map<PaginationResponse<ModelResponse>>(modelEntities);
     }

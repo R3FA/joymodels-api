@@ -6,7 +6,7 @@ namespace JoyModels.Services.Services.Models;
 
 public interface IModelService
 {
-    Task<ModelResponse> GetByUuid(Guid modelUuid);
+    Task<ModelResponse> GetByUuid(Guid modelUuid, bool arePrivateUserModelsSearched);
     Task<PaginationResponse<ModelResponse>> Search(ModelSearchRequest request);
     Task<ModelResponse> Create(ModelCreateRequest request);
     Task<ModelResponse> Patch(Guid modelUuid, ModelPatchRequest request);

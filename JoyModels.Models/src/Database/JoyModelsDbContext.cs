@@ -467,13 +467,8 @@ public partial class JoyModelsDbContext : DbContext
                 },
                 new ModelAvailability
                 {
-                    Uuid = new Guid("cc462d60-2532-49e4-8fb4-4bf44e3d1e04"),
-                    AvailabilityName = "Community"
-                },
-                new ModelAvailability
-                {
                     Uuid = new Guid("e1a7390c-ca8c-4914-83f2-15b0b3b96391"),
-                    AvailabilityName = "Store"
+                    AvailabilityName = "Public"
                 }
             );
         });
