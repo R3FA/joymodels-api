@@ -11,35 +11,39 @@ using JoyModels.Services.Validation.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using ModelAvailabilityEnum = JoyModels.Models.Enums.ModelAvailability;
+using UserRoleEnum = JoyModels.Models.Enums.UserRole;
 
 namespace JoyModels.Services.Services.Models.HelperMethods;
 
 public static class ModelHelperMethods
 {
-    public static async Task<Model> GetModelEntity(JoyModelsDbContext context, Guid modelUuid,
-        bool arePrivateUserModelsSearched, UserAuthValidation userAuthValidation)
+    public static async Task<Model> GetModelEntityWithAllAvailabilities(JoyModelsDbContext context, Guid modelUuid)
     {
-        var baseQuery = context.Models
+        var modelEntity = await context.Models
             .AsNoTracking()
             .Include(x => x.UserUu)
             .Include(x => x.UserUu.UserRoleUu)
             .Include(x => x.ModelAvailabilityUu)
             .Include(x => x.ModelCategories)
             .ThenInclude(x => x.CategoryUu)
-            .Include(x => x.ModelPictures);
+            .Include(x => x.ModelPictures)
+            .FirstOrDefaultAsync(x => x.Uuid == modelUuid);
 
-        var modelEntity = arePrivateUserModelsSearched switch
-        {
-            true => await baseQuery
-                .Where(x =>
-                    string.Equals(x.ModelAvailabilityUu.AvailabilityName, nameof(ModelAvailabilityEnum.Hidden))
-                    && x.UserUuid == userAuthValidation.GetUserClaimUuid())
-                .FirstOrDefaultAsync(x => x.Uuid == modelUuid),
-            _ => await baseQuery
-                .Where(x =>
-                    string.Equals(x.ModelAvailabilityUu.AvailabilityName, nameof(ModelAvailabilityEnum.Public)))
-                .FirstOrDefaultAsync(x => x.Uuid == modelUuid)
-        };
+        return modelEntity ?? throw new KeyNotFoundException("3D model with sent values is not found.");
+    }
+
+    public static async Task<Model> GetModelEntity(JoyModelsDbContext context, Guid modelUuid)
+    {
+        var modelEntity = await context.Models
+            .AsNoTracking()
+            .Include(x => x.UserUu)
+            .Include(x => x.UserUu.UserRoleUu)
+            .Include(x => x.ModelAvailabilityUu)
+            .Where(x => string.Equals(x.ModelAvailabilityUu.AvailabilityName, nameof(ModelAvailabilityEnum.Public)))
+            .Include(x => x.ModelCategories)
+            .ThenInclude(x => x.CategoryUu)
+            .Include(x => x.ModelPictures)
+            .FirstOrDefaultAsync(x => x.Uuid == modelUuid);
 
         return modelEntity ?? throw new KeyNotFoundException("3D model with sent values is not found.");
     }
@@ -57,19 +61,25 @@ public static class ModelHelperMethods
             .Include(x => x.ModelPictures)
             .AsQueryable();
 
+        var isAdmin = string.Equals(userAuthValidation.GetUserClaimRole(), nameof(UserRoleEnum.Admin))
+                      || string.Equals(userAuthValidation.GetUserClaimRole(), nameof(UserRoleEnum.Root));
+
         if (!string.IsNullOrWhiteSpace(modelSearchRequestDto.ModelName))
             baseQuery = baseQuery.Where(x => x.Name.Contains(modelSearchRequestDto.ModelName));
 
-        baseQuery = modelSearchRequestDto.ArePrivateUserModelsSearched switch
+        if (!isAdmin)
         {
-            true => baseQuery
-                .Where(x =>
-                    string.Equals(x.ModelAvailabilityUu.AvailabilityName, nameof(ModelAvailabilityEnum.Hidden))
-                    && x.UserUuid == userAuthValidation.GetUserClaimUuid()),
-            _ => baseQuery
-                .Where(x =>
-                    string.Equals(x.ModelAvailabilityUu.AvailabilityName, nameof(ModelAvailabilityEnum.Public)))
-        };
+            baseQuery = modelSearchRequestDto.ArePrivateUserModelsSearched switch
+            {
+                true => baseQuery
+                    .Where(x =>
+                        string.Equals(x.ModelAvailabilityUu.AvailabilityName, nameof(ModelAvailabilityEnum.Hidden))
+                        && x.UserUuid == userAuthValidation.GetUserClaimUuid()),
+                false => baseQuery
+                    .Where(x =>
+                        string.Equals(x.ModelAvailabilityUu.AvailabilityName, nameof(ModelAvailabilityEnum.Public)))
+            };
+        }
 
         var resultQuery = GlobalHelperMethods<Model>.OrderBy(baseQuery, modelSearchRequestDto.OrderBy);
 
@@ -193,17 +203,24 @@ public static class ModelHelperMethods
         JoyModelsDbContext context)
     {
         if (!string.IsNullOrWhiteSpace(request.Name))
-            await context.Models.ExecuteUpdateAsync(x => x.SetProperty(z => z.Name, request.Name));
+            await context.Models
+                .Where(x => x.Uuid == modelResponse.Uuid)
+                .ExecuteUpdateAsync(x => x.SetProperty(z => z.Name, request.Name));
 
         if (!string.IsNullOrWhiteSpace(request.Description))
-            await context.Models.ExecuteUpdateAsync(x => x.SetProperty(z => z.Description, request.Description));
+            await context.Models
+                .Where(x => x.Uuid == modelResponse.Uuid)
+                .ExecuteUpdateAsync(x => x.SetProperty(z => z.Description, request.Description));
 
         if (request.Price is not null)
-            await context.Models.ExecuteUpdateAsync(x => x.SetProperty(z => z.Price, request.Price));
+            await context.Models
+                .Where(x => x.Uuid == modelResponse.Uuid)
+                .ExecuteUpdateAsync(x => x.SetProperty(z => z.Price, request.Price));
 
         if (request.ModelAvailabilityUuid is not null)
-            await context.Models.ExecuteUpdateAsync(x =>
-                x.SetProperty(z => z.ModelAvailabilityUuid, request.ModelAvailabilityUuid));
+            await context.Models
+                .Where(x => x.Uuid == modelResponse.Uuid)
+                .ExecuteUpdateAsync(x => x.SetProperty(z => z.ModelAvailabilityUuid, request.ModelAvailabilityUuid));
 
         if (request.ModelCategoriesToDelete is not null && request.ModelCategoriesToDelete.Count != 0)
         {
@@ -254,7 +271,9 @@ public static class ModelHelperMethods
             for (var i = 0; i < request.ModelPictureLocationsToDelete.Distinct().Count(); i++)
             {
                 await context.ModelPictures
-                    .Where(x => string.Equals(x.PictureLocation, modelResponse.ModelPictures[i].PictureLocation))
+                    .Where(x => x.ModelUuid == modelResponse.Uuid
+                                && string.Equals(x.PictureLocation,
+                                    modelResponse.ModelPictures.ElementAt(i).PictureLocation))
                     .ExecuteDeleteAsync();
 
                 if (File.Exists(request.ModelPictureLocationsToDelete[i]))

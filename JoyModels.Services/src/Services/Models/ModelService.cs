@@ -22,11 +22,16 @@ public class ModelService(
     ModelSettingsDetails modelSettingsDetails)
     : IModelService
 {
-    public async Task<ModelResponse> GetByUuid(Guid modelUuid, bool arePrivateUserModelsSearched = false)
+    private async Task<ModelResponse> GetByUuidWithAllAvailabilities(Guid modelUuid)
+    {
+        var modelEntity = await ModelHelperMethods.GetModelEntityWithAllAvailabilities(context, modelUuid);
+        return mapper.Map<ModelResponse>(modelEntity);
+    }
+
+    public async Task<ModelResponse> GetByUuid(Guid modelUuid)
     {
         var modelEntity =
-            await ModelHelperMethods.GetModelEntity(context, modelUuid, arePrivateUserModelsSearched,
-                userAuthValidation);
+            await ModelHelperMethods.GetModelEntity(context, modelUuid);
         return mapper.Map<ModelResponse>(modelEntity);
     }
 
@@ -67,13 +72,13 @@ public class ModelService(
             throw new TransactionException(ex.InnerException!.Message);
         }
 
-        return await GetByUuid(modelEntity.Uuid);
+        return await GetByUuidWithAllAvailabilities(modelEntity.Uuid);
     }
 
     public async Task<ModelResponse> Patch(Guid modelUuid, ModelPatchRequest request)
     {
         userAuthValidation.ValidateRequestUuids(modelUuid, request.Uuid);
-        var modelResponse = await GetByUuid(modelUuid);
+        var modelResponse = await GetByUuidWithAllAvailabilities(modelUuid);
         userAuthValidation.ValidateUserAuthRequest(modelResponse.UserUuid);
         request.ValidateModelPatchArguments();
         await request.ValidateModelPatchArgumentsDuplicatedFields(context);
@@ -90,12 +95,12 @@ public class ModelService(
             throw new TransactionException(ex.Message);
         }
 
-        return await GetByUuid(modelResponse.Uuid);
+        return await GetByUuidWithAllAvailabilities(modelUuid);
     }
 
     public async Task Delete(Guid modelUuid)
     {
-        var modelEntity = await GetByUuid(modelUuid);
+        var modelEntity = await GetByUuidWithAllAvailabilities(modelUuid);
 
         if (userAuthValidation.GetUserClaimRole() != nameof(UserRoleEnum.Admin)
             && userAuthValidation.GetUserClaimRole() != nameof(UserRoleEnum.Root))

@@ -13,10 +13,9 @@ public class ModelController(IModelService service) : ControllerBase
 {
     [Authorize(Policy = "VerifiedUsers")]
     [HttpGet("get/{modelUuid:guid}")]
-    public async Task<ActionResult<ModelResponse>> GetByUuid([FromRoute] Guid modelUuid,
-        bool arePrivateUserModelsSearched = false)
+    public async Task<ActionResult<ModelResponse>> GetByUuid([FromRoute] Guid modelUuid)
     {
-        return await service.GetByUuid(modelUuid, arePrivateUserModelsSearched);
+        return await service.GetByUuid(modelUuid);
     }
 
     [Authorize(Policy = "VerifiedUsers")]
