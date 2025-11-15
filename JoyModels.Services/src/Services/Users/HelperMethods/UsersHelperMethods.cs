@@ -50,13 +50,16 @@ public static class UsersHelperMethods
     public static async Task PatchUserEntity(this UsersPatchRequest request, JoyModelsDbContext context)
     {
         if (!string.IsNullOrWhiteSpace(request.FirstName))
-            await context.Users.ExecuteUpdateAsync(x => x.SetProperty(z => z.FirstName, request.FirstName));
+            await context.Users.Where(x => x.Uuid == request.UserUuid)
+                .ExecuteUpdateAsync(x => x.SetProperty(z => z.FirstName, request.FirstName));
 
         if (!string.IsNullOrWhiteSpace(request.LastName))
-            await context.Users.ExecuteUpdateAsync(x => x.SetProperty(z => z.LastName, request.LastName));
+            await context.Users.Where(x => x.Uuid == request.UserUuid)
+                .ExecuteUpdateAsync(x => x.SetProperty(z => z.LastName, request.LastName));
 
         if (!string.IsNullOrWhiteSpace(request.Nickname))
-            await context.Users.ExecuteUpdateAsync(x => x.SetProperty(z => z.NickName, request.Nickname));
+            await context.Users.Where(x => x.Uuid == request.UserUuid)
+                .ExecuteUpdateAsync(x => x.SetProperty(z => z.NickName, request.Nickname));
 
         await context.SaveChangesAsync();
     }
