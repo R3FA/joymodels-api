@@ -49,4 +49,9 @@ public class ModelReviewService(
 
         return await GetByUuid(modelReviewEntity.Uuid);
     }
+
+    public async Task Delete(Guid modelReviewUuid)
+    {
+        await ModelReviewHelperMethods.DeleteModelReview(context, modelReviewUuid, userAuthValidation);
+    }
 }

@@ -3,8 +3,10 @@ using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.RequestTypes.ModelReviews;
 using JoyModels.Models.Pagination;
 using JoyModels.Services.Extensions;
+using JoyModels.Services.Validation;
 using Microsoft.EntityFrameworkCore;
 using ModelReviewEnum = JoyModels.Models.Enums.ModelReview;
+using UserRoleEnum = JoyModels.Models.Enums.UserRole;
 
 namespace JoyModels.Services.Services.ModelReviews.HelperMethods;
 
@@ -70,6 +72,27 @@ public static class ModelReviewHelperMethods
     public static async Task CreateModelReviewEntity(this ModelReview modelReviewEntity, JoyModelsDbContext context)
     {
         await context.ModelReviews.AddAsync(modelReviewEntity);
+        await context.SaveChangesAsync();
+    }
+
+    // TODO: Rewrite other eligible delete endpoints like this one - Far better performance because there's no database queries beforehand
+    public static async Task DeleteModelReview(JoyModelsDbContext context, Guid modelReviewUuid,
+        UserAuthValidation userAuthValidation)
+    {
+        var baseQuery = context.ModelReviews.AsQueryable();
+
+        baseQuery = userAuthValidation.GetUserClaimRole() switch
+        {
+            nameof(UserRoleEnum.Admin) => baseQuery.Where(x => x.Uuid == modelReviewUuid),
+            nameof(UserRoleEnum.Root) => baseQuery.Where(x => x.Uuid == modelReviewUuid),
+            _ => baseQuery.Where(x => x.Uuid == modelReviewUuid && x.UserUuid == userAuthValidation.GetUserClaimUuid())
+        };
+
+        var totalCount = await baseQuery.ExecuteDeleteAsync();
+
+        if (totalCount <= 0)
+            throw new KeyNotFoundException("No records found to delete.");
+
         await context.SaveChangesAsync();
     }
 }
