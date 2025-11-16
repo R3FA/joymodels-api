@@ -613,6 +613,17 @@ public partial class JoyModelsDbContext : DbContext
             entity.Property(e => e.ReviewName)
                 .HasMaxLength(50)
                 .HasColumnName("review_name");
+
+            entity.HasData(
+                new
+                {
+                    Uuid = new Guid("410b9090-04da-4d0e-a641-719da1962d94"), ReviewName = "Negative"
+                },
+                new
+                {
+                    Uuid = new Guid("2e3b8189-4df1-42a0-8590-d3e6ec8b91d6"), ReviewName = "Positive"
+                }
+            );
         });
 
         modelBuilder.Entity<PendingUser>(entity =>
