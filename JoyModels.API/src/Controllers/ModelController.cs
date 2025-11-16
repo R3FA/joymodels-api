@@ -12,10 +12,10 @@ namespace JoyModels.API.Controllers;
 public class ModelController(IModelService service) : ControllerBase
 {
     [Authorize(Policy = "VerifiedUsers")]
-    [HttpGet("get/{modelUuid:guid}")]
-    public async Task<ActionResult<ModelResponse>> GetByUuid([FromRoute] Guid modelUuid)
+    [HttpGet("get")]
+    public async Task<ActionResult<ModelResponse>> GetByUuid([FromQuery] ModelGetByUuidRequest request)
     {
-        return await service.GetByUuid(modelUuid);
+        return await service.GetByUuid(request);
     }
 
     [Authorize(Policy = "VerifiedUsers")]
@@ -23,6 +23,14 @@ public class ModelController(IModelService service) : ControllerBase
     public async Task<ActionResult<PaginationResponse<ModelResponse>>> Search([FromQuery] ModelSearchRequest request)
     {
         return await service.Search(request);
+    }
+
+    [Authorize(Policy = "HeadStaff")]
+    [HttpGet("admin-search")]
+    public async Task<ActionResult<PaginationResponse<ModelResponse>>> AdminSearch(
+        [FromQuery] ModelAdminSearchRequest request)
+    {
+        return await service.AdminSearch(request);
     }
 
     [Authorize(Policy = "VerifiedUsers")]

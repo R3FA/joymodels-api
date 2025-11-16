@@ -28,18 +28,27 @@ public class ModelService(
         return mapper.Map<ModelResponse>(modelEntity);
     }
 
-    public async Task<ModelResponse> GetByUuid(Guid modelUuid)
+    public async Task<ModelResponse> GetByUuid(ModelGetByUuidRequest request)
     {
         var modelEntity =
-            await ModelHelperMethods.GetModelEntity(context, modelUuid);
+            await ModelHelperMethods.GetModelEntity(context, request, userAuthValidation);
         return mapper.Map<ModelResponse>(modelEntity);
     }
 
     public async Task<PaginationResponse<ModelResponse>> Search(ModelSearchRequest request)
     {
-        request.ValidateModelSearchArguments();
+        ModelValidation.ValidateModelSearchArguments(request.ModelName!);
 
         var modelEntities = await ModelHelperMethods.SearchModelEntities(context, request, userAuthValidation);
+
+        return mapper.Map<PaginationResponse<ModelResponse>>(modelEntities);
+    }
+
+    public async Task<PaginationResponse<ModelResponse>> AdminSearch(ModelAdminSearchRequest request)
+    {
+        ModelValidation.ValidateModelSearchArguments(request.ModelName!);
+
+        var modelEntities = await ModelHelperMethods.SearchAdminModelEntities(context, request);
 
         return mapper.Map<PaginationResponse<ModelResponse>>(modelEntities);
     }

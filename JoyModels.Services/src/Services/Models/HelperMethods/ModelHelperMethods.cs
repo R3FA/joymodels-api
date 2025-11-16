@@ -11,7 +11,6 @@ using JoyModels.Services.Validation.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using ModelAvailabilityEnum = JoyModels.Models.Enums.ModelAvailability;
-using UserRoleEnum = JoyModels.Models.Enums.UserRole;
 
 namespace JoyModels.Services.Services.Models.HelperMethods;
 
@@ -32,19 +31,29 @@ public static class ModelHelperMethods
         return modelEntity ?? throw new KeyNotFoundException("3D model with sent values is not found.");
     }
 
-    public static async Task<Model> GetModelEntity(JoyModelsDbContext context, Guid modelUuid)
+    public static async Task<Model> GetModelEntity(JoyModelsDbContext context, ModelGetByUuidRequest request,
+        UserAuthValidation userAuthValidation)
     {
-        var modelEntity = await context.Models
+        var baseQuery = context.Models
             .AsNoTracking()
             .Include(x => x.UserUu)
             .Include(x => x.UserUu.UserRoleUu)
             .Include(x => x.ModelAvailabilityUu)
-            .Where(x => string.Equals(x.ModelAvailabilityUu.AvailabilityName, nameof(ModelAvailabilityEnum.Public)))
             .Include(x => x.ModelCategories)
             .ThenInclude(x => x.CategoryUu)
             .Include(x => x.ModelPictures)
-            .FirstOrDefaultAsync(x => x.Uuid == modelUuid);
+            .AsQueryable();
 
+        baseQuery = request.ArePrivateModelsSearched switch
+        {
+            true => baseQuery.Where(x =>
+                string.Equals(x.ModelAvailabilityUu.AvailabilityName, nameof(ModelAvailabilityEnum.Hidden))
+                && x.UserUuid == userAuthValidation.GetUserClaimUuid()),
+            false => baseQuery.Where(x =>
+                string.Equals(x.ModelAvailabilityUu.AvailabilityName, nameof(ModelAvailabilityEnum.Public)))
+        };
+
+        var modelEntity = await baseQuery.FirstOrDefaultAsync(x => x.Uuid == request.ModelUuid);
         return modelEntity ?? throw new KeyNotFoundException("3D model with sent values is not found.");
     }
 
@@ -61,25 +70,19 @@ public static class ModelHelperMethods
             .Include(x => x.ModelPictures)
             .AsQueryable();
 
-        var isAdmin = string.Equals(userAuthValidation.GetUserClaimRole(), nameof(UserRoleEnum.Admin))
-                      || string.Equals(userAuthValidation.GetUserClaimRole(), nameof(UserRoleEnum.Root));
-
         if (!string.IsNullOrWhiteSpace(modelSearchRequestDto.ModelName))
             baseQuery = baseQuery.Where(x => x.Name.Contains(modelSearchRequestDto.ModelName));
 
-        if (!isAdmin)
+        baseQuery = modelSearchRequestDto.ArePrivateUserModelsSearched switch
         {
-            baseQuery = modelSearchRequestDto.ArePrivateUserModelsSearched switch
-            {
-                true => baseQuery
-                    .Where(x =>
-                        string.Equals(x.ModelAvailabilityUu.AvailabilityName, nameof(ModelAvailabilityEnum.Hidden))
-                        && x.UserUuid == userAuthValidation.GetUserClaimUuid()),
-                false => baseQuery
-                    .Where(x =>
-                        string.Equals(x.ModelAvailabilityUu.AvailabilityName, nameof(ModelAvailabilityEnum.Public)))
-            };
-        }
+            true => baseQuery
+                .Where(x =>
+                    string.Equals(x.ModelAvailabilityUu.AvailabilityName, nameof(ModelAvailabilityEnum.Hidden))
+                    && x.UserUuid == userAuthValidation.GetUserClaimUuid()),
+            false => baseQuery
+                .Where(x =>
+                    string.Equals(x.ModelAvailabilityUu.AvailabilityName, nameof(ModelAvailabilityEnum.Public)))
+        };
 
         var resultQuery = GlobalHelperMethods<Model>.OrderBy(baseQuery, modelSearchRequestDto.OrderBy);
 
@@ -88,6 +91,33 @@ public static class ModelHelperMethods
             modelSearchRequestDto.PageNumber,
             modelSearchRequestDto.PageSize,
             modelSearchRequestDto.OrderBy);
+
+        return modelEntities;
+    }
+
+    public static async Task<PaginationBase<Model>> SearchAdminModelEntities(JoyModelsDbContext context,
+        ModelAdminSearchRequest modelAdminSearchRequestDto)
+    {
+        var baseQuery = context.Models
+            .AsNoTracking()
+            .Include(x => x.UserUu)
+            .Include(x => x.UserUu.UserRoleUu)
+            .Include(x => x.ModelAvailabilityUu)
+            .Include(x => x.ModelCategories)
+            .ThenInclude(x => x.CategoryUu)
+            .Include(x => x.ModelPictures)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(modelAdminSearchRequestDto.ModelName))
+            baseQuery = baseQuery.Where(x => x.Name.Contains(modelAdminSearchRequestDto.ModelName));
+
+        var resultQuery = GlobalHelperMethods<Model>.OrderBy(baseQuery, modelAdminSearchRequestDto.OrderBy);
+
+        var modelEntities = await PaginationBase<Model>.CreateAsync(
+            resultQuery,
+            modelAdminSearchRequestDto.PageNumber,
+            modelAdminSearchRequestDto.PageSize,
+            modelAdminSearchRequestDto.OrderBy);
 
         return modelEntities;
     }

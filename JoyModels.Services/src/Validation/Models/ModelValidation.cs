@@ -20,10 +20,10 @@ public static class ModelValidation
                 "Invalid value: Must contain only letters (any language), digits, and the following characters: ':', '.', ',', '-'.");
     }
 
-    public static void ValidateModelSearchArguments(this ModelSearchRequest request)
+    public static void ValidateModelSearchArguments(string requestName)
     {
-        if (!string.IsNullOrWhiteSpace(request.ModelName))
-            ValidateModelStringArguments(request.ModelName);
+        if (!string.IsNullOrWhiteSpace(requestName))
+            ValidateModelStringArguments(requestName);
     }
 
     public static void ValidateModelCreateArguments(this ModelCreateRequest request)
