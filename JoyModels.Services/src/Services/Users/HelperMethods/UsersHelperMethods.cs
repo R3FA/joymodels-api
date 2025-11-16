@@ -15,8 +15,7 @@ public static class UsersHelperMethods
         var userEntity = await context.Users
             .AsNoTracking()
             .Include(x => x.UserRoleUu)
-            .Where(x => x.UserRoleUu.RoleName != nameof(UserRoleEnum.Undefined)
-                        && x.UserRoleUu.RoleName != nameof(UserRoleEnum.Unverified))
+            .Where(x => x.UserRoleUu.RoleName != nameof(UserRoleEnum.Unverified))
             .FirstOrDefaultAsync(x => x.Uuid == userUuid);
 
         return userEntity ?? throw new KeyNotFoundException("User with sent values is not found.");
@@ -28,8 +27,7 @@ public static class UsersHelperMethods
         var baseQuery = context.Users
             .AsNoTracking()
             .Include(x => x.UserRoleUu)
-            .Where(x => x.UserRoleUu.RoleName != nameof(UserRoleEnum.Undefined)
-                        && x.UserRoleUu.RoleName != nameof(UserRoleEnum.Unverified));
+            .Where(x => x.UserRoleUu.RoleName != nameof(UserRoleEnum.Unverified));
 
         var filteredQuery = usersSearchRequestDto.Nickname switch
         {

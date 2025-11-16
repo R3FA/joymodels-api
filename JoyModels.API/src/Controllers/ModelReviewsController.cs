@@ -1,5 +1,6 @@
 using JoyModels.Models.DataTransferObjects.RequestTypes.ModelReviews;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.ModelReviews;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Services.Services.ModelReviews;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,14 @@ public class ModelReviewsController(IModelReviewService service) : ControllerBas
     public async Task<ActionResult<ModelReviewResponse>> GetByUuid([FromRoute] Guid modelReviewUuid)
     {
         return await service.GetByUuid(modelReviewUuid);
+    }
+
+    [Authorize(Policy = "VerifiedUsers")]
+    [HttpGet("search")]
+    public async Task<ActionResult<PaginationResponse<ModelReviewResponse>>> Search(
+        [FromQuery] ModelReviewSearchRequest request)
+    {
+        return await service.Search(request);
     }
 
     [Authorize(Policy = "VerifiedUsers")]

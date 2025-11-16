@@ -4,6 +4,7 @@ using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.RequestTypes.ModelReviews;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Models;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.ModelReviews;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Services.Services.ModelReviews.HelperMethods;
 using JoyModels.Services.Services.Models;
 using JoyModels.Services.Validation;
@@ -23,6 +24,13 @@ public class ModelReviewService(
         var modelReviewEntity = await ModelReviewHelperMethods.GetModelReviewEntity(context, modelReviewUuid);
 
         return mapper.Map<ModelReviewResponse>(modelReviewEntity);
+    }
+
+    public async Task<PaginationResponse<ModelReviewResponse>> Search(ModelReviewSearchRequest request)
+    {
+        var modelReviewEntities = await ModelReviewHelperMethods.SearchModelReviewEntities(context, request);
+
+        return mapper.Map<PaginationResponse<ModelReviewResponse>>(modelReviewEntities);
     }
 
     public async Task<ModelReviewResponse> Create(ModelReviewCreateRequest request)

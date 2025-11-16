@@ -157,8 +157,7 @@ public static class SsoHelperMethods
 
     public static void CheckIfUserIsUnverified(this User userEntity)
     {
-        if (userEntity.UserRoleUu.RoleName is nameof(UserRoleEnum.Undefined)
-            or nameof(UserRoleEnum.Unverified))
+        if (userEntity.UserRoleUu.RoleName is nameof(UserRoleEnum.Unverified))
             throw new ApplicationException("User is unverified.");
     }
 
