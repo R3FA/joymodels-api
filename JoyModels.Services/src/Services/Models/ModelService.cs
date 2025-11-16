@@ -107,6 +107,7 @@ public class ModelService(
         return await GetByUuidWithAllAvailabilities(modelUuid);
     }
 
+    // TODO: Eligible delete endpoint for rewrite
     public async Task Delete(Guid modelUuid)
     {
         var modelEntity = await GetByUuidWithAllAvailabilities(modelUuid);

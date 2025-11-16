@@ -62,6 +62,7 @@ public static class UsersHelperMethods
         await context.SaveChangesAsync();
     }
 
+    // TODO: Eligible delete endpoint for rewrite - It has a major bug because any user can delete other users
     public static async Task DeleteUserEntity(JoyModelsDbContext context, Guid userUuid)
     {
         var numberOfDeletedRows = await context.Users
