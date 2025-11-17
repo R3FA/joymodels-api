@@ -34,6 +34,14 @@ public class ModelReviewsController(IModelReviewService service) : ControllerBas
     }
 
     [Authorize(Policy = "VerifiedUsers")]
+    [HttpPatch("edit-model-review/{modelReviewUuid:guid}")]
+    public async Task<ActionResult<ModelReviewResponse>> Patch([FromRoute] Guid modelReviewUuid,
+        [FromForm] ModelReviewPatchRequest request)
+    {
+        return await service.Patch(modelReviewUuid, request);
+    }
+
+    [Authorize(Policy = "VerifiedUsers")]
     [HttpDelete("delete/{modelReviewUuid:guid}")]
     public async Task<ActionResult> Delete([FromRoute] Guid modelReviewUuid)
     {

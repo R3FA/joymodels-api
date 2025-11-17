@@ -9,5 +9,6 @@ public interface IModelReviewService
     Task<ModelReviewResponse> GetByUuid(Guid modelReviewUuid);
     Task<PaginationResponse<ModelReviewResponse>> Search(ModelReviewSearchRequest request);
     Task<ModelReviewResponse> Create(ModelReviewCreateRequest request);
+    Task<ModelReviewResponse> Patch(Guid modelReviewUuid, ModelReviewPatchRequest request);
     Task Delete(Guid modelReviewUuid);
 }

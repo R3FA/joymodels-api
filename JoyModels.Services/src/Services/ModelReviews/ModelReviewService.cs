@@ -50,6 +50,18 @@ public class ModelReviewService(
         return await GetByUuid(modelReviewEntity.Uuid);
     }
 
+    public async Task<ModelReviewResponse> Patch(Guid modelReviewUuid, ModelReviewPatchRequest request)
+    {
+        userAuthValidation.ValidateRequestUuids(modelReviewUuid, request.ModelReviewUuid);
+        var modelReviewResponse = await GetByUuid(modelReviewUuid);
+        userAuthValidation.ValidateUserAuthRequest(modelReviewResponse.UsersResponse.Uuid);
+        request.ValidateModelReviewPatchArguments();
+
+        await request.PatchModelEntity(context, userAuthValidation);
+
+        return await GetByUuid(modelReviewUuid);
+    }
+
     public async Task Delete(Guid modelReviewUuid)
     {
         await ModelReviewHelperMethods.DeleteModelReview(context, modelReviewUuid, userAuthValidation);

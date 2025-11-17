@@ -75,6 +75,24 @@ public static class ModelReviewHelperMethods
         await context.SaveChangesAsync();
     }
 
+    public static async Task PatchModelEntity(
+        this ModelReviewPatchRequest request,
+        JoyModelsDbContext context,
+        UserAuthValidation userAuthValidation)
+    {
+        if (request.ModelReviewTypeUuid != null)
+            await context.ModelReviews
+                .Where(x => x.Uuid == request.ModelReviewUuid && x.UserUuid == userAuthValidation.GetUserClaimUuid())
+                .ExecuteUpdateAsync(x => x.SetProperty(z => z.ReviewTypeUuid, request.ModelReviewTypeUuid));
+
+        if (!string.IsNullOrWhiteSpace(request.ModelReviewText))
+            await context.ModelReviews
+                .Where(x => x.Uuid == request.ModelReviewUuid && x.UserUuid == userAuthValidation.GetUserClaimUuid())
+                .ExecuteUpdateAsync(x => x.SetProperty(z => z.ReviewText, request.ModelReviewText));
+
+        await context.SaveChangesAsync();
+    }
+
     // TODO: Rewrite other eligible delete endpoints like this one - Far better performance because there's no database queries beforehand
     public static async Task DeleteModelReview(JoyModelsDbContext context, Guid modelReviewUuid,
         UserAuthValidation userAuthValidation)

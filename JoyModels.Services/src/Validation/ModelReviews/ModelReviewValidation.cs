@@ -24,6 +24,12 @@ public static class ModelReviewValidation
             throw new ApplicationException("You cannot review your own model!");
     }
 
+    public static void ValidateModelReviewPatchArguments(this ModelReviewPatchRequest request)
+    {
+        if (!string.IsNullOrWhiteSpace(request.ModelReviewText))
+            ValidateModelReviewStringArguments(request.ModelReviewText);
+    }
+
     public static async Task ValidateDuplicatedModelReviews(JoyModelsDbContext context, Guid modelUuid,
         Guid userClaimUuid)
     {
