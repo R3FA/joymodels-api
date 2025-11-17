@@ -3,6 +3,7 @@ using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Users;
 using JoyModels.Models.Pagination;
 using JoyModels.Services.Extensions;
+using JoyModels.Services.Validation;
 using Microsoft.EntityFrameworkCore;
 using UserRoleEnum = JoyModels.Models.Enums.UserRole;
 
@@ -15,8 +16,7 @@ public static class UsersHelperMethods
         var userEntity = await context.Users
             .AsNoTracking()
             .Include(x => x.UserRoleUu)
-            .Where(x => x.UserRoleUu.RoleName != nameof(UserRoleEnum.Undefined)
-                        && x.UserRoleUu.RoleName != nameof(UserRoleEnum.Unverified))
+            .Where(x => x.UserRoleUu.RoleName != nameof(UserRoleEnum.Unverified))
             .FirstOrDefaultAsync(x => x.Uuid == userUuid);
 
         return userEntity ?? throw new KeyNotFoundException("User with sent values is not found.");
@@ -28,8 +28,7 @@ public static class UsersHelperMethods
         var baseQuery = context.Users
             .AsNoTracking()
             .Include(x => x.UserRoleUu)
-            .Where(x => x.UserRoleUu.RoleName != nameof(UserRoleEnum.Undefined)
-                        && x.UserRoleUu.RoleName != nameof(UserRoleEnum.Unverified));
+            .Where(x => x.UserRoleUu.RoleName != nameof(UserRoleEnum.Unverified));
 
         var filteredQuery = usersSearchRequestDto.Nickname switch
         {
@@ -64,15 +63,21 @@ public static class UsersHelperMethods
         await context.SaveChangesAsync();
     }
 
-    public static async Task DeleteUserEntity(JoyModelsDbContext context, Guid userUuid)
+    public static async Task DeleteUserEntity(JoyModelsDbContext context, Guid userUuid,
+        UserAuthValidation userAuthValidation)
     {
-        var numberOfDeletedRows = await context.Users
-            .Where(x => x.Uuid == userUuid)
-            .ExecuteDeleteAsync();
-        await context.SaveChangesAsync();
+        var baseQuery = context.Users.AsQueryable();
 
-        if (numberOfDeletedRows == 0)
+        baseQuery = userAuthValidation.GetUserClaimRole() switch
+        {
+            nameof(UserRoleEnum.Admin) or nameof(UserRoleEnum.Root) => baseQuery.Where(x => x.Uuid == userUuid),
+            _ => baseQuery.Where(x => x.Uuid == userUuid && x.Uuid == userAuthValidation.GetUserClaimUuid())
+        };
+
+        var totalCount = await baseQuery.ExecuteDeleteAsync();
+
+        if (totalCount <= 0)
             throw new KeyNotFoundException(
-                $"Unverified user with UUID `{userUuid}` either is verified or does not exist.");
+                "User either doesn't exist or you don't own the account that you want to delete.");
     }
 }

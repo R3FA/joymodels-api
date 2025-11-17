@@ -4,6 +4,7 @@ using JoyModels.Models.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JoyModels.Models.src.Database.Migrations
 {
     [DbContext(typeof(JoyModelsDbContext))]
-    partial class JoyModelsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251116182019_AddModelReviewTypes")]
+    partial class AddModelReviewTypes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -868,6 +871,11 @@ namespace JoyModels.Models.src.Database.Migrations
                     b.ToTable("user_roles", (string)null);
 
                     b.HasData(
+                        new
+                        {
+                            Uuid = new Guid("6aa5d268-c259-4054-b604-ff545eaa2f1e"),
+                            RoleName = "Undefined"
+                        },
                         new
                         {
                             Uuid = new Guid("2107d612-ac38-4390-aeb6-276cf55b42bb"),

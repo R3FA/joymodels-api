@@ -613,6 +613,17 @@ public partial class JoyModelsDbContext : DbContext
             entity.Property(e => e.ReviewName)
                 .HasMaxLength(50)
                 .HasColumnName("review_name");
+
+            entity.HasData(
+                new
+                {
+                    Uuid = new Guid("410b9090-04da-4d0e-a641-719da1962d94"), ReviewName = "Negative"
+                },
+                new
+                {
+                    Uuid = new Guid("2e3b8189-4df1-42a0-8590-d3e6ec8b91d6"), ReviewName = "Positive"
+                }
+            );
         });
 
         modelBuilder.Entity<PendingUser>(entity =>
@@ -745,7 +756,6 @@ public partial class JoyModelsDbContext : DbContext
                 .HasColumnName("role_name");
 
             entity.HasData(
-                new UserRole { Uuid = new Guid("6aa5d268-c259-4054-b604-ff545eaa2f1e"), RoleName = "Undefined" },
                 new UserRole { Uuid = new Guid("2107d612-ac38-4390-aeb6-276cf55b42bb"), RoleName = "Unverified" },
                 new UserRole { Uuid = new Guid("efd09239-1461-4740-86ae-94ed49137a36"), RoleName = "User" },
                 new UserRole { Uuid = new Guid("90051a72-89ea-48ca-8543-43f5843148c8"), RoleName = "Helper" },
