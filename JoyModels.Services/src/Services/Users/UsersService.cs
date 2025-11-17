@@ -40,6 +40,6 @@ public class UsersService(JoyModelsDbContext context, IMapper mapper, UserAuthVa
 
     public async Task Delete(Guid userUuid)
     {
-        await UsersHelperMethods.DeleteUserEntity(context, userUuid);
+        await UsersHelperMethods.DeleteUserEntity(context, userUuid, userAuthValidation);
     }
 }

@@ -107,16 +107,11 @@ public class ModelService(
         return await GetByUuidWithAllAvailabilities(modelUuid);
     }
 
-    // TODO: Eligible delete endpoint for rewrite
     public async Task Delete(Guid modelUuid)
     {
         var modelEntity = await GetByUuidWithAllAvailabilities(modelUuid);
 
-        if (userAuthValidation.GetUserClaimRole() != nameof(UserRoleEnum.Admin)
-            && userAuthValidation.GetUserClaimRole() != nameof(UserRoleEnum.Root))
-            userAuthValidation.ValidateUserAuthRequest(modelEntity.UserUuid);
-
-        await ModelHelperMethods.DeleteModel(context, modelUuid);
+        await ModelHelperMethods.DeleteModel(context, modelUuid, userAuthValidation);
 
         ModelHelperMethods.DeleteModelPictureUuidFolderOnException(modelEntity.ModelPictures[0].PictureLocation);
         ModelHelperMethods.DeleteModelUuidFolderOnException(modelEntity.LocationPath);

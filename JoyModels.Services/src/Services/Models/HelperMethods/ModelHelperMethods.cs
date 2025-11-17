@@ -11,6 +11,7 @@ using JoyModels.Services.Validation.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using ModelAvailabilityEnum = JoyModels.Models.Enums.ModelAvailability;
+using UserRoleEnum = JoyModels.Models.Enums.UserRole;
 
 namespace JoyModels.Services.Services.Models.HelperMethods;
 
@@ -314,19 +315,23 @@ public static class ModelHelperMethods
         await context.SaveChangesAsync();
     }
 
-    public static async Task DeleteModel(JoyModelsDbContext context, Guid modelUuid)
+    public static async Task DeleteModel(JoyModelsDbContext context, Guid modelUuid,
+        UserAuthValidation userAuthValidation)
     {
-        try
+        var baseQuery = context.Models.AsQueryable();
+
+        baseQuery = userAuthValidation.GetUserClaimRole() switch
         {
-            await context.Models
-                .Where(x => x.Uuid == modelUuid)
-                .ExecuteDeleteAsync();
-            await context.SaveChangesAsync();
-        }
-        catch (Exception e)
-        {
-            throw new Exception(e.Message);
-        }
+            nameof(UserRoleEnum.Admin) or nameof(UserRoleEnum.Root) => baseQuery.Where(x => x.Uuid == modelUuid),
+            _ => baseQuery.Where(x => x.Uuid == modelUuid && x.UserUuid == userAuthValidation.GetUserClaimUuid())
+        };
+
+        var totalCount = await baseQuery.ExecuteDeleteAsync();
+
+        if (totalCount <= 0)
+            throw new KeyNotFoundException("Model either doesn't exist or isn't under your ownership.");
+
+        await context.SaveChangesAsync();
     }
 
     public static void DeleteModelPictureUuidFolderOnException(string modelPicturePath)

@@ -93,7 +93,6 @@ public static class ModelReviewHelperMethods
         await context.SaveChangesAsync();
     }
 
-    // TODO: Rewrite other eligible delete endpoints like this one - Far better performance because there's no database queries beforehand
     public static async Task DeleteModelReview(JoyModelsDbContext context, Guid modelReviewUuid,
         UserAuthValidation userAuthValidation)
     {
@@ -101,15 +100,14 @@ public static class ModelReviewHelperMethods
 
         baseQuery = userAuthValidation.GetUserClaimRole() switch
         {
-            nameof(UserRoleEnum.Admin) => baseQuery.Where(x => x.Uuid == modelReviewUuid),
-            nameof(UserRoleEnum.Root) => baseQuery.Where(x => x.Uuid == modelReviewUuid),
+            nameof(UserRoleEnum.Admin) or nameof(UserRoleEnum.Root) => baseQuery.Where(x => x.Uuid == modelReviewUuid),
             _ => baseQuery.Where(x => x.Uuid == modelReviewUuid && x.UserUuid == userAuthValidation.GetUserClaimUuid())
         };
 
         var totalCount = await baseQuery.ExecuteDeleteAsync();
 
         if (totalCount <= 0)
-            throw new KeyNotFoundException("No records found to delete.");
+            throw new KeyNotFoundException("Model review either doesn't exist or isn't under you ownership.");
 
         await context.SaveChangesAsync();
     }
