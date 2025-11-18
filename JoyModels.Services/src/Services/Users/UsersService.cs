@@ -50,10 +50,10 @@ public class UsersService(
     {
         request.ValidateUserSearchFollowingUsersArguments();
 
-        var userFollowerEntities = await UsersHelperMethods.SearchFollowingUsers(context, request);
-        var userFollowerResponses = mapper.Map<PaginationResponse<UserFollowingResponse>>(userFollowerEntities);
+        var userFollowingEntities = await UsersHelperMethods.SearchFollowingUsers(context, request);
+        var userFollowingResponses = mapper.Map<PaginationResponse<UserFollowingResponse>>(userFollowingEntities);
 
-        foreach (var userFollowersResponse in userFollowerResponses.Data)
+        foreach (var userFollowersResponse in userFollowingResponses.Data)
         {
             userFollowersResponse.TargetUser.UserFollowing =
                 await UsersHelperMethods.GetUserFollowing(context, userFollowersResponse.TargetUser.Uuid);
@@ -61,7 +61,7 @@ public class UsersService(
                 await UsersHelperMethods.GetUserFollowers(context, userFollowersResponse.TargetUser.Uuid);
         }
 
-        return userFollowerResponses;
+        return userFollowingResponses;
     }
 
     public async Task<PaginationResponse<UserFollowerResponse>> SearchFollowerUsers(UserFollowerSearchRequest request)

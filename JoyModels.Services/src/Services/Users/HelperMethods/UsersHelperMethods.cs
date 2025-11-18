@@ -85,12 +85,12 @@ public static class UsersHelperMethods
 
         filteredQuery = GlobalHelperMethods<UserFollower>.OrderBy(filteredQuery, request.OrderBy);
 
-        var userFollowerEntities = await PaginationBase<UserFollower>.CreateAsync(filteredQuery,
+        var userFollowing = await PaginationBase<UserFollower>.CreateAsync(filteredQuery,
             request.PageNumber,
             request.PageSize,
             request.OrderBy);
 
-        return userFollowerEntities;
+        return userFollowing;
     }
 
     public static async Task<PaginationBase<UserFollower>> SearchFollowerUsers(JoyModelsDbContext context,
