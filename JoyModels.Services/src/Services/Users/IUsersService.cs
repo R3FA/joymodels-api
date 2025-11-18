@@ -10,5 +10,6 @@ public interface IUsersService
     Task<PaginationResponse<UsersResponse>> Search(UsersSearchRequest request);
     Task<UsersResponse> FollowAnUser(Guid targetUserUuid);
     Task<UsersResponse> Patch(Guid userUuid, UsersPatchRequest request);
+    Task<UsersResponse> UnfollowAnUser(Guid targetUserUuid);
     Task Delete(Guid userUuid);
 }

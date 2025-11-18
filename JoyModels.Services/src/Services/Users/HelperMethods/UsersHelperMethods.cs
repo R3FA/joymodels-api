@@ -112,6 +112,16 @@ public static class UsersHelperMethods
         await context.SaveChangesAsync();
     }
 
+    public static async Task DeleteUserFollowerEntity(JoyModelsDbContext context, Guid targetUserUuid,
+        UserAuthValidation userAuthValidation)
+    {
+        await context.UserFollowers
+            .Where(x => x.UserOriginUuid == userAuthValidation.GetUserClaimUuid()
+                        && x.UserTargetUuid == targetUserUuid)
+            .ExecuteDeleteAsync();
+        await context.SaveChangesAsync();
+    }
+
     public static async Task DeleteUserEntity(JoyModelsDbContext context, Guid userUuid,
         UserAuthValidation userAuthValidation)
     {

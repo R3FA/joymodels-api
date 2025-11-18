@@ -41,6 +41,13 @@ public class UsersController(IUsersService service) : ControllerBase
     }
 
     [Authorize(Policy = "VerifiedUsers")]
+    [HttpDelete("unfollow-an-user/{targetUserUuid:guid}")]
+    public async Task<ActionResult<UsersResponse>> UnfollowAnUser([FromRoute] Guid targetUserUuid)
+    {
+        return await service.UnfollowAnUser(targetUserUuid);
+    }
+
+    [Authorize(Policy = "VerifiedUsers")]
     [HttpDelete("delete/{userUuid:guid}")]
     public async Task<ActionResult> Delete([FromRoute] Guid userUuid)
     {

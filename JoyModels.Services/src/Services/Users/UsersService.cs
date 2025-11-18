@@ -68,6 +68,15 @@ public class UsersService(
         return await GetByUuid(userUuid);
     }
 
+    public async Task<UsersResponse> UnfollowAnUser(Guid targetUserUuid)
+    {
+        await UsersValidation.ValidateUserUnfollowEndpoint(context, targetUserUuid, userAuthValidation);
+
+        await UsersHelperMethods.DeleteUserFollowerEntity(context, targetUserUuid, userAuthValidation);
+
+        return await GetByUuid(userAuthValidation.GetUserClaimUuid());
+    }
+
     public async Task Delete(Guid userUuid)
     {
         await UsersHelperMethods.DeleteUserEntity(context, userUuid, userAuthValidation);

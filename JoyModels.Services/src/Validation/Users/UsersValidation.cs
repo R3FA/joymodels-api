@@ -75,4 +75,17 @@ public static class UsersValidation
                     $"Nickname `{request.Nickname}` is already registered in our database.");
         }
     }
+
+    public static async Task ValidateUserUnfollowEndpoint(JoyModelsDbContext context, Guid targetUserUuid,
+        UserAuthValidation userAuthValidation)
+    {
+        if (userAuthValidation.GetUserClaimUuid() == targetUserUuid)
+            throw new ArgumentException("You cannot unfollow yourself.");
+
+        var exists = await context.UserFollowers
+            .AnyAsync(x =>
+                x.UserOriginUuid == userAuthValidation.GetUserClaimUuid() && x.UserTargetUuid == targetUserUuid);
+        if (!exists)
+            throw new ArgumentException("You don't follow this user.");
+    }
 }
