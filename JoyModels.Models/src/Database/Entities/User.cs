@@ -17,6 +17,7 @@ public partial class User
     public DateTime CreatedAt { get; set; }
 
     public Guid UserRoleUuid { get; set; }
+    public string UserPictureLocation { get; set; } = null!;
 
     public virtual ICollection<CommunityPostQuestionSection> CommunityPostQuestionSectionUserOriginUus { get; set; } =
         new List<CommunityPostQuestionSection>();

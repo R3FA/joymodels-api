@@ -686,6 +686,9 @@ public partial class JoyModelsDbContext : DbContext
                 .HasMaxLength(255)
                 .HasColumnName("password_hash");
             entity.Property(e => e.UserRoleUuid).HasColumnName("user_role_uuid");
+            entity.Property(e => e.UserPictureLocation)
+                .HasMaxLength(255)
+                .HasColumnName("user_picture_location");
 
             entity.HasOne(d => d.UserRoleUu).WithMany(p => p.Users)
                 .HasForeignKey(d => d.UserRoleUuid)
