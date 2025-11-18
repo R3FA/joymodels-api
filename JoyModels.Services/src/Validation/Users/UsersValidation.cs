@@ -34,13 +34,15 @@ public static class UsersValidation
             ValidateNickname(request.Nickname);
     }
 
-    public static async Task ValidateUserFollowEndpoint(JoyModelsDbContext context, UsersFollowRequest request)
+    public static async Task ValidateUserFollowEndpoint(JoyModelsDbContext context, Guid targetUserUuid,
+        UserAuthValidation userAuthValidation)
     {
-        if (request.OriginUserUuid == request.TargetUserUuid)
+        if (userAuthValidation.GetUserClaimUuid() == targetUserUuid)
             throw new ArgumentException("You cannot follow yourself.");
 
         var exists = await context.UserFollowers
-            .AnyAsync(x => x.UserOriginUuid == request.OriginUserUuid && x.UserTargetUuid == request.TargetUserUuid);
+            .AnyAsync(x =>
+                x.UserOriginUuid == userAuthValidation.GetUserClaimUuid() && x.UserTargetUuid == targetUserUuid);
         if (exists)
             throw new ArgumentException("You already follow this user.");
     }

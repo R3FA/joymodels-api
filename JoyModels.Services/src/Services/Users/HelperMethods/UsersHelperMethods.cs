@@ -130,13 +130,13 @@ public static class UsersHelperMethods
                 "User either doesn't exist or you don't own the account that you want to delete.");
     }
 
-    public static UserFollower CreateUserFollowerObject(UsersFollowRequest request)
+    public static UserFollower CreateUserFollowerObject(Guid targetUserUuid, UserAuthValidation userAuthValidation)
     {
         return new UserFollower
         {
             Uuid = Guid.NewGuid(),
-            UserOriginUuid = request.OriginUserUuid,
-            UserTargetUuid = request.TargetUserUuid,
+            UserOriginUuid = userAuthValidation.GetUserClaimUuid(),
+            UserTargetUuid = targetUserUuid,
             FollowedAt = DateTime.Now
         };
     }

@@ -26,10 +26,10 @@ public class UsersController(IUsersService service) : ControllerBase
     }
 
     [Authorize(Policy = "VerifiedUsers")]
-    [HttpPost("follow-an-user")]
-    public async Task<ActionResult<UsersResponse>> FollowAnUser([FromQuery] UsersFollowRequest request)
+    [HttpPost("follow-an-user/{targetUserUuid:guid}")]
+    public async Task<ActionResult<UsersResponse>> FollowAnUser([FromRoute] Guid targetUserUuid)
     {
-        return await service.FollowAnUser(request);
+        return await service.FollowAnUser(targetUserUuid);
     }
 
     [Authorize(Policy = "VerifiedUsers")]
