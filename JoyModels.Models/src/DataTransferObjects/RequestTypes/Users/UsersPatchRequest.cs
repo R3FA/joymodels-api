@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Http;
+
 namespace JoyModels.Models.DataTransferObjects.RequestTypes.Users;
 
 public class UsersPatchRequest
@@ -6,4 +8,5 @@ public class UsersPatchRequest
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
     public string? Nickname { get; set; }
+    public IFormFile? UserPicture { get; set; }
 }
