@@ -42,9 +42,9 @@ public static class ModelValidation
     }
 
     public static async Task ValidateModelPicture(IFormFile modelPicture,
-        ImageSettingsDetails imageSettingsDetails)
+        ModelImageSettingsDetails modelImageSettingsDetails)
     {
-        if (modelPicture.Length > imageSettingsDetails.AllowedSize)
+        if (modelPicture.Length > modelImageSettingsDetails.AllowedSize)
             throw new ArgumentException("Image too large. Maximum size limit is 10MB");
 
         await using (var s1 = modelPicture.OpenReadStream())
@@ -59,10 +59,10 @@ public static class ModelValidation
         if (info == null)
             throw new ArgumentException("Unsupported or corrupted image.");
 
-        var minWidth = imageSettingsDetails.ImageSettingsResolutionDetails.MinimumWidth;
-        var maxWidth = imageSettingsDetails.ImageSettingsResolutionDetails.MaximumWidth;
-        var minHeight = imageSettingsDetails.ImageSettingsResolutionDetails.MinimumHeight;
-        var maxHeight = imageSettingsDetails.ImageSettingsResolutionDetails.MaximumHeight;
+        var minWidth = modelImageSettingsDetails.ImageSettingsResolutionDetails.MinimumWidth;
+        var maxWidth = modelImageSettingsDetails.ImageSettingsResolutionDetails.MaximumWidth;
+        var minHeight = modelImageSettingsDetails.ImageSettingsResolutionDetails.MinimumHeight;
+        var maxHeight = modelImageSettingsDetails.ImageSettingsResolutionDetails.MaximumHeight;
 
         if (info.Width < minWidth || info.Width > maxWidth || info.Height < minHeight || info.Height > maxHeight)
             throw new ArgumentException(

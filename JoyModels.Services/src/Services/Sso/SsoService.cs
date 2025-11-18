@@ -2,6 +2,7 @@ using System.Transactions;
 using AutoMapper;
 using JoyModels.Models.Database;
 using JoyModels.Models.Database.Entities;
+using JoyModels.Models.DataTransferObjects.ImageSettings;
 using JoyModels.Models.DataTransferObjects.Jwt;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Email;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Sso;
@@ -20,7 +21,8 @@ public class SsoService(
     IMapper mapper,
     JwtClaimDetails jwtClaimDetails,
     UserAuthValidation userAuthValidation,
-    IMessageProducer messageProducer)
+    IMessageProducer messageProducer,
+    UserImageSettingsDetails userImageSettingsDetails)
     : ISsoService
 {
     public async Task<SsoUserResponse> GetByUuid(Guid userUuid)
@@ -59,6 +61,10 @@ public class SsoService(
 
         var emailSendUserDetailsRequest = mapper.Map<EmailSendUserDetailsRequest>((pendingUserEntity, userEntity));
 
+        userEntity.UserPictureLocation =
+            await SsoHelperMethods.SaveUserPicture(request.UserPicture, userImageSettingsDetails,
+                userEntity.Uuid);
+
         var transaction = await context.Database.BeginTransactionAsync();
         try
         {
@@ -69,6 +75,7 @@ public class SsoService(
         }
         catch (Exception ex)
         {
+            SsoHelperMethods.DeleteUserPictureFolderOnException(userEntity.UserPictureLocation);
             throw new TransactionException(ex.InnerException!.Message);
         }
 
@@ -208,6 +215,16 @@ public class SsoService(
 
     public async Task Delete(Guid userUuid)
     {
-        await SsoHelperMethods.DeleteAllUnverifiedUserData(context, userUuid);
+        var pendingUser = await GetByUuid(userUuid);
+
+        try
+        {
+            SsoHelperMethods.DeleteUserPictureFolderOnException(pendingUser.UserPictureLocation);
+            await SsoHelperMethods.DeleteAllUnverifiedUserData(context, userUuid);
+        }
+        catch (Exception e)
+        {
+            throw new Exception(e.Message);
+        }
     }
 }

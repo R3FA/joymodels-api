@@ -18,7 +18,7 @@ public class ModelService(
     JoyModelsDbContext context,
     IMapper mapper,
     UserAuthValidation userAuthValidation,
-    ImageSettingsDetails imageSettingsDetails,
+    ModelImageSettingsDetails modelImageSettingsDetails,
     ModelSettingsDetails modelSettingsDetails)
     : IModelService
 {
@@ -60,7 +60,7 @@ public class ModelService(
         var modelEntity = mapper.Map<Model>(request);
         modelEntity.UserUuid = userAuthValidation.GetUserClaimUuid();
 
-        var modelPicturePaths = await request.Pictures.SaveModelPictures(imageSettingsDetails, modelEntity.Uuid);
+        var modelPicturePaths = await request.Pictures.SaveModelPictures(modelImageSettingsDetails, modelEntity.Uuid);
         modelEntity.LocationPath =
             await request.Model.SaveModel(modelSettingsDetails, modelEntity.Uuid, modelPicturePaths);
 
@@ -95,7 +95,7 @@ public class ModelService(
         var transaction = await context.Database.BeginTransactionAsync();
         try
         {
-            await request.PatchModelEntity(modelResponse, imageSettingsDetails, context);
+            await request.PatchModelEntity(modelResponse, modelImageSettingsDetails, context);
 
             await transaction.CommitAsync();
         }

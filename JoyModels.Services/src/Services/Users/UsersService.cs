@@ -9,7 +9,10 @@ using JoyModels.Services.Validation.Users;
 
 namespace JoyModels.Services.Services.Users;
 
-public class UsersService(JoyModelsDbContext context, IMapper mapper, UserAuthValidation userAuthValidation)
+public class UsersService(
+    JoyModelsDbContext context,
+    IMapper mapper,
+    UserAuthValidation userAuthValidation)
     : IUsersService
 {
     public async Task<UsersResponse> GetByUuid(Guid userUuid)

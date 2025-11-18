@@ -4,14 +4,17 @@ using System.Security.Cryptography;
 using System.Text;
 using JoyModels.Models.Database;
 using JoyModels.Models.Database.Entities;
+using JoyModels.Models.DataTransferObjects.ImageSettings;
 using JoyModels.Models.DataTransferObjects.Jwt;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Email;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Sso;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Sso;
 using JoyModels.Models.Pagination;
 using JoyModels.Services.Extensions;
+using JoyModels.Services.Validation.Models;
 using JoyModels.Services.Validation.Sso;
 using JoyModels.Utilities.RabbitMQ.MessageProducer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using UserRoleEnum = JoyModels.Models.Enums.UserRole;
@@ -217,6 +220,31 @@ public static class SsoHelperMethods
         await context.SaveChangesAsync();
     }
 
+    public static async Task<string> SaveUserPicture(IFormFile userPicture,
+        UserImageSettingsDetails userImageSettingsDetails, Guid userUuid)
+    {
+        try
+        {
+            await SsoValidation.ValidateUserPicture(userPicture, userImageSettingsDetails);
+
+            var userPictureName = $"user-picture-{Guid.NewGuid()}{Path.GetExtension(userPicture.FileName)}";
+
+            var basePath =
+                Directory.CreateDirectory(Path.Combine(userImageSettingsDetails.SavePath, "users",
+                    userUuid.ToString()));
+            var userPicturePath = Path.Combine(basePath.FullName, userPictureName);
+
+            await using var stream = new FileStream(userPicturePath, FileMode.Create);
+            await userPicture.CopyToAsync(stream);
+
+            return userPicturePath;
+        }
+        catch (Exception e)
+        {
+            throw new ApplicationException($"Failed to save user picture: {e.Message}");
+        }
+    }
+
     public static async Task CreatePendingUser(this PendingUser pendingUserEntity, JoyModelsDbContext context)
     {
         await context.PendingUsers.AddAsync(pendingUserEntity);
@@ -281,6 +309,18 @@ public static class SsoHelperMethods
                 "Logout process failed.");
 
         await context.SaveChangesAsync();
+    }
+
+    public static void DeleteUserPictureFolderOnException(string userPicturePath)
+    {
+        var userPictureFolder = Path.GetFullPath(Path.Combine(userPicturePath, ".."));
+        if (Directory.Exists(userPictureFolder)) Directory.Delete(userPictureFolder, true);
+    }
+
+    public static void DeleteUserPictureOnException(string userPicturePath)
+    {
+        var userPicture = Path.GetFullPath(userPicturePath);
+        if (File.Exists(userPicture)) File.Delete(userPicture);
     }
 
     public static void SendEmail(EmailSendUserDetailsRequest emailSendUserDetailsRequest,

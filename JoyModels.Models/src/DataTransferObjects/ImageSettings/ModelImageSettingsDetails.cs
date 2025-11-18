@@ -1,6 +1,6 @@
 namespace JoyModels.Models.DataTransferObjects.ImageSettings;
 
-public class ImageSettingsDetails
+public class ModelImageSettingsDetails
 {
     public ImageSettingsResolutionDetails ImageSettingsResolutionDetails { get; set; } = null!;
     public int AllowedSize { get; set; }

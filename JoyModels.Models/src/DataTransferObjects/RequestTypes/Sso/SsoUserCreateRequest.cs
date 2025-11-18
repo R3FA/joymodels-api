@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 namespace JoyModels.Models.DataTransferObjects.RequestTypes.Sso;
 
@@ -18,4 +19,6 @@ public class SsoUserCreateRequest
 
     [Required, MaxLength(50, ErrorMessage = "Password cannot exceed 50 characters.")]
     public string Password { get; set; } = null!;
+
+    [Required] public IFormFile UserPicture { get; set; } = null!;
 }
