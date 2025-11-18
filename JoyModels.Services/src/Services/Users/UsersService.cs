@@ -20,7 +20,12 @@ public class UsersService(
     public async Task<UsersResponse> GetByUuid(Guid userUuid)
     {
         var userEntity = await UsersHelperMethods.GetUserEntity(context, userUuid);
-        return mapper.Map<UsersResponse>(userEntity);
+
+        var userResponse = mapper.Map<UsersResponse>(userEntity);
+        userResponse.UserFollowing = await UsersHelperMethods.GetUserFollowing(context, userUuid);
+        userResponse.UserFollowers = await UsersHelperMethods.GetUserFollowers(context, userUuid);
+
+        return userResponse;
     }
 
     public async Task<PaginationResponse<UsersResponse>> Search(UsersSearchRequest request)
@@ -28,7 +33,15 @@ public class UsersService(
         request.ValidateUserSearchArguments();
 
         var userEntities = await UsersHelperMethods.SearchUserEntities(context, request);
-        return mapper.Map<PaginationResponse<UsersResponse>>(userEntities);
+
+        var userResponses = mapper.Map<PaginationResponse<UsersResponse>>(userEntities);
+        foreach (var userResponse in userResponses.Data)
+        {
+            userResponse.UserFollowing = await UsersHelperMethods.GetUserFollowing(context, userResponse.Uuid);
+            userResponse.UserFollowers = await UsersHelperMethods.GetUserFollowers(context, userResponse.Uuid);
+        }
+
+        return userResponses;
     }
 
     public async Task<UsersResponse> Patch(Guid userUuid, UsersPatchRequest request)

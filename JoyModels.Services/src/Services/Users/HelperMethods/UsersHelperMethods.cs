@@ -14,6 +14,24 @@ namespace JoyModels.Services.Services.Users.HelperMethods;
 
 public static class UsersHelperMethods
 {
+    public static async Task<int> GetUserFollowing(JoyModelsDbContext context, Guid userUuid)
+    {
+        return await context.UserFollowers
+            .AsNoTracking()
+            .Where(x => x.UserOriginUuid == userUuid)
+            .Distinct()
+            .CountAsync();
+    }
+
+    public static async Task<int> GetUserFollowers(JoyModelsDbContext context, Guid userUuid)
+    {
+        return await context.UserFollowers
+            .AsNoTracking()
+            .Where(x => x.UserTargetUuid == userUuid)
+            .Distinct()
+            .CountAsync();
+    }
+
     public static async Task<User> GetUserEntity(JoyModelsDbContext context, Guid userUuid)
     {
         var userEntity = await context.Users
