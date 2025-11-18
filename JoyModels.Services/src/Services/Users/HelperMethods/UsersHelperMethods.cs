@@ -1,8 +1,11 @@
 using JoyModels.Models.Database;
 using JoyModels.Models.Database.Entities;
+using JoyModels.Models.DataTransferObjects.ImageSettings;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Users;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.Users;
 using JoyModels.Models.Pagination;
 using JoyModels.Services.Extensions;
+using JoyModels.Services.Services.Sso.HelperMethods;
 using JoyModels.Services.Validation;
 using Microsoft.EntityFrameworkCore;
 using UserRoleEnum = JoyModels.Models.Enums.UserRole;
@@ -46,7 +49,8 @@ public static class UsersHelperMethods
         return userEntities;
     }
 
-    public static async Task PatchUserEntity(this UsersPatchRequest request, JoyModelsDbContext context)
+    public static async Task PatchUserEntity(this UsersPatchRequest request, JoyModelsDbContext context,
+        UsersResponse userResponse, UserImageSettingsDetails userImageSettingsDetails)
     {
         if (!string.IsNullOrWhiteSpace(request.FirstName))
             await context.Users.Where(x => x.Uuid == request.UserUuid)
@@ -59,6 +63,27 @@ public static class UsersHelperMethods
         if (!string.IsNullOrWhiteSpace(request.Nickname))
             await context.Users.Where(x => x.Uuid == request.UserUuid)
                 .ExecuteUpdateAsync(x => x.SetProperty(z => z.NickName, request.Nickname));
+
+        if (request.UserPicture != null)
+        {
+            var userPicturePath = string.Empty;
+            try
+            {
+                userPicturePath =
+                    await SsoHelperMethods.SaveUserPicture(request.UserPicture, userImageSettingsDetails,
+                        request.UserUuid);
+
+                SsoHelperMethods.DeleteUserPictureOnException(userResponse.UserPictureLocation);
+
+                await context.Users.Where(x => x.Uuid == request.UserUuid)
+                    .ExecuteUpdateAsync(x => x.SetProperty(z => z.UserPictureLocation, userPicturePath));
+            }
+            catch (Exception e)
+            {
+                SsoHelperMethods.DeleteUserPictureOnException(userPicturePath);
+                throw new Exception(e.Message);
+            }
+        }
 
         await context.SaveChangesAsync();
     }

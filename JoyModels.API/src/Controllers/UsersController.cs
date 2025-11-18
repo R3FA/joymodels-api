@@ -28,7 +28,7 @@ public class UsersController(IUsersService service) : ControllerBase
     [Authorize(Policy = "VerifiedUsers")]
     [HttpPatch("edit-user/{userUuid:guid}")]
     public async Task<ActionResult<UsersResponse>> Patch([FromRoute] Guid userUuid,
-        [FromBody] UsersPatchRequest request)
+        [FromForm] UsersPatchRequest request)
     {
         return await service.Patch(userUuid, request);
     }

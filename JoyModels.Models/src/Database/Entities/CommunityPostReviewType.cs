@@ -6,5 +6,6 @@ public partial class CommunityPostReviewType
 
     public string ReviewName { get; set; } = null!;
 
-    public virtual ICollection<CommunityPostUserReview> CommunityPostUserReviews { get; set; } = new List<CommunityPostUserReview>();
+    public virtual ICollection<CommunityPostUserReview> CommunityPostUserReviews { get; set; } =
+        new List<CommunityPostUserReview>();
 }

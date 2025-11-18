@@ -4,7 +4,7 @@ namespace JoyModels.API.Setups;
 
 public static class ImageSettingsSetup
 {
-    public static ImageSettingsDetails RegisterModelImageSettingsDetails(IConfiguration configuration)
+    public static ModelImageSettingsDetails RegisterModelImageSettingsDetails(IConfiguration configuration)
     {
         var imageSettingsDetails = configuration.GetSection("ImageSettings");
         var imageSettingsResolutionSize = configuration.GetSection("ImageSettings:ImageSettingsModel");
@@ -24,7 +24,41 @@ public static class ImageSettingsSetup
             || string.IsNullOrWhiteSpace(imageSettingsResolutionMaximumHeightSize))
             throw new ApplicationException("Image settings details are not configured!");
 
-        return new ImageSettingsDetails()
+        return new ModelImageSettingsDetails()
+        {
+            ImageSettingsResolutionDetails = new ImageSettingsResolutionDetails
+            {
+                MinimumWidth = int.Parse(imageSettingsResolutionMinimumWidthSize),
+                MinimumHeight = int.Parse(imageSettingsResolutionMinimumHeightSize),
+                MaximumWidth = int.Parse(imageSettingsResolutionMaximumWidthSize),
+                MaximumHeight = int.Parse(imageSettingsResolutionMaximumHeightSize)
+            },
+            AllowedSize = int.Parse(imageSettingsAllowedSize),
+            SavePath = imageSettingsSavePath
+        };
+    }
+
+    public static UserImageSettingsDetails RegisterUserImageSettingsDetails(IConfiguration configuration)
+    {
+        var imageSettingsDetails = configuration.GetSection("ImageSettings");
+        var imageSettingsResolutionSize = configuration.GetSection("ImageSettings:ImageSettingsUser");
+
+        var imageSettingsAllowedSize = imageSettingsDetails["AllowedSize"];
+        var imageSettingsSavePath = imageSettingsDetails["SavePath"];
+        var imageSettingsResolutionMinimumWidthSize = imageSettingsResolutionSize["MinimumWidth"];
+        var imageSettingsResolutionMinimumHeightSize = imageSettingsResolutionSize["MinimumHeight"];
+        var imageSettingsResolutionMaximumWidthSize = imageSettingsResolutionSize["MaximumWidth"];
+        var imageSettingsResolutionMaximumHeightSize = imageSettingsResolutionSize["MaximumHeight"];
+
+        if (string.IsNullOrWhiteSpace(imageSettingsAllowedSize)
+            || string.IsNullOrWhiteSpace(imageSettingsSavePath)
+            || string.IsNullOrWhiteSpace(imageSettingsResolutionMinimumWidthSize)
+            || string.IsNullOrWhiteSpace(imageSettingsResolutionMinimumHeightSize)
+            || string.IsNullOrWhiteSpace(imageSettingsResolutionMaximumWidthSize)
+            || string.IsNullOrWhiteSpace(imageSettingsResolutionMaximumHeightSize))
+            throw new ApplicationException("Image settings details are not configured!");
+
+        return new UserImageSettingsDetails()
         {
             ImageSettingsResolutionDetails = new ImageSettingsResolutionDetails
             {

@@ -167,7 +167,7 @@ public static class ModelHelperMethods
     }
 
     public static async Task<List<string>> SaveModelPictures(this List<IFormFile> modelPictures,
-        ImageSettingsDetails imageSettingsDetails, Guid modelUuid)
+        ModelImageSettingsDetails modelImageSettingsDetails, Guid modelUuid)
     {
         var modelPicturePaths = new List<string>(modelPictures.Count);
 
@@ -175,12 +175,12 @@ public static class ModelHelperMethods
         {
             foreach (var modelPicture in modelPictures)
             {
-                await ModelValidation.ValidateModelPicture(modelPicture, imageSettingsDetails);
+                await ModelValidation.ValidateModelPicture(modelPicture, modelImageSettingsDetails);
 
                 var modelPictureName = $"model-picture-{Guid.NewGuid()}{Path.GetExtension(modelPicture.FileName)}";
 
                 var basePath =
-                    Directory.CreateDirectory(Path.Combine(imageSettingsDetails.SavePath, "models",
+                    Directory.CreateDirectory(Path.Combine(modelImageSettingsDetails.SavePath, "models",
                         modelUuid.ToString()));
                 var modelPicturePath = Path.Combine(basePath.FullName, modelPictureName);
 
@@ -230,7 +230,7 @@ public static class ModelHelperMethods
     public static async Task PatchModelEntity(
         this ModelPatchRequest request,
         ModelResponse modelResponse,
-        ImageSettingsDetails imageSettingsDetails,
+        ModelImageSettingsDetails modelImageSettingsDetails,
         JoyModelsDbContext context)
     {
         if (!string.IsNullOrWhiteSpace(request.Name))
@@ -292,7 +292,7 @@ public static class ModelHelperMethods
                 throw new ArgumentException("You can upload maximum of 8 pictures per model!");
 
             var modelPicturePaths =
-                await request.ModelPictureToInsert.SaveModelPictures(imageSettingsDetails, modelResponse.Uuid);
+                await request.ModelPictureToInsert.SaveModelPictures(modelImageSettingsDetails, modelResponse.Uuid);
 
             await CreateModelPictures(new Model { Uuid = modelResponse.Uuid }, context, modelPicturePaths);
         }

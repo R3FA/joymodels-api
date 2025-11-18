@@ -14,11 +14,14 @@ public partial class CommunityPost
 
     public string? YoutubeVideoLink { get; set; }
 
-    public virtual ICollection<CommunityPostPicture> CommunityPostPictures { get; set; } = new List<CommunityPostPicture>();
+    public virtual ICollection<CommunityPostPicture> CommunityPostPictures { get; set; } =
+        new List<CommunityPostPicture>();
 
-    public virtual ICollection<CommunityPostQuestionSection> CommunityPostQuestionSections { get; set; } = new List<CommunityPostQuestionSection>();
+    public virtual ICollection<CommunityPostQuestionSection> CommunityPostQuestionSections { get; set; } =
+        new List<CommunityPostQuestionSection>();
 
-    public virtual ICollection<CommunityPostUserReview> CommunityPostUserReviews { get; set; } = new List<CommunityPostUserReview>();
+    public virtual ICollection<CommunityPostUserReview> CommunityPostUserReviews { get; set; } =
+        new List<CommunityPostUserReview>();
 
     public virtual CommunityPostType PostTypeUu { get; set; } = null!;
 

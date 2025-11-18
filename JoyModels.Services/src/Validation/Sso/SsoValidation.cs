@@ -2,10 +2,15 @@ using System.Data;
 using AutoMapper;
 using JoyModels.Models.Database;
 using JoyModels.Models.Database.Entities;
+using JoyModels.Models.DataTransferObjects.ImageSettings;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Sso;
 using JoyModels.Services.Services.Sso.HelperMethods;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Formats.Png;
 
 namespace JoyModels.Services.Validation.Sso;
 
@@ -38,6 +43,34 @@ public static class SsoValidation
 
         if (isEmailDuplicated)
             throw new DuplicateNameException($"Email `{request.Email}` is already registered in our database.");
+    }
+
+    public static async Task ValidateUserPicture(IFormFile userPicture,
+        UserImageSettingsDetails userImageSettingsDetails)
+    {
+        if (userPicture.Length > userImageSettingsDetails.AllowedSize)
+            throw new ArgumentException("Image too large. Maximum size limit is 10MB");
+
+        await using (var s1 = userPicture.OpenReadStream())
+        {
+            var format = await Image.DetectFormatAsync(s1);
+            if (format is null || (format != JpegFormat.Instance && format != PngFormat.Instance))
+                throw new ArgumentException("Unsupported image format. Allowed: .jpg, .jpeg, .png");
+        }
+
+        await using var s2 = userPicture.OpenReadStream();
+        var info = await Image.IdentifyAsync(s2);
+        if (info == null)
+            throw new ArgumentException("Unsupported or corrupted image.");
+
+        var minWidth = userImageSettingsDetails.ImageSettingsResolutionDetails.MinimumWidth;
+        var maxWidth = userImageSettingsDetails.ImageSettingsResolutionDetails.MaximumWidth;
+        var minHeight = userImageSettingsDetails.ImageSettingsResolutionDetails.MinimumHeight;
+        var maxHeight = userImageSettingsDetails.ImageSettingsResolutionDetails.MaximumHeight;
+
+        if (info.Width < minWidth || info.Width > maxWidth || info.Height < minHeight || info.Height > maxHeight)
+            throw new ArgumentException(
+                $"Image error: {info.Width}x{info.Height}. Allowed: width between {minWidth}-{maxWidth}px and height between {minHeight}-{maxHeight}px.");
     }
 
     public static void ValidateOtpCodeValueFormat(string otpCode)

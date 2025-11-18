@@ -26,7 +26,7 @@ public class SsoController(ISsoService service) : ControllerBase
     }
 
     [HttpPost("create")]
-    public async Task<ActionResult<SsoUserResponse>> Create([FromBody] SsoUserCreateRequest request)
+    public async Task<ActionResult<SsoUserResponse>> Create([FromForm] SsoUserCreateRequest request)
     {
         return await service.Create(request);
     }

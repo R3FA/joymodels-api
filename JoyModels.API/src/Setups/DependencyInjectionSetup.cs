@@ -73,6 +73,7 @@ public static class DependencyInjectionSetup
 
         // ImageSettings DI
         services.AddSingleton(ImageSettingsSetup.RegisterModelImageSettingsDetails(configuration));
+        services.AddSingleton(ImageSettingsSetup.RegisterUserImageSettingsDetails(configuration));
 
         // ModelSettings DI
         services.AddSingleton(ModelSettingsSetup.RegisterModelSettingsDetails(configuration));

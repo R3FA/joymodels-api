@@ -1,5 +1,6 @@
 using AutoMapper;
 using JoyModels.Models.Database;
+using JoyModels.Models.DataTransferObjects.ImageSettings;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Users;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Users;
@@ -9,7 +10,11 @@ using JoyModels.Services.Validation.Users;
 
 namespace JoyModels.Services.Services.Users;
 
-public class UsersService(JoyModelsDbContext context, IMapper mapper, UserAuthValidation userAuthValidation)
+public class UsersService(
+    JoyModelsDbContext context,
+    IMapper mapper,
+    UserAuthValidation userAuthValidation,
+    UserImageSettingsDetails userImageSettingsDetails)
     : IUsersService
 {
     public async Task<UsersResponse> GetByUuid(Guid userUuid)
@@ -33,7 +38,9 @@ public class UsersService(JoyModelsDbContext context, IMapper mapper, UserAuthVa
         request.ValidateUserPatchArguments();
         await request.ValidateUserPatchArgumentsDuplicatedFields(context);
 
-        await request.PatchUserEntity(context);
+        var userResponse = await GetByUuid(userUuid);
+
+        await request.PatchUserEntity(context, userResponse, userImageSettingsDetails);
 
         return await GetByUuid(userUuid);
     }
