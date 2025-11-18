@@ -1,5 +1,6 @@
 using JoyModels.Models.DataTransferObjects.RequestTypes.Users;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.UserFollowers;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Users;
 using JoyModels.Services.Services.Users;
 using Microsoft.AspNetCore.Authorization;
@@ -26,11 +27,41 @@ public class UsersController(IUsersService service) : ControllerBase
     }
 
     [Authorize(Policy = "VerifiedUsers")]
+    [HttpGet("search-following-users")]
+    public async Task<ActionResult<PaginationResponse<UserFollowingResponse>>> SearchFollowingUsers(
+        [FromQuery] UserFollowerSearchRequest request)
+    {
+        return await service.SearchFollowingUsers(request);
+    }
+
+    [Authorize(Policy = "VerifiedUsers")]
+    [HttpGet("search-follower-users")]
+    public async Task<ActionResult<PaginationResponse<UserFollowerResponse>>> SearchFollowerUsers(
+        [FromQuery] UserFollowerSearchRequest request)
+    {
+        return await service.SearchFollowerUsers(request);
+    }
+
+    [Authorize(Policy = "VerifiedUsers")]
+    [HttpPost("follow-an-user/{targetUserUuid:guid}")]
+    public async Task<ActionResult<UsersResponse>> FollowAnUser([FromRoute] Guid targetUserUuid)
+    {
+        return await service.FollowAnUser(targetUserUuid);
+    }
+
+    [Authorize(Policy = "VerifiedUsers")]
     [HttpPatch("edit-user/{userUuid:guid}")]
     public async Task<ActionResult<UsersResponse>> Patch([FromRoute] Guid userUuid,
         [FromForm] UsersPatchRequest request)
     {
         return await service.Patch(userUuid, request);
+    }
+
+    [Authorize(Policy = "VerifiedUsers")]
+    [HttpDelete("unfollow-an-user/{targetUserUuid:guid}")]
+    public async Task<ActionResult<UsersResponse>> UnfollowAnUser([FromRoute] Guid targetUserUuid)
+    {
+        return await service.UnfollowAnUser(targetUserUuid);
     }
 
     [Authorize(Policy = "VerifiedUsers")]

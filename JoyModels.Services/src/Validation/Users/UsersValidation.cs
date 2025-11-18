@@ -34,6 +34,25 @@ public static class UsersValidation
             ValidateNickname(request.Nickname);
     }
 
+    public static void ValidateUserSearchFollowingUsersArguments(this UserFollowerSearchRequest request)
+    {
+        if (!string.IsNullOrWhiteSpace(request.Nickname))
+            ValidateNickname(request.Nickname);
+    }
+
+    public static async Task ValidateUserFollowEndpoint(JoyModelsDbContext context, Guid targetUserUuid,
+        UserAuthValidation userAuthValidation)
+    {
+        if (userAuthValidation.GetUserClaimUuid() == targetUserUuid)
+            throw new ArgumentException("You cannot follow yourself.");
+
+        var exists = await context.UserFollowers
+            .AnyAsync(x =>
+                x.UserOriginUuid == userAuthValidation.GetUserClaimUuid() && x.UserTargetUuid == targetUserUuid);
+        if (exists)
+            throw new ArgumentException("You already follow this user.");
+    }
+
     public static void ValidateUserPatchArguments(this UsersPatchRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.FirstName)
@@ -61,5 +80,18 @@ public static class UsersValidation
                 throw new DuplicateNameException(
                     $"Nickname `{request.Nickname}` is already registered in our database.");
         }
+    }
+
+    public static async Task ValidateUserUnfollowEndpoint(JoyModelsDbContext context, Guid targetUserUuid,
+        UserAuthValidation userAuthValidation)
+    {
+        if (userAuthValidation.GetUserClaimUuid() == targetUserUuid)
+            throw new ArgumentException("You cannot unfollow yourself.");
+
+        var exists = await context.UserFollowers
+            .AnyAsync(x =>
+                x.UserOriginUuid == userAuthValidation.GetUserClaimUuid() && x.UserTargetUuid == targetUserUuid);
+        if (!exists)
+            throw new ArgumentException("You don't follow this user.");
     }
 }

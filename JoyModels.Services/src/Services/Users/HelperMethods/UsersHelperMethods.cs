@@ -14,6 +14,24 @@ namespace JoyModels.Services.Services.Users.HelperMethods;
 
 public static class UsersHelperMethods
 {
+    public static async Task<int> GetUserFollowing(JoyModelsDbContext context, Guid userUuid)
+    {
+        return await context.UserFollowers
+            .AsNoTracking()
+            .Where(x => x.UserOriginUuid == userUuid)
+            .Distinct()
+            .CountAsync();
+    }
+
+    public static async Task<int> GetUserFollowers(JoyModelsDbContext context, Guid userUuid)
+    {
+        return await context.UserFollowers
+            .AsNoTracking()
+            .Where(x => x.UserTargetUuid == userUuid)
+            .Distinct()
+            .CountAsync();
+    }
+
     public static async Task<User> GetUserEntity(JoyModelsDbContext context, Guid userUuid)
     {
         var userEntity = await context.Users
@@ -47,6 +65,64 @@ public static class UsersHelperMethods
             usersSearchRequestDto.OrderBy);
 
         return userEntities;
+    }
+
+    public static async Task<PaginationBase<UserFollower>> SearchFollowingUsers(JoyModelsDbContext context,
+        UserFollowerSearchRequest request)
+    {
+        var baseQuery = context.UserFollowers
+            .AsNoTracking()
+            .Include(x => x.UserTargetUu)
+            .Include(x => x.UserTargetUu.UserRoleUu)
+            .Where(x => x.UserTargetUu.UserRoleUu.RoleName != nameof(UserRoleEnum.Unverified)
+                        && x.UserOriginUuid == request.TargetUserUuid);
+
+        var filteredQuery = request.Nickname switch
+        {
+            not null => baseQuery.Where(x => x.UserTargetUu.NickName.Contains(request.Nickname)),
+            _ => baseQuery
+        };
+
+        filteredQuery = GlobalHelperMethods<UserFollower>.OrderBy(filteredQuery, request.OrderBy);
+
+        var userFollowing = await PaginationBase<UserFollower>.CreateAsync(filteredQuery,
+            request.PageNumber,
+            request.PageSize,
+            request.OrderBy);
+
+        return userFollowing;
+    }
+
+    public static async Task<PaginationBase<UserFollower>> SearchFollowerUsers(JoyModelsDbContext context,
+        UserFollowerSearchRequest request)
+    {
+        var baseQuery = context.UserFollowers
+            .AsNoTracking()
+            .Include(x => x.UserOriginUu)
+            .Include(x => x.UserOriginUu.UserRoleUu)
+            .Where(x => x.UserOriginUu.UserRoleUu.RoleName != nameof(UserRoleEnum.Unverified)
+                        && x.UserTargetUuid == request.TargetUserUuid);
+
+        var filteredQuery = request.Nickname switch
+        {
+            not null => baseQuery.Where(x => x.UserOriginUu.NickName.Contains(request.Nickname)),
+            _ => baseQuery
+        };
+
+        filteredQuery = GlobalHelperMethods<UserFollower>.OrderBy(filteredQuery, request.OrderBy);
+
+        var userFollowerEntities = await PaginationBase<UserFollower>.CreateAsync(filteredQuery,
+            request.PageNumber,
+            request.PageSize,
+            request.OrderBy);
+
+        return userFollowerEntities;
+    }
+
+    public static async Task CreateUserFollowerEntity(this UserFollower userFollowerEntity, JoyModelsDbContext context)
+    {
+        await context.AddAsync(userFollowerEntity);
+        await context.SaveChangesAsync();
     }
 
     public static async Task PatchUserEntity(this UsersPatchRequest request, JoyModelsDbContext context,
@@ -88,6 +164,16 @@ public static class UsersHelperMethods
         await context.SaveChangesAsync();
     }
 
+    public static async Task DeleteUserFollowerEntity(JoyModelsDbContext context, Guid targetUserUuid,
+        UserAuthValidation userAuthValidation)
+    {
+        await context.UserFollowers
+            .Where(x => x.UserOriginUuid == userAuthValidation.GetUserClaimUuid()
+                        && x.UserTargetUuid == targetUserUuid)
+            .ExecuteDeleteAsync();
+        await context.SaveChangesAsync();
+    }
+
     public static async Task DeleteUserEntity(JoyModelsDbContext context, Guid userUuid,
         UserAuthValidation userAuthValidation)
     {
@@ -104,5 +190,16 @@ public static class UsersHelperMethods
         if (totalCount <= 0)
             throw new KeyNotFoundException(
                 "User either doesn't exist or you don't own the account that you want to delete.");
+    }
+
+    public static UserFollower CreateUserFollowerObject(Guid targetUserUuid, UserAuthValidation userAuthValidation)
+    {
+        return new UserFollower
+        {
+            Uuid = Guid.NewGuid(),
+            UserOriginUuid = userAuthValidation.GetUserClaimUuid(),
+            UserTargetUuid = targetUserUuid,
+            FollowedAt = DateTime.Now
+        };
     }
 }
