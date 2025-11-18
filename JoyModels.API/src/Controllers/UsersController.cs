@@ -26,6 +26,13 @@ public class UsersController(IUsersService service) : ControllerBase
     }
 
     [Authorize(Policy = "VerifiedUsers")]
+    [HttpPost("follow-an-user")]
+    public async Task<ActionResult<UsersResponse>> FollowAnUser([FromQuery] UsersFollowRequest request)
+    {
+        return await service.FollowAnUser(request);
+    }
+
+    [Authorize(Policy = "VerifiedUsers")]
     [HttpPatch("edit-user/{userUuid:guid}")]
     public async Task<ActionResult<UsersResponse>> Patch([FromRoute] Guid userUuid,
         [FromForm] UsersPatchRequest request)

@@ -67,6 +67,12 @@ public static class UsersHelperMethods
         return userEntities;
     }
 
+    public static async Task CreateUserFollowerEntity(this UserFollower userFollowerEntity, JoyModelsDbContext context)
+    {
+        await context.AddAsync(userFollowerEntity);
+        await context.SaveChangesAsync();
+    }
+
     public static async Task PatchUserEntity(this UsersPatchRequest request, JoyModelsDbContext context,
         UsersResponse userResponse, UserImageSettingsDetails userImageSettingsDetails)
     {
@@ -122,5 +128,16 @@ public static class UsersHelperMethods
         if (totalCount <= 0)
             throw new KeyNotFoundException(
                 "User either doesn't exist or you don't own the account that you want to delete.");
+    }
+
+    public static UserFollower CreateUserFollowerObject(UsersFollowRequest request)
+    {
+        return new UserFollower
+        {
+            Uuid = Guid.NewGuid(),
+            UserOriginUuid = request.OriginUserUuid,
+            UserTargetUuid = request.TargetUserUuid,
+            FollowedAt = DateTime.Now
+        };
     }
 }

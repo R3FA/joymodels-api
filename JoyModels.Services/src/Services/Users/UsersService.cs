@@ -44,6 +44,17 @@ public class UsersService(
         return userResponses;
     }
 
+    public async Task<UsersResponse> FollowAnUser(UsersFollowRequest request)
+    {
+        userAuthValidation.ValidateUserAuthRequest(request.OriginUserUuid);
+        await UsersValidation.ValidateUserFollowEndpoint(context, request);
+
+        var userFollowerEntity = UsersHelperMethods.CreateUserFollowerObject(request);
+        await userFollowerEntity.CreateUserFollowerEntity(context);
+
+        return await GetByUuid(request.OriginUserUuid);
+    }
+
     public async Task<UsersResponse> Patch(Guid userUuid, UsersPatchRequest request)
     {
         userAuthValidation.ValidateUserAuthRequest(userUuid);
