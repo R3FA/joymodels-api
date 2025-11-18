@@ -3,6 +3,7 @@ using JoyModels.Models.Database;
 using JoyModels.Models.DataTransferObjects.ImageSettings;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Users;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.UserFollowers;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Users;
 using JoyModels.Services.Services.Users.HelperMethods;
 using JoyModels.Services.Validation;
@@ -42,6 +43,43 @@ public class UsersService(
         }
 
         return userResponses;
+    }
+
+    public async Task<PaginationResponse<UserFollowingResponse>> SearchFollowingUsers(
+        UserFollowerSearchRequest request)
+    {
+        request.ValidateUserSearchFollowingUsersArguments();
+
+        var userFollowerEntities = await UsersHelperMethods.SearchFollowingUsers(context, request);
+        var userFollowerResponses = mapper.Map<PaginationResponse<UserFollowingResponse>>(userFollowerEntities);
+
+        foreach (var userFollowersResponse in userFollowerResponses.Data)
+        {
+            userFollowersResponse.TargetUser.UserFollowing =
+                await UsersHelperMethods.GetUserFollowing(context, userFollowersResponse.TargetUser.Uuid);
+            userFollowersResponse.TargetUser.UserFollowers =
+                await UsersHelperMethods.GetUserFollowers(context, userFollowersResponse.TargetUser.Uuid);
+        }
+
+        return userFollowerResponses;
+    }
+
+    public async Task<PaginationResponse<UserFollowerResponse>> SearchFollowerUsers(UserFollowerSearchRequest request)
+    {
+        request.ValidateUserSearchFollowingUsersArguments();
+
+        var userFollowerEntities = await UsersHelperMethods.SearchFollowerUsers(context, request);
+        var userFollowerResponses = mapper.Map<PaginationResponse<UserFollowerResponse>>(userFollowerEntities);
+
+        foreach (var userFollowersResponse in userFollowerResponses.Data)
+        {
+            userFollowersResponse.OriginUser.UserFollowing =
+                await UsersHelperMethods.GetUserFollowing(context, userFollowersResponse.OriginUser.Uuid);
+            userFollowersResponse.OriginUser.UserFollowers =
+                await UsersHelperMethods.GetUserFollowers(context, userFollowersResponse.OriginUser.Uuid);
+        }
+
+        return userFollowerResponses;
     }
 
     public async Task<UsersResponse> FollowAnUser(Guid targetUserUuid)

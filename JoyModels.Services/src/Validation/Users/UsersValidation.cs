@@ -34,6 +34,12 @@ public static class UsersValidation
             ValidateNickname(request.Nickname);
     }
 
+    public static void ValidateUserSearchFollowingUsersArguments(this UserFollowerSearchRequest request)
+    {
+        if (!string.IsNullOrWhiteSpace(request.Nickname))
+            ValidateNickname(request.Nickname);
+    }
+
     public static async Task ValidateUserFollowEndpoint(JoyModelsDbContext context, Guid targetUserUuid,
         UserAuthValidation userAuthValidation)
     {

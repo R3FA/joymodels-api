@@ -67,6 +67,58 @@ public static class UsersHelperMethods
         return userEntities;
     }
 
+    public static async Task<PaginationBase<UserFollower>> SearchFollowingUsers(JoyModelsDbContext context,
+        UserFollowerSearchRequest request)
+    {
+        var baseQuery = context.UserFollowers
+            .AsNoTracking()
+            .Include(x => x.UserTargetUu)
+            .Include(x => x.UserTargetUu.UserRoleUu)
+            .Where(x => x.UserTargetUu.UserRoleUu.RoleName != nameof(UserRoleEnum.Unverified)
+                        && x.UserOriginUuid == request.TargetUserUuid);
+
+        var filteredQuery = request.Nickname switch
+        {
+            not null => baseQuery.Where(x => x.UserTargetUu.NickName.Contains(request.Nickname)),
+            _ => baseQuery
+        };
+
+        filteredQuery = GlobalHelperMethods<UserFollower>.OrderBy(filteredQuery, request.OrderBy);
+
+        var userFollowerEntities = await PaginationBase<UserFollower>.CreateAsync(filteredQuery,
+            request.PageNumber,
+            request.PageSize,
+            request.OrderBy);
+
+        return userFollowerEntities;
+    }
+
+    public static async Task<PaginationBase<UserFollower>> SearchFollowerUsers(JoyModelsDbContext context,
+        UserFollowerSearchRequest request)
+    {
+        var baseQuery = context.UserFollowers
+            .AsNoTracking()
+            .Include(x => x.UserOriginUu)
+            .Include(x => x.UserOriginUu.UserRoleUu)
+            .Where(x => x.UserOriginUu.UserRoleUu.RoleName != nameof(UserRoleEnum.Unverified)
+                        && x.UserTargetUuid == request.TargetUserUuid);
+
+        var filteredQuery = request.Nickname switch
+        {
+            not null => baseQuery.Where(x => x.UserOriginUu.NickName.Contains(request.Nickname)),
+            _ => baseQuery
+        };
+
+        filteredQuery = GlobalHelperMethods<UserFollower>.OrderBy(filteredQuery, request.OrderBy);
+
+        var userFollowerEntities = await PaginationBase<UserFollower>.CreateAsync(filteredQuery,
+            request.PageNumber,
+            request.PageSize,
+            request.OrderBy);
+
+        return userFollowerEntities;
+    }
+
     public static async Task CreateUserFollowerEntity(this UserFollower userFollowerEntity, JoyModelsDbContext context)
     {
         await context.AddAsync(userFollowerEntity);
