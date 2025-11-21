@@ -2,6 +2,7 @@ using System.Data;
 using JoyModels.Models.Database;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Users;
 using Microsoft.EntityFrameworkCore;
+using ModelAvailabilityEnum = JoyModels.Models.Enums.ModelAvailability;
 
 namespace JoyModels.Services.Validation.Users;
 
@@ -28,6 +29,13 @@ public static class UsersValidation
                 "Nickname must have at least 3 characters and may only contain lowercase letters and numbers.");
     }
 
+    private static void ValidateModelName(string modelName)
+    {
+        if (!RegularExpressionValidation.IsStringValid(modelName))
+            throw new ArgumentException(
+                "Invalid value: Must contain only letters (any language), digits, and the following characters: ':', '.', ',', '-'.");
+    }
+
     public static void ValidateUserSearchArguments(this UsersSearchRequest request)
     {
         if (!string.IsNullOrWhiteSpace(request.Nickname))
@@ -40,6 +48,12 @@ public static class UsersValidation
             ValidateNickname(request.Nickname);
     }
 
+    public static void ValidateUserModelLikesSearchArguments(this UserModelLikesSearchRequest request)
+    {
+        if (!string.IsNullOrWhiteSpace(request.ModelName))
+            ValidateModelName(request.ModelName);
+    }
+
     public static async Task ValidateUserFollowEndpoint(JoyModelsDbContext context, Guid targetUserUuid,
         UserAuthValidation userAuthValidation)
     {
@@ -50,7 +64,27 @@ public static class UsersValidation
             .AnyAsync(x =>
                 x.UserOriginUuid == userAuthValidation.GetUserClaimUuid() && x.UserTargetUuid == targetUserUuid);
         if (exists)
-            throw new ArgumentException("You already follow this user.");
+            throw new ArgumentException("You have already followed this user.");
+    }
+
+    public static async Task ValidateModelLikeEndpoint(JoyModelsDbContext context, Guid modelUuid,
+        UserAuthValidation userAuthValidation)
+    {
+        var isModelPublic = await context.UserModelLikes
+            .Include(x => x.ModelUu)
+            .Include(x => x.ModelUu.ModelAvailabilityUu)
+            .AnyAsync(x => x.ModelUuid == modelUuid
+                           && x.ModelUu.ModelAvailabilityUu.AvailabilityName == nameof(ModelAvailabilityEnum.Public));
+
+        if (!isModelPublic)
+            throw new ArgumentException("You cannot like a hidden model.");
+
+        var exists = await context.UserModelLikes
+            .AnyAsync(x =>
+                x.UserUuid == userAuthValidation.GetUserClaimUuid()
+                && x.ModelUuid == modelUuid);
+        if (exists)
+            throw new ArgumentException("You have already liked this model.");
     }
 
     public static void ValidateUserPatchArguments(this UsersPatchRequest request)
@@ -93,5 +127,15 @@ public static class UsersValidation
                 x.UserOriginUuid == userAuthValidation.GetUserClaimUuid() && x.UserTargetUuid == targetUserUuid);
         if (!exists)
             throw new ArgumentException("You don't follow this user.");
+    }
+
+    public static async Task ValidateModelUnlikeEndpoint(JoyModelsDbContext context, Guid modelUuid,
+        UserAuthValidation userAuthValidation)
+    {
+        var exists = await context.UserModelLikes
+            .AnyAsync(x =>
+                x.UserUuid == userAuthValidation.GetUserClaimUuid() && x.ModelUuid == modelUuid);
+        if (!exists)
+            throw new ArgumentException("You cannot unlike a model that you have never liked.");
     }
 }

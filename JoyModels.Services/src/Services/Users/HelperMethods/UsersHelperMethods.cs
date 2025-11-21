@@ -9,6 +9,7 @@ using JoyModels.Services.Services.Sso.HelperMethods;
 using JoyModels.Services.Validation;
 using Microsoft.EntityFrameworkCore;
 using UserRoleEnum = JoyModels.Models.Enums.UserRole;
+using ModelAvailabilityEnum = JoyModels.Models.Enums.ModelAvailability;
 
 namespace JoyModels.Services.Services.Users.HelperMethods;
 
@@ -28,6 +29,15 @@ public static class UsersHelperMethods
         return await context.UserFollowers
             .AsNoTracking()
             .Where(x => x.UserTargetUuid == userUuid)
+            .Distinct()
+            .CountAsync();
+    }
+
+    public static async Task<int> GetUserModelLikes(JoyModelsDbContext context, Guid userUuid)
+    {
+        return await context.UserModelLikes
+            .AsNoTracking()
+            .Where(x => x.UserUuid == userUuid)
             .Distinct()
             .CountAsync();
     }
@@ -119,9 +129,48 @@ public static class UsersHelperMethods
         return userFollowerEntities;
     }
 
+    public static async Task<PaginationBase<UserModelLike>> SearchUserModelLikes(JoyModelsDbContext context,
+        UserModelLikesSearchRequest request)
+    {
+        var baseQuery = context.UserModelLikes
+            .AsNoTracking()
+            .Include(x => x.ModelUu)
+            .Include(x => x.ModelUu.UserUu)
+            .Include(x => x.ModelUu.UserUu)
+            .Include(x => x.ModelUu.ModelAvailabilityUu)
+            .Include(x => x.ModelUu.ModelCategories)
+            .ThenInclude(x => x.CategoryUu)
+            .Include(x => x.ModelUu.ModelPictures)
+            .Where(x => x.UserUuid == request.UserUuid
+                        && string.Equals(x.ModelUu.ModelAvailabilityUu.AvailabilityName,
+                            nameof(ModelAvailabilityEnum.Public)));
+
+        var filteredQuery = request.ModelName switch
+        {
+            not null => baseQuery.Where(x => x.ModelUu.Name.Contains(request.ModelName)),
+            _ => baseQuery
+        };
+
+        filteredQuery = GlobalHelperMethods<UserModelLike>.OrderBy(filteredQuery, request.OrderBy);
+
+        var userModelLikesEntity = await PaginationBase<UserModelLike>.CreateAsync(filteredQuery,
+            request.PageNumber,
+            request.PageSize,
+            request.OrderBy);
+
+        return userModelLikesEntity;
+    }
+
     public static async Task CreateUserFollowerEntity(this UserFollower userFollowerEntity, JoyModelsDbContext context)
     {
         await context.AddAsync(userFollowerEntity);
+        await context.SaveChangesAsync();
+    }
+
+    public static async Task CreateUserModelLikeEntity(this UserModelLike userModelLikeEntity,
+        JoyModelsDbContext context)
+    {
+        await context.UserModelLikes.AddAsync(userModelLikeEntity);
         await context.SaveChangesAsync();
     }
 
@@ -174,6 +223,16 @@ public static class UsersHelperMethods
         await context.SaveChangesAsync();
     }
 
+    public static async Task DeleteUserModelLikeEntity(JoyModelsDbContext context, Guid modelUuid,
+        UserAuthValidation userAuthValidation)
+    {
+        await context.UserModelLikes
+            .Where(x => x.UserUuid == userAuthValidation.GetUserClaimUuid()
+                        && x.ModelUuid == modelUuid)
+            .ExecuteDeleteAsync();
+        await context.SaveChangesAsync();
+    }
+
     public static async Task DeleteUserEntity(JoyModelsDbContext context, Guid userUuid,
         UserAuthValidation userAuthValidation)
     {
@@ -200,6 +259,16 @@ public static class UsersHelperMethods
             UserOriginUuid = userAuthValidation.GetUserClaimUuid(),
             UserTargetUuid = targetUserUuid,
             FollowedAt = DateTime.Now
+        };
+    }
+
+    public static UserModelLike CreateUserModelLikeObject(Guid modelUuid, UserAuthValidation userAuthValidation)
+    {
+        return new UserModelLike
+        {
+            Uuid = Guid.NewGuid(),
+            UserUuid = userAuthValidation.GetUserClaimUuid(),
+            ModelUuid = modelUuid,
         };
     }
 }
