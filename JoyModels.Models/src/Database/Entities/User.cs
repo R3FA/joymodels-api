@@ -18,6 +18,9 @@ public partial class User
 
     public Guid UserRoleUuid { get; set; }
     public string UserPictureLocation { get; set; } = null!;
+    public int UserFollowerCount { get; set; }
+    public int UserFollowingCount { get; set; }
+    public int UserLikedModelsCount { get; set; }
 
     public virtual ICollection<CommunityPostQuestionSection> CommunityPostQuestionSectionUserOriginUus { get; set; } =
         new List<CommunityPostQuestionSection>();

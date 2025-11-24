@@ -22,12 +22,7 @@ public class UsersService(
     {
         var userEntity = await UsersHelperMethods.GetUserEntity(context, userUuid);
 
-        var userResponse = mapper.Map<UsersResponse>(userEntity);
-        userResponse.UserFollowing = await UsersHelperMethods.GetUserFollowing(context, userUuid);
-        userResponse.UserFollowers = await UsersHelperMethods.GetUserFollowers(context, userUuid);
-        userResponse.UserModelLikes = await UsersHelperMethods.GetUserModelLikes(context, userUuid);
-
-        return userResponse;
+        return mapper.Map<UsersResponse>(userEntity);
     }
 
     public async Task<PaginationResponse<UsersResponse>> Search(UsersSearchRequest request)
@@ -36,15 +31,7 @@ public class UsersService(
 
         var userEntities = await UsersHelperMethods.SearchUserEntities(context, request);
 
-        var userResponses = mapper.Map<PaginationResponse<UsersResponse>>(userEntities);
-        foreach (var userResponse in userResponses.Data)
-        {
-            userResponse.UserFollowing = await UsersHelperMethods.GetUserFollowing(context, userResponse.Uuid);
-            userResponse.UserFollowers = await UsersHelperMethods.GetUserFollowers(context, userResponse.Uuid);
-            userResponse.UserModelLikes = await UsersHelperMethods.GetUserModelLikes(context, userResponse.Uuid);
-        }
-
-        return userResponses;
+        return mapper.Map<PaginationResponse<UsersResponse>>(userEntities);
     }
 
     public async Task<PaginationResponse<UserFollowingResponse>> SearchFollowingUsers(
@@ -53,19 +40,8 @@ public class UsersService(
         request.ValidateUserSearchFollowingUsersArguments();
 
         var userFollowingEntities = await UsersHelperMethods.SearchFollowingUsers(context, request);
-        var userFollowingResponses = mapper.Map<PaginationResponse<UserFollowingResponse>>(userFollowingEntities);
 
-        foreach (var userFollowingResponse in userFollowingResponses.Data)
-        {
-            userFollowingResponse.TargetUser.UserFollowing =
-                await UsersHelperMethods.GetUserFollowing(context, userFollowingResponse.TargetUser.Uuid);
-            userFollowingResponse.TargetUser.UserFollowers =
-                await UsersHelperMethods.GetUserFollowers(context, userFollowingResponse.TargetUser.Uuid);
-            userFollowingResponse.TargetUser.UserModelLikes =
-                await UsersHelperMethods.GetUserModelLikes(context, userFollowingResponse.TargetUser.Uuid);
-        }
-
-        return userFollowingResponses;
+        return mapper.Map<PaginationResponse<UserFollowingResponse>>(userFollowingEntities);
     }
 
     public async Task<PaginationResponse<UserFollowerResponse>> SearchFollowerUsers(UserFollowerSearchRequest request)
@@ -73,19 +49,8 @@ public class UsersService(
         request.ValidateUserSearchFollowingUsersArguments();
 
         var userFollowerEntities = await UsersHelperMethods.SearchFollowerUsers(context, request);
-        var userFollowerResponses = mapper.Map<PaginationResponse<UserFollowerResponse>>(userFollowerEntities);
 
-        foreach (var userFollowersResponse in userFollowerResponses.Data)
-        {
-            userFollowersResponse.OriginUser.UserFollowing =
-                await UsersHelperMethods.GetUserFollowing(context, userFollowersResponse.OriginUser.Uuid);
-            userFollowersResponse.OriginUser.UserFollowers =
-                await UsersHelperMethods.GetUserFollowers(context, userFollowersResponse.OriginUser.Uuid);
-            userFollowersResponse.OriginUser.UserModelLikes =
-                await UsersHelperMethods.GetUserModelLikes(context, userFollowersResponse.OriginUser.Uuid);
-        }
-
-        return userFollowerResponses;
+        return mapper.Map<PaginationResponse<UserFollowerResponse>>(userFollowerEntities);
     }
 
     public async Task<PaginationResponse<UserModelLikesSearchResponse>> SearchUserModelLikes(

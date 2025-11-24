@@ -11,8 +11,8 @@ public class UsersResponse
     public string Email { get; set; } = null!;
     public DateTime CreatedAt { get; set; }
     public string UserPictureLocation { get; set; } = null!;
-    public int? UserFollowers { get; set; }
-    public int? UserFollowing { get; set; }
-    public int? UserModelLikes { get; set; }
+    public int UserFollowerCount { get; set; }
+    public int UserFollowingCount { get; set; }
+    public int UserLikedModelsCount { get; set; }
     public virtual UserRoleResponse UserRole { get; set; } = null!;
 }

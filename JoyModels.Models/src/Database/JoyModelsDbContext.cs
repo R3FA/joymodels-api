@@ -689,6 +689,18 @@ public partial class JoyModelsDbContext : DbContext
             entity.Property(e => e.UserPictureLocation)
                 .HasMaxLength(255)
                 .HasColumnName("user_picture_location");
+            entity.Property(e => e.UserFollowerCount)
+                .HasColumnName("user_follower_count")
+                .HasDefaultValue(0)
+                .IsRequired();
+            entity.Property(e => e.UserFollowingCount)
+                .HasColumnName("user_following_count")
+                .HasDefaultValue(0)
+                .IsRequired();
+            entity.Property(e => e.UserLikedModelsCount)
+                .HasColumnName("user_liked_models_count")
+                .HasDefaultValue(0)
+                .IsRequired();
 
             entity.HasOne(d => d.UserRoleUu).WithMany(p => p.Users)
                 .HasForeignKey(d => d.UserRoleUuid)

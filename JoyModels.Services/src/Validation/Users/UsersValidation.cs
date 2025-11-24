@@ -70,11 +70,10 @@ public static class UsersValidation
     public static async Task ValidateModelLikeEndpoint(JoyModelsDbContext context, Guid modelUuid,
         UserAuthValidation userAuthValidation)
     {
-        var isModelPublic = await context.UserModelLikes
-            .Include(x => x.ModelUu)
-            .Include(x => x.ModelUu.ModelAvailabilityUu)
-            .AnyAsync(x => x.ModelUuid == modelUuid
-                           && x.ModelUu.ModelAvailabilityUu.AvailabilityName == nameof(ModelAvailabilityEnum.Public));
+        var isModelPublic = await context.Models
+            .Include(x => x.ModelAvailabilityUu)
+            .AnyAsync(x => x.Uuid == modelUuid
+                           && x.ModelAvailabilityUu.AvailabilityName == nameof(ModelAvailabilityEnum.Public));
 
         if (!isModelPublic)
             throw new ArgumentException("You cannot like a hidden model.");
