@@ -239,6 +239,13 @@ public static class ModelHelperMethods
         return modelPath;
     }
 
+    public static async Task CreateUserModelLikeEntity(this UserModelLike userModelLikeEntity,
+        JoyModelsDbContext context)
+    {
+        await context.UserModelLikes.AddAsync(userModelLikeEntity);
+        await context.SaveChangesAsync();
+    }
+
     public static async Task PatchModelEntity(
         this ModelPatchRequest request,
         ModelResponse modelResponse,
@@ -327,6 +334,16 @@ public static class ModelHelperMethods
         await context.SaveChangesAsync();
     }
 
+    public static async Task DeleteUserModelLikeEntity(JoyModelsDbContext context, Guid modelUuid,
+        UserAuthValidation userAuthValidation)
+    {
+        await context.UserModelLikes
+            .Where(x => x.UserUuid == userAuthValidation.GetUserClaimUuid()
+                        && x.ModelUuid == modelUuid)
+            .ExecuteDeleteAsync();
+        await context.SaveChangesAsync();
+    }
+
     public static async Task DeleteModel(JoyModelsDbContext context, Guid modelUuid,
         UserAuthValidation userAuthValidation)
     {
@@ -356,5 +373,15 @@ public static class ModelHelperMethods
     {
         var modelFolder = Path.GetFullPath(Path.Combine(modelPath, ".."));
         if (Directory.Exists(modelFolder)) Directory.Delete(modelFolder, true);
+    }
+
+    public static UserModelLike CreateUserModelLikeObject(Guid modelUuid, UserAuthValidation userAuthValidation)
+    {
+        return new UserModelLike
+        {
+            Uuid = Guid.NewGuid(),
+            UserUuid = userAuthValidation.GetUserClaimUuid(),
+            ModelUuid = modelUuid,
+        };
     }
 }

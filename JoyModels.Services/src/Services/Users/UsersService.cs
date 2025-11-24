@@ -65,24 +65,12 @@ public class UsersService(
         return userModelLikeResponses;
     }
 
-    public async Task<UsersResponse> FollowAnUser(Guid targetUserUuid)
+    public async Task FollowAnUser(Guid targetUserUuid)
     {
         await UsersValidation.ValidateUserFollowEndpoint(context, targetUserUuid, userAuthValidation);
 
         var userFollowerEntity = UsersHelperMethods.CreateUserFollowerObject(targetUserUuid, userAuthValidation);
         await userFollowerEntity.CreateUserFollowerEntity(context);
-
-        return await GetByUuid(userAuthValidation.GetUserClaimUuid());
-    }
-
-    public async Task<UsersResponse> ModelLike(Guid modelUuid)
-    {
-        await UsersValidation.ValidateModelLikeEndpoint(context, modelUuid, userAuthValidation);
-
-        var userModelLikeEntity = UsersHelperMethods.CreateUserModelLikeObject(modelUuid, userAuthValidation);
-        await userModelLikeEntity.CreateUserModelLikeEntity(context);
-
-        return await GetByUuid(userAuthValidation.GetUserClaimUuid());
     }
 
     public async Task<UsersResponse> Patch(Guid userUuid, UsersPatchRequest request)
@@ -99,22 +87,11 @@ public class UsersService(
         return await GetByUuid(userUuid);
     }
 
-    public async Task<UsersResponse> UnfollowAnUser(Guid targetUserUuid)
+    public async Task UnfollowAnUser(Guid targetUserUuid)
     {
         await UsersValidation.ValidateUserUnfollowEndpoint(context, targetUserUuid, userAuthValidation);
 
         await UsersHelperMethods.DeleteUserFollowerEntity(context, targetUserUuid, userAuthValidation);
-
-        return await GetByUuid(userAuthValidation.GetUserClaimUuid());
-    }
-
-    public async Task<UsersResponse> ModelUnlike(Guid modelUuid)
-    {
-        await UsersValidation.ValidateModelUnlikeEndpoint(context, modelUuid, userAuthValidation);
-
-        await UsersHelperMethods.DeleteUserModelLikeEntity(context, modelUuid, userAuthValidation);
-
-        return await GetByUuid(userAuthValidation.GetUserClaimUuid());
     }
 
     public async Task Delete(Guid userUuid)

@@ -52,16 +52,10 @@ public class UsersController(IUsersService service) : ControllerBase
 
     [Authorize(Policy = "VerifiedUsers")]
     [HttpPost("follow-an-user/{targetUserUuid:guid}")]
-    public async Task<ActionResult<UsersResponse>> FollowAnUser([FromRoute] Guid targetUserUuid)
+    public async Task<ActionResult> FollowAnUser([FromRoute] Guid targetUserUuid)
     {
-        return await service.FollowAnUser(targetUserUuid);
-    }
-
-    [Authorize(Policy = "VerifiedUsers")]
-    [HttpPost("model-like/{modelUuid:guid}")]
-    public async Task<ActionResult<UsersResponse>> ModelLike([FromRoute] Guid modelUuid)
-    {
-        return await service.ModelLike(modelUuid);
+        await service.FollowAnUser(targetUserUuid);
+        return NoContent();
     }
 
     [Authorize(Policy = "VerifiedUsers")]
@@ -74,16 +68,10 @@ public class UsersController(IUsersService service) : ControllerBase
 
     [Authorize(Policy = "VerifiedUsers")]
     [HttpDelete("unfollow-an-user/{targetUserUuid:guid}")]
-    public async Task<ActionResult<UsersResponse>> UnfollowAnUser([FromRoute] Guid targetUserUuid)
+    public async Task<ActionResult> UnfollowAnUser([FromRoute] Guid targetUserUuid)
     {
-        return await service.UnfollowAnUser(targetUserUuid);
-    }
-
-    [Authorize(Policy = "VerifiedUsers")]
-    [HttpDelete("model-unlike/{modelUuid:guid}")]
-    public async Task<ActionResult<UsersResponse>> ModelUnlike([FromRoute] Guid modelUuid)
-    {
-        return await service.ModelUnlike(modelUuid);
+        await service.UnfollowAnUser(targetUserUuid);
+        return NoContent();
     }
 
     [Authorize(Policy = "VerifiedUsers")]

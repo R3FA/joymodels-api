@@ -2,7 +2,6 @@ using System.Data;
 using JoyModels.Models.Database;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Users;
 using Microsoft.EntityFrameworkCore;
-using ModelAvailabilityEnum = JoyModels.Models.Enums.ModelAvailability;
 
 namespace JoyModels.Services.Validation.Users;
 
@@ -67,25 +66,6 @@ public static class UsersValidation
             throw new ArgumentException("You have already followed this user.");
     }
 
-    public static async Task ValidateModelLikeEndpoint(JoyModelsDbContext context, Guid modelUuid,
-        UserAuthValidation userAuthValidation)
-    {
-        var isModelPublic = await context.Models
-            .Include(x => x.ModelAvailabilityUu)
-            .AnyAsync(x => x.Uuid == modelUuid
-                           && x.ModelAvailabilityUu.AvailabilityName == nameof(ModelAvailabilityEnum.Public));
-
-        if (!isModelPublic)
-            throw new ArgumentException("You cannot like a hidden model.");
-
-        var exists = await context.UserModelLikes
-            .AnyAsync(x =>
-                x.UserUuid == userAuthValidation.GetUserClaimUuid()
-                && x.ModelUuid == modelUuid);
-        if (exists)
-            throw new ArgumentException("You have already liked this model.");
-    }
-
     public static void ValidateUserPatchArguments(this UsersPatchRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.FirstName)
@@ -126,15 +106,5 @@ public static class UsersValidation
                 x.UserOriginUuid == userAuthValidation.GetUserClaimUuid() && x.UserTargetUuid == targetUserUuid);
         if (!exists)
             throw new ArgumentException("You don't follow this user.");
-    }
-
-    public static async Task ValidateModelUnlikeEndpoint(JoyModelsDbContext context, Guid modelUuid,
-        UserAuthValidation userAuthValidation)
-    {
-        var exists = await context.UserModelLikes
-            .AnyAsync(x =>
-                x.UserUuid == userAuthValidation.GetUserClaimUuid() && x.ModelUuid == modelUuid);
-        if (!exists)
-            throw new ArgumentException("You cannot unlike a model that you have never liked.");
     }
 }

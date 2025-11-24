@@ -140,13 +140,6 @@ public static class UsersHelperMethods
         await context.SaveChangesAsync();
     }
 
-    public static async Task CreateUserModelLikeEntity(this UserModelLike userModelLikeEntity,
-        JoyModelsDbContext context)
-    {
-        await context.UserModelLikes.AddAsync(userModelLikeEntity);
-        await context.SaveChangesAsync();
-    }
-
     public static async Task PatchUserEntity(this UsersPatchRequest request, JoyModelsDbContext context,
         UsersResponse userResponse, UserImageSettingsDetails userImageSettingsDetails)
     {
@@ -196,16 +189,6 @@ public static class UsersHelperMethods
         await context.SaveChangesAsync();
     }
 
-    public static async Task DeleteUserModelLikeEntity(JoyModelsDbContext context, Guid modelUuid,
-        UserAuthValidation userAuthValidation)
-    {
-        await context.UserModelLikes
-            .Where(x => x.UserUuid == userAuthValidation.GetUserClaimUuid()
-                        && x.ModelUuid == modelUuid)
-            .ExecuteDeleteAsync();
-        await context.SaveChangesAsync();
-    }
-
     public static async Task DeleteUserEntity(JoyModelsDbContext context, Guid userUuid,
         UserAuthValidation userAuthValidation)
     {
@@ -232,16 +215,6 @@ public static class UsersHelperMethods
             UserOriginUuid = userAuthValidation.GetUserClaimUuid(),
             UserTargetUuid = targetUserUuid,
             FollowedAt = DateTime.Now
-        };
-    }
-
-    public static UserModelLike CreateUserModelLikeObject(Guid modelUuid, UserAuthValidation userAuthValidation)
-    {
-        return new UserModelLike
-        {
-            Uuid = Guid.NewGuid(),
-            UserUuid = userAuthValidation.GetUserClaimUuid(),
-            ModelUuid = modelUuid,
         };
     }
 }

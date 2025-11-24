@@ -12,10 +12,8 @@ public interface IUsersService
     Task<PaginationResponse<UserFollowingResponse>> SearchFollowingUsers(UserFollowerSearchRequest request);
     Task<PaginationResponse<UserFollowerResponse>> SearchFollowerUsers(UserFollowerSearchRequest request);
     Task<PaginationResponse<UserModelLikesSearchResponse>> SearchUserModelLikes(UserModelLikesSearchRequest request);
-    Task<UsersResponse> FollowAnUser(Guid targetUserUuid);
-    Task<UsersResponse> ModelLike(Guid modelUuid);
+    Task FollowAnUser(Guid targetUserUuid);
     Task<UsersResponse> Patch(Guid userUuid, UsersPatchRequest request);
-    Task<UsersResponse> UnfollowAnUser(Guid targetUserUuid);
-    Task<UsersResponse> ModelUnlike(Guid modelUuid);
+    Task UnfollowAnUser(Guid targetUserUuid);
     Task Delete(Guid userUuid);
 }
