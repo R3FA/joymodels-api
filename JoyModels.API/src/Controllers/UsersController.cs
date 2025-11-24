@@ -43,10 +43,19 @@ public class UsersController(IUsersService service) : ControllerBase
     }
 
     [Authorize(Policy = "VerifiedUsers")]
-    [HttpPost("follow-an-user/{targetUserUuid:guid}")]
-    public async Task<ActionResult<UsersResponse>> FollowAnUser([FromRoute] Guid targetUserUuid)
+    [HttpGet("search-user-model-likes")]
+    public async Task<ActionResult<PaginationResponse<UserModelLikesSearchResponse>>> SearchUserModelLikes(
+        [FromQuery] UserModelLikesSearchRequest request)
     {
-        return await service.FollowAnUser(targetUserUuid);
+        return await service.SearchUserModelLikes(request);
+    }
+
+    [Authorize(Policy = "VerifiedUsers")]
+    [HttpPost("follow-an-user/{targetUserUuid:guid}")]
+    public async Task<ActionResult> FollowAnUser([FromRoute] Guid targetUserUuid)
+    {
+        await service.FollowAnUser(targetUserUuid);
+        return NoContent();
     }
 
     [Authorize(Policy = "VerifiedUsers")]
@@ -59,9 +68,10 @@ public class UsersController(IUsersService service) : ControllerBase
 
     [Authorize(Policy = "VerifiedUsers")]
     [HttpDelete("unfollow-an-user/{targetUserUuid:guid}")]
-    public async Task<ActionResult<UsersResponse>> UnfollowAnUser([FromRoute] Guid targetUserUuid)
+    public async Task<ActionResult> UnfollowAnUser([FromRoute] Guid targetUserUuid)
     {
-        return await service.UnfollowAnUser(targetUserUuid);
+        await service.UnfollowAnUser(targetUserUuid);
+        return NoContent();
     }
 
     [Authorize(Policy = "VerifiedUsers")]

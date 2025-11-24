@@ -9,6 +9,7 @@ public class ModelAvailabilityProfile : Profile
 {
     public ModelAvailabilityProfile()
     {
+        CreateMap<ModelAvailabilityResponse, ModelAvailability>();
         CreateMap<ModelAvailability, ModelAvailabilityResponse>();
         CreateMap<ModelAvailabilityCreateRequest, ModelAvailability>()
             .AfterMap((_, dest) => dest.Uuid = Guid.NewGuid());

@@ -28,6 +28,13 @@ public static class UsersValidation
                 "Nickname must have at least 3 characters and may only contain lowercase letters and numbers.");
     }
 
+    private static void ValidateModelName(string modelName)
+    {
+        if (!RegularExpressionValidation.IsStringValid(modelName))
+            throw new ArgumentException(
+                "Invalid value: Must contain only letters (any language), digits, and the following characters: ':', '.', ',', '-'.");
+    }
+
     public static void ValidateUserSearchArguments(this UsersSearchRequest request)
     {
         if (!string.IsNullOrWhiteSpace(request.Nickname))
@@ -40,6 +47,12 @@ public static class UsersValidation
             ValidateNickname(request.Nickname);
     }
 
+    public static void ValidateUserModelLikesSearchArguments(this UserModelLikesSearchRequest request)
+    {
+        if (!string.IsNullOrWhiteSpace(request.ModelName))
+            ValidateModelName(request.ModelName);
+    }
+
     public static async Task ValidateUserFollowEndpoint(JoyModelsDbContext context, Guid targetUserUuid,
         UserAuthValidation userAuthValidation)
     {
@@ -50,7 +63,7 @@ public static class UsersValidation
             .AnyAsync(x =>
                 x.UserOriginUuid == userAuthValidation.GetUserClaimUuid() && x.UserTargetUuid == targetUserUuid);
         if (exists)
-            throw new ArgumentException("You already follow this user.");
+            throw new ArgumentException("You have already followed this user.");
     }
 
     public static void ValidateUserPatchArguments(this UsersPatchRequest request)

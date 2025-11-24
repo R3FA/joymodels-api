@@ -22,11 +22,7 @@ public class UsersService(
     {
         var userEntity = await UsersHelperMethods.GetUserEntity(context, userUuid);
 
-        var userResponse = mapper.Map<UsersResponse>(userEntity);
-        userResponse.UserFollowing = await UsersHelperMethods.GetUserFollowing(context, userUuid);
-        userResponse.UserFollowers = await UsersHelperMethods.GetUserFollowers(context, userUuid);
-
-        return userResponse;
+        return mapper.Map<UsersResponse>(userEntity);
     }
 
     public async Task<PaginationResponse<UsersResponse>> Search(UsersSearchRequest request)
@@ -35,14 +31,7 @@ public class UsersService(
 
         var userEntities = await UsersHelperMethods.SearchUserEntities(context, request);
 
-        var userResponses = mapper.Map<PaginationResponse<UsersResponse>>(userEntities);
-        foreach (var userResponse in userResponses.Data)
-        {
-            userResponse.UserFollowing = await UsersHelperMethods.GetUserFollowing(context, userResponse.Uuid);
-            userResponse.UserFollowers = await UsersHelperMethods.GetUserFollowers(context, userResponse.Uuid);
-        }
-
-        return userResponses;
+        return mapper.Map<PaginationResponse<UsersResponse>>(userEntities);
     }
 
     public async Task<PaginationResponse<UserFollowingResponse>> SearchFollowingUsers(
@@ -51,17 +40,8 @@ public class UsersService(
         request.ValidateUserSearchFollowingUsersArguments();
 
         var userFollowingEntities = await UsersHelperMethods.SearchFollowingUsers(context, request);
-        var userFollowingResponses = mapper.Map<PaginationResponse<UserFollowingResponse>>(userFollowingEntities);
 
-        foreach (var userFollowersResponse in userFollowingResponses.Data)
-        {
-            userFollowersResponse.TargetUser.UserFollowing =
-                await UsersHelperMethods.GetUserFollowing(context, userFollowersResponse.TargetUser.Uuid);
-            userFollowersResponse.TargetUser.UserFollowers =
-                await UsersHelperMethods.GetUserFollowers(context, userFollowersResponse.TargetUser.Uuid);
-        }
-
-        return userFollowingResponses;
+        return mapper.Map<PaginationResponse<UserFollowingResponse>>(userFollowingEntities);
     }
 
     public async Task<PaginationResponse<UserFollowerResponse>> SearchFollowerUsers(UserFollowerSearchRequest request)
@@ -69,27 +49,28 @@ public class UsersService(
         request.ValidateUserSearchFollowingUsersArguments();
 
         var userFollowerEntities = await UsersHelperMethods.SearchFollowerUsers(context, request);
-        var userFollowerResponses = mapper.Map<PaginationResponse<UserFollowerResponse>>(userFollowerEntities);
 
-        foreach (var userFollowersResponse in userFollowerResponses.Data)
-        {
-            userFollowersResponse.OriginUser.UserFollowing =
-                await UsersHelperMethods.GetUserFollowing(context, userFollowersResponse.OriginUser.Uuid);
-            userFollowersResponse.OriginUser.UserFollowers =
-                await UsersHelperMethods.GetUserFollowers(context, userFollowersResponse.OriginUser.Uuid);
-        }
-
-        return userFollowerResponses;
+        return mapper.Map<PaginationResponse<UserFollowerResponse>>(userFollowerEntities);
     }
 
-    public async Task<UsersResponse> FollowAnUser(Guid targetUserUuid)
+    public async Task<PaginationResponse<UserModelLikesSearchResponse>> SearchUserModelLikes(
+        UserModelLikesSearchRequest request)
+    {
+        request.ValidateUserModelLikesSearchArguments();
+
+        var userModelLikeEntities = await UsersHelperMethods.SearchUserModelLikes(context, request);
+        var userModelLikeResponses =
+            mapper.Map<PaginationResponse<UserModelLikesSearchResponse>>(userModelLikeEntities);
+
+        return userModelLikeResponses;
+    }
+
+    public async Task FollowAnUser(Guid targetUserUuid)
     {
         await UsersValidation.ValidateUserFollowEndpoint(context, targetUserUuid, userAuthValidation);
 
         var userFollowerEntity = UsersHelperMethods.CreateUserFollowerObject(targetUserUuid, userAuthValidation);
         await userFollowerEntity.CreateUserFollowerEntity(context);
-
-        return await GetByUuid(userAuthValidation.GetUserClaimUuid());
     }
 
     public async Task<UsersResponse> Patch(Guid userUuid, UsersPatchRequest request)
@@ -106,13 +87,11 @@ public class UsersService(
         return await GetByUuid(userUuid);
     }
 
-    public async Task<UsersResponse> UnfollowAnUser(Guid targetUserUuid)
+    public async Task UnfollowAnUser(Guid targetUserUuid)
     {
         await UsersValidation.ValidateUserUnfollowEndpoint(context, targetUserUuid, userAuthValidation);
 
         await UsersHelperMethods.DeleteUserFollowerEntity(context, targetUserUuid, userAuthValidation);
-
-        return await GetByUuid(userAuthValidation.GetUserClaimUuid());
     }
 
     public async Task Delete(Guid userUuid)

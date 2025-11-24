@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
+using ModelAvailabilityEnum = JoyModels.Models.Enums.ModelAvailability;
 
 namespace JoyModels.Services.Validation.Models;
 
@@ -84,6 +85,25 @@ public static class ModelValidation
                 "Unsupported model format. Allowed: .glb,.gltf,.fbx,.obj,.stl,.blend,.max,.ma,.mb");
     }
 
+    public static async Task ValidateModelLikeEndpoint(JoyModelsDbContext context, Guid modelUuid,
+        UserAuthValidation userAuthValidation)
+    {
+        var isModelPublic = await context.Models
+            .Include(x => x.ModelAvailabilityUu)
+            .AnyAsync(x => x.Uuid == modelUuid
+                           && x.ModelAvailabilityUu.AvailabilityName == nameof(ModelAvailabilityEnum.Public));
+
+        if (!isModelPublic)
+            throw new ArgumentException("You cannot like a hidden model.");
+
+        var exists = await context.UserModelLikes
+            .AnyAsync(x =>
+                x.UserUuid == userAuthValidation.GetUserClaimUuid()
+                && x.ModelUuid == modelUuid);
+        if (exists)
+            throw new ArgumentException("You have already liked this model.");
+    }
+
     public static void ValidateModelPatchArguments(this ModelPatchRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Name)
@@ -116,5 +136,15 @@ public static class ModelValidation
                 throw new DuplicateNameException(
                     $"Model name `{request.Name}` is already registered in our database.");
         }
+    }
+
+    public static async Task ValidateModelUnlikeEndpoint(JoyModelsDbContext context, Guid modelUuid,
+        UserAuthValidation userAuthValidation)
+    {
+        var exists = await context.UserModelLikes
+            .AnyAsync(x =>
+                x.UserUuid == userAuthValidation.GetUserClaimUuid() && x.ModelUuid == modelUuid);
+        if (!exists)
+            throw new ArgumentException("You cannot unlike a model that you have never liked.");
     }
 }

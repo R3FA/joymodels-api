@@ -9,29 +9,12 @@ using JoyModels.Services.Services.Sso.HelperMethods;
 using JoyModels.Services.Validation;
 using Microsoft.EntityFrameworkCore;
 using UserRoleEnum = JoyModels.Models.Enums.UserRole;
+using ModelAvailabilityEnum = JoyModels.Models.Enums.ModelAvailability;
 
 namespace JoyModels.Services.Services.Users.HelperMethods;
 
 public static class UsersHelperMethods
 {
-    public static async Task<int> GetUserFollowing(JoyModelsDbContext context, Guid userUuid)
-    {
-        return await context.UserFollowers
-            .AsNoTracking()
-            .Where(x => x.UserOriginUuid == userUuid)
-            .Distinct()
-            .CountAsync();
-    }
-
-    public static async Task<int> GetUserFollowers(JoyModelsDbContext context, Guid userUuid)
-    {
-        return await context.UserFollowers
-            .AsNoTracking()
-            .Where(x => x.UserTargetUuid == userUuid)
-            .Distinct()
-            .CountAsync();
-    }
-
     public static async Task<User> GetUserEntity(JoyModelsDbContext context, Guid userUuid)
     {
         var userEntity = await context.Users
@@ -117,6 +100,38 @@ public static class UsersHelperMethods
             request.OrderBy);
 
         return userFollowerEntities;
+    }
+
+    public static async Task<PaginationBase<UserModelLike>> SearchUserModelLikes(JoyModelsDbContext context,
+        UserModelLikesSearchRequest request)
+    {
+        var baseQuery = context.UserModelLikes
+            .AsNoTracking()
+            .Include(x => x.ModelUu)
+            .Include(x => x.ModelUu.UserUu)
+            .Include(x => x.ModelUu.UserUu)
+            .Include(x => x.ModelUu.ModelAvailabilityUu)
+            .Include(x => x.ModelUu.ModelCategories)
+            .ThenInclude(x => x.CategoryUu)
+            .Include(x => x.ModelUu.ModelPictures)
+            .Where(x => x.UserUuid == request.UserUuid
+                        && string.Equals(x.ModelUu.ModelAvailabilityUu.AvailabilityName,
+                            nameof(ModelAvailabilityEnum.Public)));
+
+        var filteredQuery = request.ModelName switch
+        {
+            not null => baseQuery.Where(x => x.ModelUu.Name.Contains(request.ModelName)),
+            _ => baseQuery
+        };
+
+        filteredQuery = GlobalHelperMethods<UserModelLike>.OrderBy(filteredQuery, request.OrderBy);
+
+        var userModelLikesEntity = await PaginationBase<UserModelLike>.CreateAsync(filteredQuery,
+            request.PageNumber,
+            request.PageSize,
+            request.OrderBy);
+
+        return userModelLikesEntity;
     }
 
     public static async Task CreateUserFollowerEntity(this UserFollower userFollowerEntity, JoyModelsDbContext context)

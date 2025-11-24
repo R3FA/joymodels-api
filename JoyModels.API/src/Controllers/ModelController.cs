@@ -41,11 +41,27 @@ public class ModelController(IModelService service) : ControllerBase
     }
 
     [Authorize(Policy = "VerifiedUsers")]
+    [HttpPost("model-like/{modelUuid:guid}")]
+    public async Task<ActionResult> ModelLike([FromRoute] Guid modelUuid)
+    {
+        await service.ModelLike(modelUuid);
+        return NoContent();
+    }
+
+    [Authorize(Policy = "VerifiedUsers")]
     [HttpPatch("edit-model/{modelUuid:guid}")]
     public async Task<ActionResult<ModelResponse>> Patch([FromRoute] Guid modelUuid,
         [FromForm] ModelPatchRequest request)
     {
         return await service.Patch(modelUuid, request);
+    }
+
+    [Authorize(Policy = "VerifiedUsers")]
+    [HttpDelete("model-unlike/{modelUuid:guid}")]
+    public async Task<ActionResult> ModelUnlike([FromRoute] Guid modelUuid)
+    {
+        await service.ModelUnlike(modelUuid);
+        return NoContent();
     }
 
     [Authorize(Policy = "VerifiedUsers")]

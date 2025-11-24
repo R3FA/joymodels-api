@@ -2,6 +2,7 @@ using AutoMapper;
 using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.RequestTypes.ModelReviews;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.ModelReviews;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.ModelReviewsType;
 
 namespace JoyModels.Models.AutoMapper;
 
@@ -19,5 +20,7 @@ public class ModelReviewProfile : Profile
             .ForMember(x => x.ReviewText, o => o.MapFrom(z => z.ModelReviewText))
             .AfterMap((_, dest) => dest.Uuid = Guid.NewGuid())
             .AfterMap((_, dest) => dest.CreatedAt = DateTime.Now);
+        CreateMap<ModelReviewType, ModelReviewTypeResponse>()
+            .ForMember(x => x.ReviewType, o => o.MapFrom(z => z.ReviewName));
     }
 }
