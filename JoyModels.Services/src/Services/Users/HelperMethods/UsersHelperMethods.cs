@@ -109,7 +109,7 @@ public static class UsersHelperMethods
             .AsNoTracking()
             .Include(x => x.ModelUu)
             .Include(x => x.ModelUu.UserUu)
-            .Include(x => x.ModelUu.UserUu)
+            .Include(x => x.ModelUu.UserUu.UserRoleUu)
             .Include(x => x.ModelUu.ModelAvailabilityUu)
             .Include(x => x.ModelUu.ModelCategories)
             .ThenInclude(x => x.CategoryUu)
