@@ -11,7 +11,7 @@ using JoyModels.Services.Services.Users;
 using JoyModels.Services.Validation;
 using JoyModels.Utilities.RabbitMQ.MessageConsumer;
 using JoyModels.Utilities.RabbitMQ.MessageProducer;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 
 namespace JoyModels.API.Setups;
 
@@ -26,30 +26,25 @@ public static class DependencyInjectionSetup
         services.AddProblemDetails();
 
         // Swagger DI
-        services.AddSwaggerGen(c =>
+        services.AddSwaggerGen(x =>
         {
-            var securityScheme = new OpenApiSecurityScheme
+            x.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
+                Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\"",
                 Name = "Authorization",
-                Description = "Insert JWT access token.",
                 In = ParameterLocation.Header,
                 Type = SecuritySchemeType.Http,
                 Scheme = "Bearer",
-                BearerFormat = "JWT",
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            };
+                BearerFormat = "JWT"
+            });
 
-            c.AddSecurityDefinition("Bearer", securityScheme);
-
-            var securityRequirement = new OpenApiSecurityRequirement
+            x.AddSecurityRequirement(document => new OpenApiSecurityRequirement
             {
-                { securityScheme, Array.Empty<string>() }
-            };
-            c.AddSecurityRequirement(securityRequirement);
+                {
+                    new OpenApiSecuritySchemeReference("Bearer", document),
+                    new List<string>()
+                }
+            });
         });
 
         // IHttpContext DI
