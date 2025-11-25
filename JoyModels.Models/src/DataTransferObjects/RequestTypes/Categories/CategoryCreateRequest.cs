@@ -4,5 +4,6 @@ namespace JoyModels.Models.DataTransferObjects.RequestTypes.Categories;
 
 public class CategoryCreateRequest
 {
-    [MaxLength(100)] [Required] public string CategoryName { get; set; } = string.Empty;
+    [Required, MaxLength(50, ErrorMessage = "CategoryName cannot exceed 50 characters.")]
+    public string CategoryName { get; set; } = string.Empty;
 }

@@ -8,7 +8,6 @@ using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Services.Services.ModelReviews.HelperMethods;
 using JoyModels.Services.Services.Models;
 using JoyModels.Services.Validation;
-using JoyModels.Services.Validation.ModelReviews;
 
 namespace JoyModels.Services.Services.ModelReviews;
 
@@ -52,7 +51,7 @@ public class ModelReviewService(
 
     public async Task<ModelReviewResponse> Patch(Guid modelReviewUuid, ModelReviewPatchRequest request)
     {
-        userAuthValidation.ValidateRequestUuids(modelReviewUuid, request.ModelReviewUuid);
+        GlobalValidation.ValidateRequestUuids(modelReviewUuid, request.ModelReviewUuid);
         var modelReviewResponse = await GetByUuid(modelReviewUuid);
         userAuthValidation.ValidateUserAuthRequest(modelReviewResponse.UsersResponse.Uuid);
         request.ValidateModelReviewPatchArguments();

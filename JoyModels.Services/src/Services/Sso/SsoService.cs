@@ -10,7 +10,6 @@ using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Sso;
 using JoyModels.Services.Services.Sso.HelperMethods;
 using JoyModels.Services.Validation;
-using JoyModels.Services.Validation.Sso;
 using JoyModels.Utilities.RabbitMQ.MessageProducer;
 using UserRoleEnum = JoyModels.Models.Enums.UserRole;
 
@@ -88,8 +87,8 @@ public class SsoService(
     public async Task<SsoUserResponse> Verify(Guid userUuid, SsoVerifyRequest request)
     {
         userAuthValidation.ValidateUserAuthRequest(userUuid);
-        userAuthValidation.ValidateRequestUuids(userUuid, request.UserUuid);
-        SsoValidation.ValidateOtpCodeValueFormat(request.OtpCode);
+        GlobalValidation.ValidateRequestUuids(userUuid, request.UserUuid);
+        RegularExpressionValidation.ValidateOtpCode(request.OtpCode);
         var accessTokenChangeRequest = mapper.Map<SsoAccessTokenChangeRequest>(request);
         await accessTokenChangeRequest.ValidateUserRefreshToken(context, mapper);
 
@@ -125,7 +124,7 @@ public class SsoService(
     public async Task RequestNewOtpCode(Guid userUuid, SsoNewOtpCodeRequest request)
     {
         userAuthValidation.ValidateUserAuthRequest(userUuid);
-        userAuthValidation.ValidateRequestUuids(userUuid, request.UserUuid);
+        GlobalValidation.ValidateRequestUuids(userUuid, request.UserUuid);
 
         var userEntity = await SsoHelperMethods.GetUserEntity(context, request.UserUuid, null);
 
@@ -170,7 +169,7 @@ public class SsoService(
         SsoAccessTokenChangeRequest request)
     {
         userAuthValidation.ValidateUserAuthRequest(userUuid);
-        userAuthValidation.ValidateRequestUuids(userUuid, request.UserUuid);
+        GlobalValidation.ValidateRequestUuids(userUuid, request.UserUuid);
 
         await request.ValidateUserRefreshToken(context, mapper);
 
@@ -182,7 +181,7 @@ public class SsoService(
     public async Task Logout(Guid userUuid, SsoLogoutRequest request)
     {
         userAuthValidation.ValidateUserAuthRequest(userUuid);
-        userAuthValidation.ValidateRequestUuids(userUuid, request.UserUuid);
+        GlobalValidation.ValidateRequestUuids(userUuid, request.UserUuid);
 
         await request.DeleteUserRefreshToken(context);
     }
@@ -191,7 +190,7 @@ public class SsoService(
         SsoPasswordChangeRequest request)
     {
         userAuthValidation.ValidateUserAuthRequest(userUuid);
-        userAuthValidation.ValidateRequestUuids(userUuid, request.UserUuid);
+        GlobalValidation.ValidateRequestUuids(userUuid, request.UserUuid);
         request.ValidateUserPasswordChangeRequestArguments();
 
         await SsoHelperMethods.CheckIfUserExists(context, request.UserUuid);
@@ -200,7 +199,7 @@ public class SsoService(
 
     public async Task SetRole(Guid userUuid, SsoSetRoleRequest request)
     {
-        userAuthValidation.ValidateRequestUuids(userUuid, request.UserUuid);
+        GlobalValidation.ValidateRequestUuids(userUuid, request.UserUuid);
 
         var userEntity = await SsoHelperMethods.GetUserEntity(context, request.UserUuid, null);
         userEntity.CheckIfUserIsUnverified();
