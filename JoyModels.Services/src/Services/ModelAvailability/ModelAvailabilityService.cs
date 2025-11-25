@@ -5,11 +5,10 @@ using JoyModels.Models.DataTransferObjects.ResponseTypes.ModelAvailability;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Services.Services.ModelAvailability.HelperMethods;
 using JoyModels.Services.Validation;
-using JoyModels.Services.Validation.ModelAvailability;
 
 namespace JoyModels.Services.Services.ModelAvailability;
 
-public class ModelAvailabilityService(JoyModelsDbContext context, IMapper mapper, UserAuthValidation userAuthValidation)
+public class ModelAvailabilityService(JoyModelsDbContext context, IMapper mapper)
     : IModelAvailabilityService
 {
     public async Task<ModelAvailabilityResponse> GetByUuid(Guid modelAvailabilityUuid)
@@ -42,7 +41,7 @@ public class ModelAvailabilityService(JoyModelsDbContext context, IMapper mapper
     public async Task<ModelAvailabilityResponse> Patch(Guid modelAvailabilityUuid,
         ModelAvailabilityPatchRequest request)
     {
-        userAuthValidation.ValidateRequestUuids(modelAvailabilityUuid, request.Uuid);
+        GlobalValidation.ValidateRequestUuids(modelAvailabilityUuid, request.Uuid);
         request.ValidateModelAvailabilityPatchArguments();
 
         await request.PatchModelAvailability(context);

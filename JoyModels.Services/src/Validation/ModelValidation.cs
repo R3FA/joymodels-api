@@ -10,30 +10,23 @@ using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
 using ModelAvailabilityEnum = JoyModels.Models.Enums.ModelAvailability;
 
-namespace JoyModels.Services.Validation.Models;
+namespace JoyModels.Services.Validation;
 
 public static class ModelValidation
 {
-    private static void ValidateModelStringArguments(string stringArgument)
-    {
-        if (!RegularExpressionValidation.IsStringValid(stringArgument))
-            throw new ArgumentException(
-                "Invalid value: Must contain only letters (any language), digits, and the following characters: ':', '.', ',', '-'.");
-    }
-
     public static void ValidateModelSearchArguments(string requestName)
     {
         if (!string.IsNullOrWhiteSpace(requestName))
-            ValidateModelStringArguments(requestName);
+            RegularExpressionValidation.ValidateText(requestName);
     }
 
     public static void ValidateModelCreateArguments(this ModelCreateRequest request)
     {
         if (!string.IsNullOrWhiteSpace(request.Name))
-            ValidateModelStringArguments(request.Name);
+            RegularExpressionValidation.ValidateText(request.Name);
 
         if (!string.IsNullOrWhiteSpace(request.Description))
-            ValidateModelStringArguments(request.Description);
+            RegularExpressionValidation.ValidateText(request.Description);
 
         if (request.Price <= 0)
             throw new ArgumentException("Price must be a positive number.");
@@ -117,10 +110,10 @@ public static class ModelValidation
             throw new ArgumentException("You cannot send an empty request!");
 
         if (!string.IsNullOrWhiteSpace(request.Name))
-            ValidateModelStringArguments(request.Name);
+            RegularExpressionValidation.ValidateText(request.Name);
 
         if (!string.IsNullOrWhiteSpace(request.Description))
-            ValidateModelStringArguments(request.Description);
+            RegularExpressionValidation.ValidateText(request.Description);
 
         if (request.Price is not null && request.Price <= 0)
             throw new ArgumentException("Price must be a positive number.");

@@ -7,7 +7,6 @@ using JoyModels.Models.DataTransferObjects.ResponseTypes.UserFollowers;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Users;
 using JoyModels.Services.Services.Users.HelperMethods;
 using JoyModels.Services.Validation;
-using JoyModels.Services.Validation.Users;
 
 namespace JoyModels.Services.Services.Users;
 
@@ -76,7 +75,7 @@ public class UsersService(
     public async Task<UsersResponse> Patch(Guid userUuid, UsersPatchRequest request)
     {
         userAuthValidation.ValidateUserAuthRequest(userUuid);
-        userAuthValidation.ValidateRequestUuids(userUuid, request.UserUuid);
+        GlobalValidation.ValidateRequestUuids(userUuid, request.UserUuid);
         request.ValidateUserPatchArguments();
         await request.ValidateUserPatchArgumentsDuplicatedFields(context);
 

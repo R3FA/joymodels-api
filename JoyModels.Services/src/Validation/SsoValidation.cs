@@ -12,24 +12,20 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
 
-namespace JoyModels.Services.Validation.Sso;
+namespace JoyModels.Services.Validation;
 
 public static class SsoValidation
 {
     public static void ValidateUserCreationArguments(this SsoUserCreateRequest request)
     {
-        if (!RegularExpressionValidation.IsNameValid(request.FirstName))
-            throw new ArgumentException(
-                "First name must begin with a capital letter and contain only lowercase letters after.");
+        RegularExpressionValidation.ValidateName(request.FirstName);
 
         if (!string.IsNullOrWhiteSpace(request.LastName))
-            if (!RegularExpressionValidation.IsNameValid(request.LastName))
-                throw new ArgumentException(
-                    "Last name must begin with a capital letter and contain only lowercase letters after.");
+            RegularExpressionValidation.ValidateName(request.LastName);
 
-        ValidateNickname(request.Nickname);
-        ValidateEmail(request.Email);
-        ValidatePassword(request.Password);
+        RegularExpressionValidation.ValidateNickname(request.Nickname);
+        RegularExpressionValidation.ValidateEmail(request.Email);
+        RegularExpressionValidation.ValidatePassword(request.Password);
     }
 
     public static async Task ValidateUserCreationDuplicatedFields(this SsoUserCreateRequest request,
@@ -73,12 +69,6 @@ public static class SsoValidation
                 $"Image error: {info.Width}x{info.Height}. Allowed: width between {minWidth}-{maxWidth}px and height between {minHeight}-{maxHeight}px.");
     }
 
-    public static void ValidateOtpCodeValueFormat(string otpCode)
-    {
-        if (!RegularExpressionValidation.IsOtpCodeValid(otpCode))
-            throw new ArgumentException("OTP code must be 12 characters, using only uppercase letters and numbers.");
-    }
-
     public static void ValidateOtpCodeForUserVerification(PendingUser pendingUserEntity,
         SsoVerifyRequest request)
     {
@@ -93,10 +83,10 @@ public static class SsoValidation
     public static void ValidateUserSearchArguments(this SsoSearchRequest request)
     {
         if (!string.IsNullOrWhiteSpace(request.Nickname))
-            ValidateNickname(request.Nickname);
+            RegularExpressionValidation.ValidateNickname(request.Nickname);
 
         if (!string.IsNullOrWhiteSpace(request.Email))
-            ValidateEmail(request.Email);
+            RegularExpressionValidation.ValidateEmail(request.Email);
     }
 
     public static void ValidateUserPasswordChangeRequestArguments(
@@ -105,13 +95,13 @@ public static class SsoValidation
         if (passwordChangeRequest.NewPassword != passwordChangeRequest.ConfirmNewPassword)
             throw new ArgumentException("New password and confirm password do not match.");
 
-        ValidatePassword(passwordChangeRequest.NewPassword);
+        RegularExpressionValidation.ValidatePassword(passwordChangeRequest.NewPassword);
     }
 
     public static void ValidateUserLoginRequestArguments(this SsoLoginRequest request)
     {
-        ValidateNickname(request.Nickname);
-        ValidatePassword(request.Password);
+        RegularExpressionValidation.ValidateNickname(request.Nickname);
+        RegularExpressionValidation.ValidatePassword(request.Password);
     }
 
     public static void ValidateUsersPassword(this SsoLoginRequest request, User userEntity)
@@ -147,26 +137,5 @@ public static class SsoValidation
     {
         if (userEntity.UserRoleUuid == designatedRole.Uuid)
             throw new ArgumentException($"User {userEntity.NickName} already has a role {designatedRole.RoleName}");
-    }
-
-    private static void ValidateNickname(string nickname)
-    {
-        if (!RegularExpressionValidation.IsNicknameValid(nickname))
-            throw new ArgumentException(
-                "Nickname must have at least 3 characters and may only contain lowercase letters and numbers.");
-    }
-
-    private static void ValidateEmail(string email)
-    {
-        if (!RegularExpressionValidation.IsEmailValid(email))
-            throw new ArgumentException(
-                "Email must contain the '@' symbol, followed by a domain with a dot. Value has to be without spaces or blank characters.");
-    }
-
-    private static void ValidatePassword(string password)
-    {
-        if (!RegularExpressionValidation.IsPasswordValid(password))
-            throw new ArgumentException(
-                "Password must have at least 8 characters, one uppercase letter, one number, and one special character (!@#$%^&*).");
     }
 }

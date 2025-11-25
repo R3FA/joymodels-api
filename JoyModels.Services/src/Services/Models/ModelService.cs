@@ -9,7 +9,6 @@ using JoyModels.Models.DataTransferObjects.ResponseTypes.Models;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Services.Services.Models.HelperMethods;
 using JoyModels.Services.Validation;
-using JoyModels.Services.Validation.Models;
 
 namespace JoyModels.Services.Services.Models;
 
@@ -93,7 +92,7 @@ public class ModelService(
 
     public async Task<ModelResponse> Patch(Guid modelUuid, ModelPatchRequest request)
     {
-        userAuthValidation.ValidateRequestUuids(modelUuid, request.Uuid);
+        GlobalValidation.ValidateRequestUuids(modelUuid, request.Uuid);
         var modelResponse = await GetByUuidWithAllAvailabilities(modelUuid);
         userAuthValidation.ValidateUserAuthRequest(modelResponse.UserUuid);
         request.ValidateModelPatchArguments();

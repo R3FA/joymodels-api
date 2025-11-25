@@ -11,8 +11,7 @@ using JoyModels.Models.DataTransferObjects.RequestTypes.Sso;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Sso;
 using JoyModels.Models.Pagination;
 using JoyModels.Services.Extensions;
-using JoyModels.Services.Validation.Models;
-using JoyModels.Services.Validation.Sso;
+using JoyModels.Services.Validation;
 using JoyModels.Utilities.RabbitMQ.MessageProducer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -65,7 +64,7 @@ public static class SsoHelperMethods
             chars[i] = otpAlphabet[randomBytes[i] % otpAlphabet.Length];
 
         var otpCode = new string(chars);
-        SsoValidation.ValidateOtpCodeValueFormat(otpCode);
+        RegularExpressionValidation.ValidateOtpCode(otpCode);
         return otpCode;
     }
 

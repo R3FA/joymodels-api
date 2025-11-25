@@ -6,11 +6,10 @@ using JoyModels.Models.DataTransferObjects.ResponseTypes.Categories;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Services.Services.Categories.HelperMethods;
 using JoyModels.Services.Validation;
-using JoyModels.Services.Validation.Categories;
 
 namespace JoyModels.Services.Services.Categories;
 
-public class CategoryService(JoyModelsDbContext context, IMapper mapper, UserAuthValidation userAuthValidation)
+public class CategoryService(JoyModelsDbContext context, IMapper mapper)
     : ICategoryService
 {
     public async Task<CategoryResponse> GetByUuid(Guid categoryUuid)
@@ -40,7 +39,7 @@ public class CategoryService(JoyModelsDbContext context, IMapper mapper, UserAut
 
     public async Task<CategoryResponse> Patch(Guid categoryUuid, CategoryPatchRequest request)
     {
-        userAuthValidation.ValidateRequestUuids(categoryUuid, request.Uuid);
+        GlobalValidation.ValidateRequestUuids(categoryUuid, request.Uuid);
         request.ValidateCategoryPatchArguments();
 
         await request.PatchCategory(context);

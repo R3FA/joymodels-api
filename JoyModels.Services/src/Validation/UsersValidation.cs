@@ -3,54 +3,26 @@ using JoyModels.Models.Database;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Users;
 using Microsoft.EntityFrameworkCore;
 
-namespace JoyModels.Services.Validation.Users;
+namespace JoyModels.Services.Validation;
 
 public static class UsersValidation
 {
-    private static void ValidateFirstName(string firstName)
-    {
-        if (!RegularExpressionValidation.IsNameValid(firstName))
-            throw new ArgumentException(
-                "First name must begin with a capital letter and contain only lowercase letters after.");
-    }
-
-    private static void ValidateLastName(string lastName)
-    {
-        if (!RegularExpressionValidation.IsNameValid(lastName))
-            throw new ArgumentException(
-                "Last name must begin with a capital letter and contain only lowercase letters after.");
-    }
-
-    private static void ValidateNickname(string nickname)
-    {
-        if (!RegularExpressionValidation.IsNicknameValid(nickname))
-            throw new ArgumentException(
-                "Nickname must have at least 3 characters and may only contain lowercase letters and numbers.");
-    }
-
-    private static void ValidateModelName(string modelName)
-    {
-        if (!RegularExpressionValidation.IsStringValid(modelName))
-            throw new ArgumentException(
-                "Invalid value: Must contain only letters (any language), digits, and the following characters: ':', '.', ',', '-'.");
-    }
-
     public static void ValidateUserSearchArguments(this UsersSearchRequest request)
     {
         if (!string.IsNullOrWhiteSpace(request.Nickname))
-            ValidateNickname(request.Nickname);
+            RegularExpressionValidation.ValidateNickname(request.Nickname);
     }
 
     public static void ValidateUserSearchFollowingUsersArguments(this UserFollowerSearchRequest request)
     {
         if (!string.IsNullOrWhiteSpace(request.Nickname))
-            ValidateNickname(request.Nickname);
+            RegularExpressionValidation.ValidateNickname(request.Nickname);
     }
 
     public static void ValidateUserModelLikesSearchArguments(this UserModelLikesSearchRequest request)
     {
         if (!string.IsNullOrWhiteSpace(request.ModelName))
-            ValidateModelName(request.ModelName);
+            RegularExpressionValidation.ValidateText(request.ModelName);
     }
 
     public static async Task ValidateUserFollowEndpoint(JoyModelsDbContext context, Guid targetUserUuid,
@@ -74,13 +46,13 @@ public static class UsersValidation
             throw new ArgumentException("You cannot send an empty request!");
 
         if (!string.IsNullOrWhiteSpace(request.FirstName))
-            ValidateFirstName(request.FirstName);
+            RegularExpressionValidation.ValidateName(request.FirstName);
 
         if (!string.IsNullOrWhiteSpace(request.LastName))
-            ValidateLastName(request.LastName);
+            RegularExpressionValidation.ValidateName(request.LastName);
 
         if (!string.IsNullOrWhiteSpace(request.Nickname))
-            ValidateNickname(request.Nickname);
+            RegularExpressionValidation.ValidateNickname(request.Nickname);
     }
 
     public static async Task ValidateUserPatchArgumentsDuplicatedFields(this UsersPatchRequest request,
