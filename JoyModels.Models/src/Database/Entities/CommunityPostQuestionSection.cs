@@ -4,13 +4,11 @@ public partial class CommunityPostQuestionSection
 {
     public Guid Uuid { get; set; }
 
-    public Guid UserOriginUuid { get; set; }
+    public Guid? ParentMessageUuid { get; set; }
 
-    public Guid? UserTargetUuid { get; set; }
+    public Guid UserUuid { get; set; }
 
     public Guid CommunityPostUuid { get; set; }
-
-    public Guid MessageTypeUuid { get; set; }
 
     public string MessageText { get; set; } = null!;
 
@@ -18,9 +16,9 @@ public partial class CommunityPostQuestionSection
 
     public virtual CommunityPost CommunityPostUu { get; set; } = null!;
 
-    public virtual MessageType MessageTypeUu { get; set; } = null!;
+    public CommunityPostQuestionSection ParentMessage { get; set; } = null!;
 
-    public virtual User UserOriginUu { get; set; } = null!;
+    public ICollection<CommunityPostQuestionSection> Replies { get; set; } = new List<CommunityPostQuestionSection>();
 
-    public virtual User? UserTargetUu { get; set; }
+    public virtual User UserUu { get; set; } = null!;
 }
