@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text.Json.Serialization;
 using JoyModels.API.Handlers;
 using JoyModels.Communications.Setups;
 using JoyModels.Models.Database;
@@ -81,7 +82,9 @@ public static class DependencyInjectionSetup
         services.AddTransient<IModelAvailabilityService, ModelAvailabilityService>();
         services.AddTransient<IModelReviewService, ModelReviewService>();
 
-        services.AddControllers();
+        services
+            .AddControllers()
+            .AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
         return services;
     }

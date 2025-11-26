@@ -16,9 +16,10 @@ public partial class CommunityPostQuestionSection
 
     public virtual CommunityPost CommunityPostUu { get; set; } = null!;
 
-    public CommunityPostQuestionSection ParentMessage { get; set; } = null!;
+    public virtual CommunityPostQuestionSection? ParentMessage { get; set; }
 
-    public ICollection<CommunityPostQuestionSection> Replies { get; set; } = new List<CommunityPostQuestionSection>();
+    public virtual ICollection<CommunityPostQuestionSection> Replies { get; set; } =
+        new List<CommunityPostQuestionSection>();
 
     public virtual User UserUu { get; set; } = null!;
 }

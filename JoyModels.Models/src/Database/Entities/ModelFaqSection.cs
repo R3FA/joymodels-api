@@ -14,9 +14,9 @@ public partial class ModelFaqSection
 
     public DateTime CreatedAt { get; set; }
 
-    public ModelFaqSection ParentMessage { get; set; } = null!;
+    public virtual ModelFaqSection? ParentMessage { get; set; }
 
-    public ICollection<ModelFaqSection> Replies { get; set; } = new List<ModelFaqSection>();
+    public virtual ICollection<ModelFaqSection> Replies { get; set; } = new List<ModelFaqSection>();
 
     public virtual Model ModelUu { get; set; } = null!;
 
