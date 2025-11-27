@@ -22,10 +22,7 @@ public partial class User
     public int UserFollowingCount { get; set; }
     public int UserLikedModelsCount { get; set; }
 
-    public virtual ICollection<CommunityPostQuestionSection> CommunityPostQuestionSectionUserOriginUus { get; set; } =
-        new List<CommunityPostQuestionSection>();
-
-    public virtual ICollection<CommunityPostQuestionSection> CommunityPostQuestionSectionUserTargetUus { get; set; } =
+    public virtual ICollection<CommunityPostQuestionSection> CommunityPostQuestionSectionUserUus { get; set; } =
         new List<CommunityPostQuestionSection>();
 
     public virtual ICollection<CommunityPostUserReview> CommunityPostUserReviews { get; set; } =
@@ -33,10 +30,7 @@ public partial class User
 
     public virtual ICollection<CommunityPost> CommunityPosts { get; set; } = new List<CommunityPost>();
 
-    public virtual ICollection<ModelFaqSection> ModelFaqSectionUserOriginUus { get; set; } =
-        new List<ModelFaqSection>();
-
-    public virtual ICollection<ModelFaqSection> ModelFaqSectionUserTargetUus { get; set; } =
+    public virtual ICollection<ModelFaqSection> ModelFaqSectionUserUus { get; set; } =
         new List<ModelFaqSection>();
 
     public virtual ICollection<ModelReview> ModelReviews { get; set; } = new List<ModelReview>();

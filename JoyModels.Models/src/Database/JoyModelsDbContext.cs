@@ -28,8 +28,6 @@ public partial class JoyModelsDbContext : DbContext
 
     public virtual DbSet<CommunityPostUserReview> CommunityPostUserReviews { get; set; }
 
-    public virtual DbSet<MessageType> MessageTypes { get; set; }
-
     public virtual DbSet<Model> Models { get; set; }
 
     public virtual DbSet<ModelAvailability> ModelAvailabilities { get; set; }
@@ -293,42 +291,36 @@ public partial class JoyModelsDbContext : DbContext
             entity.ToTable("community_post_question_section");
 
             entity.HasIndex(e => e.CommunityPostUuid, "community_post_uuid");
+            entity.HasIndex(e => e.UserUuid, "user_uuid");
+            entity.HasIndex(e => e.ParentMessageUuid, "parent_message_uuid");
 
-            entity.HasIndex(e => e.MessageTypeUuid, "message_type_uuid");
-
-            entity.HasIndex(e => e.UserOriginUuid, "user_origin_uuid");
-
-            entity.HasIndex(e => e.UserTargetUuid, "user_target_uuid");
 
             entity.Property(e => e.Uuid).HasColumnName("uuid");
-            entity.Property(e => e.CommunityPostUuid).HasColumnName("community_post_uuid");
+            entity.Property(e => e.ParentMessageUuid).HasColumnName("parent_message_uuid");
+            entity.Property(e => e.CommunityPostUuid).HasColumnName("community_post_uuid").IsRequired();
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("datetime")
-                .HasColumnName("created_at");
+                .HasColumnName("created_at")
+                .IsRequired();
             entity.Property(e => e.MessageText)
                 .HasColumnType("text")
-                .HasColumnName("message_text");
-            entity.Property(e => e.MessageTypeUuid).HasColumnName("message_type_uuid");
-            entity.Property(e => e.UserOriginUuid).HasColumnName("user_origin_uuid");
-            entity.Property(e => e.UserTargetUuid).HasColumnName("user_target_uuid");
+                .HasColumnName("message_text")
+                .IsRequired();
+            entity.Property(e => e.UserUuid).HasColumnName("user_uuid").IsRequired();
 
             entity.HasOne(d => d.CommunityPostUu).WithMany(p => p.CommunityPostQuestionSections)
                 .HasForeignKey(d => d.CommunityPostUuid)
                 .HasConstraintName("community_post_question_section_ibfk_3");
 
-            entity.HasOne(d => d.MessageTypeUu).WithMany(p => p.CommunityPostQuestionSections)
-                .HasForeignKey(d => d.MessageTypeUuid)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("community_post_question_section_ibfk_4");
-
-            entity.HasOne(d => d.UserOriginUu).WithMany(p => p.CommunityPostQuestionSectionUserOriginUus)
-                .HasForeignKey(d => d.UserOriginUuid)
+            entity.HasOne(d => d.UserUu).WithMany(p => p.CommunityPostQuestionSectionUserUus)
+                .HasForeignKey(d => d.UserUuid)
                 .HasConstraintName("community_post_question_section_ibfk_1");
 
-            entity.HasOne(d => d.UserTargetUu).WithMany(p => p.CommunityPostQuestionSectionUserTargetUus)
-                .HasForeignKey(d => d.UserTargetUuid)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("community_post_question_section_ibfk_2");
+            entity.HasOne(d => d.ParentMessage)
+                .WithMany(p => p.Replies)
+                .HasForeignKey(d => d.ParentMessageUuid)
+                .HasConstraintName("community_post_question_section_ibfk_parent")
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<CommunityPostReviewType>(entity =>
@@ -388,20 +380,6 @@ public partial class JoyModelsDbContext : DbContext
             entity.HasOne(d => d.UserUu).WithMany(p => p.CommunityPostUserReviews)
                 .HasForeignKey(d => d.UserUuid)
                 .HasConstraintName("community_post_user_reviews_ibfk_1");
-        });
-
-        modelBuilder.Entity<MessageType>(entity =>
-        {
-            entity.HasKey(e => e.Uuid).HasName("PRIMARY");
-
-            entity.ToTable("message_types");
-
-            entity.HasIndex(e => e.MessageName, "message_name").IsUnique();
-
-            entity.Property(e => e.Uuid).HasColumnName("uuid");
-            entity.Property(e => e.MessageName)
-                .HasMaxLength(50)
-                .HasColumnName("message_name");
         });
 
         modelBuilder.Entity<Model>(entity =>
@@ -503,43 +481,38 @@ public partial class JoyModelsDbContext : DbContext
 
             entity.ToTable("model_faq_section");
 
-            entity.HasIndex(e => e.MessageTypeUuid, "message_type_uuid");
-
             entity.HasIndex(e => e.ModelUuid, "model_uuid");
 
-            entity.HasIndex(e => e.UserOriginUuid, "user_origin_uuid");
+            entity.HasIndex(e => e.UserUuid, "user_uuid");
 
-            entity.HasIndex(e => e.UserTargetUuid, "user_target_uuid");
+            entity.HasIndex(e => e.ParentMessageUuid, "parent_message_uuid");
 
             entity.Property(e => e.Uuid).HasColumnName("uuid");
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("datetime")
-                .HasColumnName("created_at");
+                .HasColumnName("created_at")
+                .IsRequired();
             entity.Property(e => e.MessageText)
                 .HasColumnType("text")
-                .HasColumnName("message_text");
-            entity.Property(e => e.MessageTypeUuid).HasColumnName("message_type_uuid");
-            entity.Property(e => e.ModelUuid).HasColumnName("model_uuid");
-            entity.Property(e => e.UserOriginUuid).HasColumnName("user_origin_uuid");
-            entity.Property(e => e.UserTargetUuid).HasColumnName("user_target_uuid");
-
-            entity.HasOne(d => d.MessageTypeUu).WithMany(p => p.ModelFaqSections)
-                .HasForeignKey(d => d.MessageTypeUuid)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("model_faq_section_ibfk_4");
+                .HasColumnName("message_text")
+                .IsRequired();
+            entity.Property(e => e.ModelUuid).HasColumnName("model_uuid").IsRequired();
+            entity.Property(e => e.UserUuid).HasColumnName("user_uuid").IsRequired();
+            entity.Property(e => e.ParentMessageUuid).HasColumnName("parent_message_uuid");
 
             entity.HasOne(d => d.ModelUu).WithMany(p => p.ModelFaqSections)
                 .HasForeignKey(d => d.ModelUuid)
                 .HasConstraintName("model_faq_section_ibfk_3");
 
-            entity.HasOne(d => d.UserOriginUu).WithMany(p => p.ModelFaqSectionUserOriginUus)
-                .HasForeignKey(d => d.UserOriginUuid)
+            entity.HasOne(d => d.UserUu).WithMany(p => p.ModelFaqSectionUserUus)
+                .HasForeignKey(d => d.UserUuid)
                 .HasConstraintName("model_faq_section_ibfk_1");
 
-            entity.HasOne(d => d.UserTargetUu).WithMany(p => p.ModelFaqSectionUserTargetUus)
-                .HasForeignKey(d => d.UserTargetUuid)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("model_faq_section_ibfk_2");
+            entity.HasOne(d => d.ParentMessage)
+                .WithMany(p => p.Replies)
+                .HasForeignKey(d => d.ParentMessageUuid)
+                .HasConstraintName("model_faq_section_ibfk_parent")
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<ModelPicture>(entity =>

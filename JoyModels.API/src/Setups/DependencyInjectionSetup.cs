@@ -1,9 +1,11 @@
 using System.Reflection;
+using System.Text.Json.Serialization;
 using JoyModels.API.Handlers;
 using JoyModels.Communications.Setups;
 using JoyModels.Models.Database;
 using JoyModels.Services.Services.Categories;
 using JoyModels.Services.Services.ModelAvailability;
+using JoyModels.Services.Services.ModelFaqSection;
 using JoyModels.Services.Services.ModelReviews;
 using JoyModels.Services.Services.Models;
 using JoyModels.Services.Services.Sso;
@@ -80,8 +82,11 @@ public static class DependencyInjectionSetup
         services.AddTransient<ICategoryService, CategoryService>();
         services.AddTransient<IModelAvailabilityService, ModelAvailabilityService>();
         services.AddTransient<IModelReviewService, ModelReviewService>();
+        services.AddTransient<IModelFaqSectionService, ModelFaqSectionService>();
 
-        services.AddControllers();
+        services
+            .AddControllers()
+            .AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
         return services;
     }
