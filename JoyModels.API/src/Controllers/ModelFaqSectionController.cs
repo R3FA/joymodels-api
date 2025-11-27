@@ -17,13 +17,6 @@ public class ModelFaqSectionController(IModelFaqSectionService service) : Contro
         return await service.GetByUuid(modelFaqSectionUuid);
     }
 
-    // [Authorize(Policy = "VerifiedUsers")]
-    // [HttpGet("search")]
-    // public async Task<ActionResult<PaginationResponse<ModelFaqSectionResponse>>> Search([FromQuery] ModelSearchRequest request)
-    // {
-    //     return await service.Search(request);
-    // }
-
     [Authorize(Policy = "VerifiedUsers")]
     [HttpPost("create")]
     public async Task<ActionResult<ModelFaqSectionResponse>> Create([FromForm] ModelFaqSectionCreateRequest request)
@@ -39,19 +32,18 @@ public class ModelFaqSectionController(IModelFaqSectionService service) : Contro
         return await service.CreateAnswer(request);
     }
 
-    // [Authorize(Policy = "VerifiedUsers")]
-    // [HttpPatch("edit-model/{modelUuid:guid}")]
-    // public async Task<ActionResult<ModelFaqSectionResponse>> Patch([FromRoute] Guid modelUuid,
-    //     [FromForm] ModelPatchRequest request)
-    // {
-    //     return await service.Patch(modelUuid, request);
-    // }
+    [Authorize(Policy = "VerifiedUsers")]
+    [HttpPatch("patch")]
+    public async Task<ActionResult<ModelFaqSectionResponse>> Patch([FromForm] ModelFaqSectionPatchRequest request)
+    {
+        return await service.Patch(request);
+    }
 
     [Authorize(Policy = "VerifiedUsers")]
-    [HttpDelete("delete/{modelFaqSectionUuid:guid}")]
-    public async Task<ActionResult> Delete([FromRoute] Guid modelFaqSectionUuid)
+    [HttpDelete("delete")]
+    public async Task<ActionResult> Delete([FromForm] ModelFaqSectionDeleteRequest request)
     {
-        await service.Delete(modelFaqSectionUuid);
+        await service.Delete(request);
         return NoContent();
     }
 }

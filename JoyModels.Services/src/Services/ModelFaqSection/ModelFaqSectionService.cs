@@ -44,8 +44,17 @@ public class ModelFaqSectionService(
         return await GetByUuid(modelFaqSectionEntity.Uuid);
     }
 
-    public async Task Delete(Guid modelFaqSectionUuid)
+    public async Task<ModelFaqSectionResponse> Patch(ModelFaqSectionPatchRequest request)
     {
-        throw new NotImplementedException();
+        request.ValidateModelFaqSectionPatchArguments();
+
+        await request.PatchModelEntity(context, userAuthValidation);
+
+        return await GetByUuid(request.ModelFaqSectionUuid);
+    }
+
+    public async Task Delete(ModelFaqSectionDeleteRequest request)
+    {
+        await request.DeleteModelFaqSectionEntity(context, userAuthValidation);
     }
 }

@@ -10,10 +10,16 @@ public class ModelFaqSectionProfile : Profile
     public ModelFaqSectionProfile()
     {
         CreateMap<ModelFaqSection, ModelFaqSectionResponse>()
-            .ForMember(dest => dest.Model,
-                opt => opt.MapFrom(src => src.ModelUu))
-            .ForMember(dest => dest.User,
-                opt => opt.MapFrom(src => src.UserUu));
+            .ForMember(dest => dest.Model, opt => opt.MapFrom(src => src.ModelUu))
+            .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.UserUu))
+            .ForMember(dest => dest.ParentMessage, opt => opt.MapFrom(src => src.ParentMessage))
+            .ForMember(dest => dest.Replies, opt => opt.MapFrom(src => src.Replies));
+
+        CreateMap<ModelFaqSection, ModelFaqSectionParentDto>()
+            .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.UserUu));
+
+        CreateMap<ModelFaqSection, ModelFaqSectionReplyDto>()
+            .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.UserUu));
 
         CreateMap<ModelFaqSectionCreateRequest, ModelFaqSection>()
             .AfterMap((_, dest) => dest.Uuid = Guid.NewGuid())

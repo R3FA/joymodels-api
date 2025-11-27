@@ -8,5 +8,6 @@ public interface IModelFaqSectionService
     Task<ModelFaqSectionResponse> GetByUuid(Guid modelFaqSectionUuid);
     Task<ModelFaqSectionResponse> Create(ModelFaqSectionCreateRequest request);
     Task<ModelFaqSectionResponse> CreateAnswer(ModelFaqSectionCreateAnswerRequest request);
-    Task Delete(Guid modelFaqSectionUuid);
+    Task<ModelFaqSectionResponse> Patch(ModelFaqSectionPatchRequest request);
+    Task Delete(ModelFaqSectionDeleteRequest request);
 }

@@ -32,4 +32,7 @@ public static class ModelFaqSectionValidation
         if (targetMessage.ParentMessageUuid != null)
             throw new ArgumentException("You cannot answer to an answer of FAQ section.");
     }
+
+    public static void ValidateModelFaqSectionPatchArguments(this ModelFaqSectionPatchRequest request)
+        => ValidateMessageText(request.MessageText);
 }

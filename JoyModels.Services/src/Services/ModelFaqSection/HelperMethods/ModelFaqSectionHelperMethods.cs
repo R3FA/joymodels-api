@@ -1,4 +1,6 @@
 using JoyModels.Models.Database;
+using JoyModels.Models.DataTransferObjects.RequestTypes.ModelFaqSection;
+using JoyModels.Services.Validation;
 using Microsoft.EntityFrameworkCore;
 using ModelAvailabilityEnum = JoyModels.Models.Enums.ModelAvailability;
 
@@ -12,25 +14,13 @@ public static class ModelFaqSectionHelperMethods
         var modelFaqSectionEntity = await context.ModelFaqSections
             .AsNoTracking()
             .Include(x => x.UserUu)
-            .Include(x => x.UserUu.UserRoleUu)
             .Include(x => x.ModelUu)
-            .Include(x => x.ModelUu.UserUu)
-            .Include(x => x.ModelUu.UserUu.UserRoleUu)
+            .ThenInclude(y => y.UserUu)
             .Include(x => x.ModelUu.ModelAvailabilityUu)
-            .Include(x => x.ModelUu.ModelCategories)
-            .ThenInclude(x => x.CategoryUu)
-            .Include(x => x.ModelUu.ModelPictures)
             .Include(x => x.ParentMessage)
-            .ThenInclude(p => p.UserUu)
-            .ThenInclude(pu => pu.UserRoleUu)
-            .Include(x => x.ParentMessage)
-            .ThenInclude(p => p.ModelUu)
-            .ThenInclude(pm => pm.ModelPictures)
+            .ThenInclude(y => y!.UserUu)
             .Include(x => x.Replies)
-            .ThenInclude(r => r.UserUu)
-            .ThenInclude(ru => ru.UserRoleUu)
-            .Include(x => x.Replies)
-            .ThenInclude(r => r.ModelUu)
+            .ThenInclude(y => y.UserUu)
             .Where(x => string.Equals(x.ModelUu.ModelAvailabilityUu.AvailabilityName,
                 nameof(ModelAvailabilityEnum.Public)))
             .FirstOrDefaultAsync(x => x.Uuid == modelFaqSectionUuid);
@@ -44,6 +34,37 @@ public static class ModelFaqSectionHelperMethods
         JoyModelsDbContext context)
     {
         await context.ModelFaqSections.AddAsync(modelFaqSectionEntity);
+        await context.SaveChangesAsync();
+    }
+
+    public static async Task PatchModelEntity(this ModelFaqSectionPatchRequest request, JoyModelsDbContext context,
+        UserAuthValidation userAuthValidation)
+    {
+        var totalRecords = await context.ModelFaqSections
+            .Where(x => x.Uuid == request.ModelFaqSectionUuid
+                        && x.ModelUuid == request.ModelUuid
+                        && x.UserUuid == userAuthValidation.GetUserClaimUuid())
+            .ExecuteUpdateAsync(x => x.SetProperty(z => z.MessageText, request.MessageText));
+
+        if (totalRecords <= 0)
+            throw new KeyNotFoundException("No question or answer found for editing.");
+
+        await context.SaveChangesAsync();
+    }
+
+    public static async Task DeleteModelFaqSectionEntity(this ModelFaqSectionDeleteRequest request,
+        JoyModelsDbContext context, UserAuthValidation userAuthValidation)
+    {
+        var numberOfDeletedRows = await context.ModelFaqSections
+            .Where(x => x.UserUuid == userAuthValidation.GetUserClaimUuid()
+                        && x.Uuid == request.ModelFaqSectionUuid
+                        && x.ModelUuid == request.ModelUuid)
+            .ExecuteDeleteAsync();
+
+        if (numberOfDeletedRows == 0)
+            throw new KeyNotFoundException(
+                "No question or answer found for deletion.");
+
         await context.SaveChangesAsync();
     }
 }
