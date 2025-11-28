@@ -14,6 +14,8 @@ public partial class CommunityPost
 
     public string? YoutubeVideoLink { get; set; }
     public DateTime CreatedAt { get; set; }
+    public int CommunityPostLikes { get; set; }
+    public int CommunityPostDislikes { get; set; }
 
     public virtual ICollection<CommunityPostPicture> CommunityPostPictures { get; set; } =
         new List<CommunityPostPicture>();

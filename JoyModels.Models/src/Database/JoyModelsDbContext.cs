@@ -247,6 +247,14 @@ public partial class JoyModelsDbContext : DbContext
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
+            entity.Property(e => e.CommunityPostLikes)
+                .HasColumnName("community_post_likes")
+                .HasDefaultValue(0)
+                .IsRequired();
+            entity.Property(e => e.CommunityPostDislikes)
+                .HasColumnName("community_post_dislikes")
+                .HasDefaultValue(0)
+                .IsRequired();
 
             entity.HasOne(d => d.PostTypeUu).WithMany(p => p.CommunityPosts)
                 .HasForeignKey(d => d.PostTypeUuid)
