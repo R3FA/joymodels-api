@@ -1,6 +1,8 @@
 using JoyModels.Models.Database;
 using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.ImageSettings;
+using JoyModels.Models.DataTransferObjects.RequestTypes.CommunityPost;
+using JoyModels.Services.Validation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,6 +10,32 @@ namespace JoyModels.Services.Services.CommunityPost.HelperMethods;
 
 public static class CommunityPostHelperMethods
 {
+    private static async Task UpdateCommunityPostUserReview(CommunityPostLikeRequest request,
+        JoyModelsDbContext context, UserAuthValidation userAuthValidation)
+    {
+        await context.CommunityPostUserReviews
+            .Where(x => x.CommunityPostUuid == request.CommunityPostUuid
+                        && x.UserUuid == userAuthValidation.GetUserClaimUuid())
+            .ExecuteUpdateAsync(x => x.SetProperty(z => z.ReviewTypeUuid, request.ReviewTypeUuid));
+
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task CreateCommunityPostUserReview(CommunityPostLikeRequest request,
+        JoyModelsDbContext context, UserAuthValidation userAuthValidation)
+    {
+        await context.CommunityPostUserReviews.AddAsync(
+            new CommunityPostUserReview
+            {
+                Uuid = Guid.NewGuid(),
+                UserUuid = userAuthValidation.GetUserClaimUuid(),
+                CommunityPostUuid = request.CommunityPostUuid,
+                ReviewTypeUuid = request.ReviewTypeUuid,
+            });
+
+        await context.SaveChangesAsync();
+    }
+
     public static async Task<JoyModels.Models.Database.Entities.CommunityPost> GetCommunityPostEntity(
         JoyModelsDbContext context,
         Guid communityPostUuid)
@@ -91,6 +119,24 @@ public static class CommunityPostHelperMethods
                 await context.CommunityPostPictures.AddAsync(entity);
                 await context.SaveChangesAsync();
             }
+        }
+    }
+
+    public static async Task CreateCommunityPostUserReviewEntity(
+        this CommunityPostLikeRequest request, JoyModelsDbContext context, UserAuthValidation userAuthValidation)
+    {
+        var isAlreadyReviewed = await context.CommunityPostUserReviews
+            .AnyAsync(x => x.CommunityPostUuid == request.CommunityPostUuid
+                           && x.UserUuid == userAuthValidation.GetUserClaimUuid());
+
+        switch (isAlreadyReviewed)
+        {
+            case true:
+                await UpdateCommunityPostUserReview(request, context, userAuthValidation);
+                break;
+            case false:
+                await CreateCommunityPostUserReview(request, context, userAuthValidation);
+                break;
         }
     }
 }

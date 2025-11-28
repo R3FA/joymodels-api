@@ -1,5 +1,7 @@
+using JoyModels.Models.Database;
 using JoyModels.Models.DataTransferObjects.ImageSettings;
 using JoyModels.Models.DataTransferObjects.RequestTypes.CommunityPost;
+using Microsoft.EntityFrameworkCore;
 
 namespace JoyModels.Services.Validation;
 
@@ -21,5 +23,17 @@ public static class CommunityPostValidation
                 await GlobalValidation.ValidateModelAndCommunityPostPicture(picture, modelImageSettingsDetails);
             }
         }
+    }
+
+    public static async Task ValidateCommunityPostLikeArguments(this CommunityPostLikeRequest request,
+        JoyModelsDbContext context, UserAuthValidation userAuthValidation)
+    {
+        var isDataDuplicated = await context.CommunityPostUserReviews
+            .Where(x => x.CommunityPostUuid == request.CommunityPostUuid
+                        && x.UserUuid == userAuthValidation.GetUserClaimUuid())
+            .AnyAsync(x => x.ReviewTypeUuid == request.ReviewTypeUuid);
+
+        if (isDataDuplicated)
+            throw new ArgumentException("You cannot like the same community post twice.");
     }
 }

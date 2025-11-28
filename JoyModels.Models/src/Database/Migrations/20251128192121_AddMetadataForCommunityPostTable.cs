@@ -83,8 +83,8 @@ namespace JoyModels.Models.src.Database.Migrations
                 AFTER UPDATE ON community_post_user_reviews
                 FOR EACH ROW
                 BEGIN
-                    DECLARE positive_uuid BINARY(16);
-                    DECLARE negative_uuid BINARY(16);
+                    DECLARE positive_uuid CHAR(36);
+                    DECLARE negative_uuid CHAR(36);
 
                     SELECT uuid INTO positive_uuid FROM community_post_review_types WHERE review_name = 'Positive';
                     SELECT uuid INTO negative_uuid FROM community_post_review_types WHERE review_name = 'Negative';

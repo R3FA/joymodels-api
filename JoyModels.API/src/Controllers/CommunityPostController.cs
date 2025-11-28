@@ -23,14 +23,6 @@ public class CommunityPostController(ICommunityPostService service) : Controller
     // {
     //     return await service.Search(request);
     // }
-    //
-    // [Authorize(Policy = "HeadStaff")]
-    // [HttpGet("admin-search")]
-    // public async Task<ActionResult<PaginationResponse<ModelResponse>>> AdminSearch(
-    //     [FromQuery] ModelAdminSearchRequest request)
-    // {
-    //     return await service.AdminSearch(request);
-    // }
 
     [Authorize(Policy = "VerifiedUsers")]
     [HttpPost("create")]
@@ -39,14 +31,14 @@ public class CommunityPostController(ICommunityPostService service) : Controller
         return await service.Create(request);
     }
 
-    // [Authorize(Policy = "VerifiedUsers")]
-    // [HttpPost("model-like/{modelUuid:guid}")]
-    // public async Task<ActionResult> ModelLike([FromRoute] Guid modelUuid)
-    // {
-    //     await service.ModelLike(modelUuid);
-    //     return NoContent();
-    // }
-    //
+    [Authorize(Policy = "VerifiedUsers")]
+    [HttpPost("community-post-like")]
+    public async Task<ActionResult> CommunityPostLike([FromForm] CommunityPostLikeRequest request)
+    {
+        await service.CommunityPostLike(request);
+        return NoContent();
+    }
+
     // [Authorize(Policy = "VerifiedUsers")]
     // [HttpPatch("edit-model/{modelUuid:guid}")]
     // public async Task<ActionResult<ModelResponse>> Patch([FromRoute] Guid modelUuid,

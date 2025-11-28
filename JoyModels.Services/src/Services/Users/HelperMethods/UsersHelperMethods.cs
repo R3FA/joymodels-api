@@ -3,13 +3,12 @@ using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.ImageSettings;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Users;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Users;
+using JoyModels.Models.Enums;
 using JoyModels.Models.Pagination;
 using JoyModels.Services.Extensions;
 using JoyModels.Services.Services.Sso.HelperMethods;
 using JoyModels.Services.Validation;
 using Microsoft.EntityFrameworkCore;
-using UserRoleEnum = JoyModels.Models.Enums.UserRole;
-using ModelAvailabilityEnum = JoyModels.Models.Enums.ModelAvailability;
 
 namespace JoyModels.Services.Services.Users.HelperMethods;
 

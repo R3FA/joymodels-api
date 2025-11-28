@@ -1,12 +1,11 @@
 using JoyModels.Models.Database;
 using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.RequestTypes.ModelReviews;
+using JoyModels.Models.Enums;
 using JoyModels.Models.Pagination;
 using JoyModels.Services.Extensions;
 using JoyModels.Services.Validation;
 using Microsoft.EntityFrameworkCore;
-using ModelReviewEnum = JoyModels.Models.Enums.ModelReview;
-using UserRoleEnum = JoyModels.Models.Enums.UserRole;
 
 namespace JoyModels.Services.Services.ModelReviews.HelperMethods;
 

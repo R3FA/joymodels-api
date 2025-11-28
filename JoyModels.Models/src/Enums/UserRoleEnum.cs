@@ -1,6 +1,6 @@
 namespace JoyModels.Models.Enums;
 
-public enum UserRole
+public enum UserRoleEnum
 {
     Unverified = 0,
     User = 1,

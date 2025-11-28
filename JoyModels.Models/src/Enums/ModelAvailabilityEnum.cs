@@ -1,6 +1,6 @@
 namespace JoyModels.Models.Enums;
 
-public enum ModelAvailability
+public enum ModelAvailabilityEnum
 {
     Hidden = 0,
     Public = 1

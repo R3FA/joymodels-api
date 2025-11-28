@@ -8,10 +8,10 @@ using JoyModels.Models.DataTransferObjects.RequestTypes.Email;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Sso;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Sso;
+using JoyModels.Models.Enums;
 using JoyModels.Services.Services.Sso.HelperMethods;
 using JoyModels.Services.Validation;
 using JoyModels.Utilities.RabbitMQ.MessageProducer;
-using UserRoleEnum = JoyModels.Models.Enums.UserRole;
 
 namespace JoyModels.Services.Services.Sso;
 
