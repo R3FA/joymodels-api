@@ -1,11 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace JoyModels.Models.src.Database.Migrations
 {
     /// <inheritdoc />
-    public partial class IncreaseCharacterLengthForVideoYoutubeLink : Migration
+    public partial class ModifyCommunityPostTable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -24,11 +25,22 @@ namespace JoyModels.Models.src.Database.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4")
                 .OldAnnotation("MySql:CharSet", "utf8mb4")
                 .OldAnnotation("Relational:Collation", "utf8mb4_uca1400_ai_ci");
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "created_at",
+                table: "community_posts",
+                type: "datetime",
+                nullable: false,
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropColumn(
+                name: "created_at",
+                table: "community_posts");
+
             migrationBuilder.AlterColumn<string>(
                 name: "youtube_video_link",
                 table: "community_posts",

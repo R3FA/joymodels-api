@@ -8,6 +8,8 @@ public class CommunityPostResponse
     public UsersResponse User { get; set; } = null!;
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
-    public CommunityPostUserReviewResponse UserReview { get; set; } = null!;
     public string? YoutubeVideoLink { get; set; }
+    public CommunityPostTypeResponse CommunityPostType { get; set; } = null!;
+    public CommunityPostUserReviewResponse? UserReview { get; set; }
+    public List<CommunityPostPictureResponse>? PictureLocations { get; set; }
 }

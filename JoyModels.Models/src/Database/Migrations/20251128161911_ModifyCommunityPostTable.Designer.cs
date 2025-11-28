@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JoyModels.Models.src.Database.Migrations
 {
     [DbContext(typeof(JoyModelsDbContext))]
-    [Migration("20251128154634_IncreaseCharacterLengthForVideoYoutubeLink")]
-    partial class IncreaseCharacterLengthForVideoYoutubeLink
+    [Migration("20251128161911_ModifyCommunityPostTable")]
+    partial class ModifyCommunityPostTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -202,6 +202,10 @@ namespace JoyModels.Models.src.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)")
                         .HasColumnName("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_at");
 
                     b.Property<string>("Description")
                         .IsRequired()

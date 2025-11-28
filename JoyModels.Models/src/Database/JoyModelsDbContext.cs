@@ -244,6 +244,9 @@ public partial class JoyModelsDbContext : DbContext
             entity.Property(e => e.YoutubeVideoLink)
                 .HasMaxLength(2048)
                 .HasColumnName("youtube_video_link");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
 
             entity.HasOne(d => d.PostTypeUu).WithMany(p => p.CommunityPosts)
                 .HasForeignKey(d => d.PostTypeUuid)
@@ -269,15 +272,9 @@ public partial class JoyModelsDbContext : DbContext
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
-            entity.Property(e => e.PictureHeight)
-                .HasColumnType("int(11)")
-                .HasColumnName("picture_height");
             entity.Property(e => e.PictureLocation)
                 .HasMaxLength(254)
                 .HasColumnName("picture_location");
-            entity.Property(e => e.PictureWidth)
-                .HasColumnType("int(11)")
-                .HasColumnName("picture_width");
 
             entity.HasOne(d => d.CommunityPostUu).WithMany(p => p.CommunityPostPictures)
                 .HasForeignKey(d => d.CommunityPostUuid)

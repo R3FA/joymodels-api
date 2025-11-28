@@ -178,7 +178,7 @@ public static class ModelHelperMethods
         {
             foreach (var modelPicture in modelPictures)
             {
-                await ModelValidation.ValidateModelPicture(modelPicture, modelImageSettingsDetails);
+                await GlobalValidation.ValidateModelAndCommunityPostPicture(modelPicture, modelImageSettingsDetails);
 
                 var modelPictureName = $"model-picture-{Guid.NewGuid()}{Path.GetExtension(modelPicture.FileName)}";
 

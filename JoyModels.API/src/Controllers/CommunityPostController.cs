@@ -1,4 +1,7 @@
+using JoyModels.Models.DataTransferObjects.RequestTypes.CommunityPost;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.CommunityPost;
 using JoyModels.Services.Services.CommunityPost;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JoyModels.API.Controllers;
@@ -7,13 +10,13 @@ namespace JoyModels.API.Controllers;
 [ApiController]
 public class CommunityPostController(ICommunityPostService service) : ControllerBase
 {
-    // [Authorize(Policy = "VerifiedUsers")]
-    // [HttpGet("get")]
-    // public async Task<ActionResult<ModelResponse>> GetByUuid([FromQuery] ModelGetByUuidRequest request)
-    // {
-    //     return await service.GetByUuid(request);
-    // }
-    //
+    [Authorize(Policy = "VerifiedUsers")]
+    [HttpGet("get/{communityPostUuid:guid}")]
+    public async Task<ActionResult<CommunityPostResponse>> GetByUuid([FromRoute] Guid communityPostUuid)
+    {
+        return await service.GetByUuid(communityPostUuid);
+    }
+
     // [Authorize(Policy = "VerifiedUsers")]
     // [HttpGet("search")]
     // public async Task<ActionResult<PaginationResponse<ModelResponse>>> Search([FromQuery] ModelSearchRequest request)
@@ -28,14 +31,14 @@ public class CommunityPostController(ICommunityPostService service) : Controller
     // {
     //     return await service.AdminSearch(request);
     // }
-    //
-    // [Authorize(Policy = "VerifiedUsers")]
-    // [HttpPost("create")]
-    // public async Task<ActionResult<ModelResponse>> Create([FromForm] ModelCreateRequest request)
-    // {
-    //     return await service.Create(request);
-    // }
-    //
+
+    [Authorize(Policy = "VerifiedUsers")]
+    [HttpPost("create")]
+    public async Task<ActionResult<CommunityPostResponse>> Create([FromForm] CommunityPostCreateRequest request)
+    {
+        return await service.Create(request);
+    }
+
     // [Authorize(Policy = "VerifiedUsers")]
     // [HttpPost("model-like/{modelUuid:guid}")]
     // public async Task<ActionResult> ModelLike([FromRoute] Guid modelUuid)
