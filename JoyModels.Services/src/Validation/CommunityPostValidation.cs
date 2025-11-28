@@ -25,7 +25,7 @@ public static class CommunityPostValidation
         }
     }
 
-    public static async Task ValidateCommunityPostLikeArguments(this CommunityPostLikeRequest request,
+    public static async Task ValidateCommunityPostLikeArguments(this CommunityPostUserReviewCreateRequest request,
         JoyModelsDbContext context, UserAuthValidation userAuthValidation)
     {
         var isDataDuplicated = await context.CommunityPostUserReviews
@@ -34,6 +34,6 @@ public static class CommunityPostValidation
             .AnyAsync(x => x.ReviewTypeUuid == request.ReviewTypeUuid);
 
         if (isDataDuplicated)
-            throw new ArgumentException("You cannot like the same community post twice.");
+            throw new ArgumentException("You cannot review the same community post twice.");
     }
 }

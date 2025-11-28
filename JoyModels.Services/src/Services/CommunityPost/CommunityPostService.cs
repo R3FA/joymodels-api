@@ -62,7 +62,7 @@ public class CommunityPostService(
         return await GetByUuid(communityPostEntity.Uuid);
     }
 
-    public async Task CommunityPostLike(CommunityPostLikeRequest request)
+    public async Task CreateUserReview(CommunityPostUserReviewCreateRequest request)
     {
         await request.ValidateCommunityPostLikeArguments(context, userAuthValidation);
 

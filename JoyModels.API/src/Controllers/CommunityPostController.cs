@@ -32,10 +32,10 @@ public class CommunityPostController(ICommunityPostService service) : Controller
     }
 
     [Authorize(Policy = "VerifiedUsers")]
-    [HttpPost("community-post-like")]
-    public async Task<ActionResult> CommunityPostLike([FromForm] CommunityPostLikeRequest request)
+    [HttpPost("create-user-review")]
+    public async Task<ActionResult> CreateUserReview([FromForm] CommunityPostUserReviewCreateRequest request)
     {
-        await service.CommunityPostLike(request);
+        await service.CreateUserReview(request);
         return NoContent();
     }
 

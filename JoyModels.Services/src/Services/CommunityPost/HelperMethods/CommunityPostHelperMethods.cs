@@ -10,7 +10,7 @@ namespace JoyModels.Services.Services.CommunityPost.HelperMethods;
 
 public static class CommunityPostHelperMethods
 {
-    private static async Task UpdateCommunityPostUserReview(CommunityPostLikeRequest request,
+    private static async Task UpdateCommunityPostUserReview(CommunityPostUserReviewCreateRequest request,
         JoyModelsDbContext context, UserAuthValidation userAuthValidation)
     {
         await context.CommunityPostUserReviews
@@ -21,7 +21,7 @@ public static class CommunityPostHelperMethods
         await context.SaveChangesAsync();
     }
 
-    private static async Task CreateCommunityPostUserReview(CommunityPostLikeRequest request,
+    private static async Task CreateCommunityPostUserReview(CommunityPostUserReviewCreateRequest request,
         JoyModelsDbContext context, UserAuthValidation userAuthValidation)
     {
         await context.CommunityPostUserReviews.AddAsync(
@@ -123,7 +123,8 @@ public static class CommunityPostHelperMethods
     }
 
     public static async Task CreateCommunityPostUserReviewEntity(
-        this CommunityPostLikeRequest request, JoyModelsDbContext context, UserAuthValidation userAuthValidation)
+        this CommunityPostUserReviewCreateRequest request, JoyModelsDbContext context,
+        UserAuthValidation userAuthValidation)
     {
         var isAlreadyReviewed = await context.CommunityPostUserReviews
             .AnyAsync(x => x.CommunityPostUuid == request.CommunityPostUuid
