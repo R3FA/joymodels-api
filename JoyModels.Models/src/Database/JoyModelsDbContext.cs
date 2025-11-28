@@ -242,7 +242,7 @@ public partial class JoyModelsDbContext : DbContext
                 .HasColumnName("title");
             entity.Property(e => e.UserUuid).HasColumnName("user_uuid");
             entity.Property(e => e.YoutubeVideoLink)
-                .HasMaxLength(255)
+                .HasMaxLength(2048)
                 .HasColumnName("youtube_video_link");
 
             entity.HasOne(d => d.PostTypeUu).WithMany(p => p.CommunityPosts)
