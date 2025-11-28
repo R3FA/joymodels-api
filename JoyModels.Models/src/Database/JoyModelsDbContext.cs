@@ -360,6 +360,19 @@ public partial class JoyModelsDbContext : DbContext
             entity.Property(e => e.CommunityPostName)
                 .HasMaxLength(50)
                 .HasColumnName("community_post_name");
+
+            entity.HasData(
+                new CommunityPostType
+                {
+                    Uuid = new Guid("458c69e7-3d86-44c2-a9c1-336354d81643"),
+                    CommunityPostName = "Guide"
+                },
+                new CommunityPostType
+                {
+                    Uuid = new Guid("662b1c39-8e30-4567-a874-d1188a88a8fb"),
+                    CommunityPostName = "Post"
+                }
+            );
         });
 
         modelBuilder.Entity<CommunityPostUserReview>(entity =>
