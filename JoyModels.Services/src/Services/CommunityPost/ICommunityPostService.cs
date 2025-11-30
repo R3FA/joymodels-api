@@ -8,4 +8,5 @@ public interface ICommunityPostService
     Task<CommunityPostResponse> GetByUuid(Guid communityPostUuid);
     Task<CommunityPostResponse> Create(CommunityPostCreateRequest request);
     Task CreateUserReview(CommunityPostUserReviewCreateRequest request);
+    Task DeleteUserReview(CommunityPostUserReviewDeleteRequest request);
 }

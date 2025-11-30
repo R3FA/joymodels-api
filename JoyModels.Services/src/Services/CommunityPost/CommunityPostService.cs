@@ -68,4 +68,9 @@ public class CommunityPostService(
 
         await request.CreateCommunityPostUserReviewEntity(context, userAuthValidation);
     }
+
+    public async Task DeleteUserReview(CommunityPostUserReviewDeleteRequest request)
+    {
+        await request.DeleteCommunityPostUserReview(context, userAuthValidation);
+    }
 }

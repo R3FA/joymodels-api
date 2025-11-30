@@ -45,6 +45,11 @@ public static class CommunityPostHelperMethods
             .Include(x => x.UserUu)
             .Include(x => x.UserUu.UserRoleUu)
             .Include(x => x.PostTypeUu)
+            .Include(x => x.CommunityPostUserReviews)
+            .ThenInclude(x => x.UserUu)
+            .ThenInclude(x => x.UserRoleUu)
+            .Include(x => x.CommunityPostUserReviews)
+            .ThenInclude(x => x.ReviewTypeUu)
             .Include(x => x.CommunityPostPictures)
             .FirstOrDefaultAsync(x => x.Uuid == communityPostUuid);
 
@@ -139,5 +144,20 @@ public static class CommunityPostHelperMethods
                 await CreateCommunityPostUserReview(request, context, userAuthValidation);
                 break;
         }
+    }
+
+    public static async Task DeleteCommunityPostUserReview(this CommunityPostUserReviewDeleteRequest request,
+        JoyModelsDbContext context, UserAuthValidation userAuthValidation)
+    {
+        var totalRecords = await context.CommunityPostUserReviews
+            .Where(x => x.CommunityPostUuid == request.CommunityPostUuid
+                        && x.ReviewTypeUuid == request.ReviewTypeUuid
+                        && x.UserUuid == userAuthValidation.GetUserClaimUuid())
+            .ExecuteDeleteAsync();
+
+        if (totalRecords <= 0)
+            throw new KeyNotFoundException("You cannot remove a review that you have never reviewed before.");
+
+        await context.SaveChangesAsync();
     }
 }

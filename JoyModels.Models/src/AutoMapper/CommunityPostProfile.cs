@@ -11,6 +11,14 @@ public class CommunityPostProfile : Profile
     {
         CreateMap<CommunityPostType, CommunityPostTypeResponse>();
 
+        CreateMap<CommunityPostReviewType, CommunityPostReviewTypeResponse>();
+
+        CreateMap<CommunityPostUserReview, CommunityPostUserReviewResponse>()
+            .ForMember(dest => dest.User,
+                opt => opt.MapFrom(src => src.UserUu))
+            .ForMember(dest => dest.ReviewType,
+                opt => opt.MapFrom(src => src.ReviewTypeUu));
+
         CreateMap<CommunityPostPicture, CommunityPostPictureResponse>();
 
         CreateMap<CommunityPost, CommunityPostResponse>()
@@ -18,6 +26,8 @@ public class CommunityPostProfile : Profile
                 opt => opt.MapFrom(src => src.UserUu))
             .ForMember(dest => dest.CommunityPostType,
                 opt => opt.MapFrom(src => src.PostTypeUu))
+            .ForMember(dest => dest.UserReview,
+                opt => opt.MapFrom(src => src.CommunityPostUserReviews))
             .ForMember(dest => dest.PictureLocations,
                 opt => opt.MapFrom(src => src.CommunityPostPictures));
 
