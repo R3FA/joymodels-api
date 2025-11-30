@@ -9,7 +9,8 @@ public class CommunityPostResponse
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string? YoutubeVideoLink { get; set; }
+    public int CommunityPostLikes { get; set; }
+    public int CommunityPostDislikes { get; set; }
     public CommunityPostTypeResponse CommunityPostType { get; set; } = null!;
-    public List<CommunityPostUserReviewResponse>? UserReview { get; set; }
     public List<CommunityPostPictureResponse>? PictureLocations { get; set; }
 }

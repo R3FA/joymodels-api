@@ -7,6 +7,12 @@ namespace JoyModels.Services.Validation;
 
 public static class CommunityPostValidation
 {
+    public static void ValidateCommunityPostSearchArguments(this CommunityPostSearchRequest request)
+    {
+        if (!string.IsNullOrWhiteSpace(request.Title))
+            RegularExpressionValidation.ValidateText(request.Title);
+    }
+
     public static async Task ValidateCommunityPostCreateArguments(this CommunityPostCreateRequest request,
         ModelImageSettingsDetails modelImageSettingsDetails)
     {

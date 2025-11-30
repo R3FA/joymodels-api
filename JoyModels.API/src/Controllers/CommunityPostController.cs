@@ -1,5 +1,6 @@
 using JoyModels.Models.DataTransferObjects.RequestTypes.CommunityPost;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.CommunityPost;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Services.Services.CommunityPost;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,12 +18,13 @@ public class CommunityPostController(ICommunityPostService service) : Controller
         return await service.GetByUuid(communityPostUuid);
     }
 
-    // [Authorize(Policy = "VerifiedUsers")]
-    // [HttpGet("search")]
-    // public async Task<ActionResult<PaginationResponse<ModelResponse>>> Search([FromQuery] ModelSearchRequest request)
-    // {
-    //     return await service.Search(request);
-    // }
+    [Authorize(Policy = "VerifiedUsers")]
+    [HttpGet("search")]
+    public async Task<ActionResult<PaginationResponse<CommunityPostResponse>>> Search(
+        [FromQuery] CommunityPostSearchRequest request)
+    {
+        return await service.Search(request);
+    }
 
     [Authorize(Policy = "VerifiedUsers")]
     [HttpPost("create")]

@@ -2,6 +2,8 @@ using JoyModels.Models.Database;
 using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.ImageSettings;
 using JoyModels.Models.DataTransferObjects.RequestTypes.CommunityPost;
+using JoyModels.Models.Pagination;
+using JoyModels.Services.Extensions;
 using JoyModels.Services.Validation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -45,15 +47,45 @@ public static class CommunityPostHelperMethods
             .Include(x => x.UserUu)
             .Include(x => x.UserUu.UserRoleUu)
             .Include(x => x.PostTypeUu)
-            .Include(x => x.CommunityPostUserReviews)
-            .ThenInclude(x => x.UserUu)
-            .ThenInclude(x => x.UserRoleUu)
-            .Include(x => x.CommunityPostUserReviews)
-            .ThenInclude(x => x.ReviewTypeUu)
             .Include(x => x.CommunityPostPictures)
             .FirstOrDefaultAsync(x => x.Uuid == communityPostUuid);
 
         return communityPostEntity ?? throw new KeyNotFoundException("Community post with sent values is not found.");
+    }
+
+    public static async Task<PaginationBase<JoyModels.Models.Database.Entities.CommunityPost>>
+        SearchCommunityPostEntities(
+            this CommunityPostSearchRequest request,
+            JoyModelsDbContext context)
+    {
+        var baseQuery = context.CommunityPosts
+            .AsNoTracking()
+            .Include(x => x.UserUu)
+            .Include(x => x.UserUu.UserRoleUu)
+            .Include(x => x.PostTypeUu)
+            .Include(x => x.CommunityPostUserReviews)
+            .Include(x => x.CommunityPostPictures)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(request.Title))
+            baseQuery = baseQuery.Where(x => x.Title.Contains(request.Title));
+
+        baseQuery = request.PostTypeUuid switch
+        {
+            not null => baseQuery.Where(x => x.PostTypeUuid == request.PostTypeUuid),
+            _ => baseQuery
+        };
+
+        var resultQuery =
+            GlobalHelperMethods<JoyModels.Models.Database.Entities.CommunityPost>.OrderBy(baseQuery, request.OrderBy);
+
+        var communityPostEntities = await PaginationBase<JoyModels.Models.Database.Entities.CommunityPost>.CreateAsync(
+            resultQuery,
+            request.PageNumber,
+            request.PageSize,
+            request.OrderBy);
+
+        return communityPostEntities;
     }
 
     public static async Task<List<string>> SaveCommunityPostPictures(this List<IFormFile> communityPostPictures,

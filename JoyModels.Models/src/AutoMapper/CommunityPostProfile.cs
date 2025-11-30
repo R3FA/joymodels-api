@@ -26,8 +26,6 @@ public class CommunityPostProfile : Profile
                 opt => opt.MapFrom(src => src.UserUu))
             .ForMember(dest => dest.CommunityPostType,
                 opt => opt.MapFrom(src => src.PostTypeUu))
-            .ForMember(dest => dest.UserReview,
-                opt => opt.MapFrom(src => src.CommunityPostUserReviews))
             .ForMember(dest => dest.PictureLocations,
                 opt => opt.MapFrom(src => src.CommunityPostPictures));
 
