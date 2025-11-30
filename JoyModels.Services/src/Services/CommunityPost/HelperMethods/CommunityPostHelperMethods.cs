@@ -2,6 +2,7 @@ using JoyModels.Models.Database;
 using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.ImageSettings;
 using JoyModels.Models.DataTransferObjects.RequestTypes.CommunityPost;
+using JoyModels.Models.Enums;
 using JoyModels.Models.Pagination;
 using JoyModels.Services.Extensions;
 using JoyModels.Services.Validation;
@@ -189,6 +190,27 @@ public static class CommunityPostHelperMethods
 
         if (totalRecords <= 0)
             throw new KeyNotFoundException("You cannot remove a review that you have never reviewed before.");
+
+        await context.SaveChangesAsync();
+    }
+
+    public static async Task DeleteCommunityPostEntity(JoyModelsDbContext context, Guid communityPostUuid,
+        UserAuthValidation userAuthValidation)
+    {
+        var baseQuery = context.CommunityPosts.AsQueryable();
+
+        baseQuery = userAuthValidation.GetUserClaimRole() switch
+        {
+            nameof(UserRoleEnum.Admin) or nameof(UserRoleEnum.Root) =>
+                baseQuery.Where(x => x.Uuid == communityPostUuid),
+            _ => baseQuery.Where(x =>
+                x.Uuid == communityPostUuid && x.UserUuid == userAuthValidation.GetUserClaimUuid())
+        };
+
+        var totalCount = await baseQuery.ExecuteDeleteAsync();
+
+        if (totalCount <= 0)
+            throw new KeyNotFoundException("Community post either doesn't exist or isn't under your ownership.");
 
         await context.SaveChangesAsync();
     }

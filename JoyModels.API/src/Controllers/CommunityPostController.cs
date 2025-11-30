@@ -48,4 +48,12 @@ public class CommunityPostController(ICommunityPostService service) : Controller
         await service.DeleteUserReview(request);
         return NoContent();
     }
+
+    [Authorize(Policy = "VerifiedUsers")]
+    [HttpDelete("delete/{communityPostUuid:guid}")]
+    public async Task<ActionResult> Delete([FromRoute] Guid communityPostUuid)
+    {
+        await service.Delete(communityPostUuid);
+        return NoContent();
+    }
 }

@@ -83,4 +83,15 @@ public class CommunityPostService(
     {
         await request.DeleteCommunityPostUserReview(context, userAuthValidation);
     }
+
+    public async Task Delete(Guid communityPostUuid)
+    {
+        var communityPostEntity = await GetByUuid(communityPostUuid);
+
+        await CommunityPostHelperMethods.DeleteCommunityPostEntity(context, communityPostUuid, userAuthValidation);
+
+        if (communityPostEntity.PictureLocations != null)
+            ModelHelperMethods.DeleteModelUuidFolderOnException(communityPostEntity.PictureLocations[0]
+                .PictureLocation);
+    }
 }

@@ -11,4 +11,5 @@ public interface ICommunityPostService
     Task<CommunityPostResponse> Create(CommunityPostCreateRequest request);
     Task CreateUserReview(CommunityPostUserReviewCreateRequest request);
     Task DeleteUserReview(CommunityPostUserReviewDeleteRequest request);
+    Task Delete(Guid communityPostUuid);
 }
