@@ -48,7 +48,7 @@ public class CommunityPostService(
             var communityPostPicturePaths =
                 await request.Pictures.SaveCommunityPostPictures(modelImageSettingsDetails, communityPostEntity.Uuid);
             communityPostPictureEntities =
-                CommunityPostHelperMethods.CreateCommunityPostPictureEntities(communityPostEntity.Uuid,
+                CommunityPostHelperMethods.CreateCommunityPostPictureEntityInstances(communityPostEntity.Uuid,
                     communityPostPicturePaths);
         }
 
@@ -72,6 +72,28 @@ public class CommunityPostService(
         return await GetByUuid(communityPostEntity.Uuid);
     }
 
+    public async Task<CommunityPostResponse> Patch(CommunityPostPatchRequest request)
+    {
+        var communityPostResponse = await GetByUuid(request.CommunityPostUuid);
+        userAuthValidation.ValidateUserAuthRequest(communityPostResponse.User.Uuid);
+
+        await request.ValidateCommunityPostPatchArguments(context, communityPostResponse, modelImageSettingsDetails);
+
+        var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            await request.PatchCommunityPostEntity(communityPostResponse, modelImageSettingsDetails, context);
+
+            await transaction.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            throw new TransactionException(ex.Message);
+        }
+
+        return await GetByUuid(request.CommunityPostUuid);
+    }
+
     public async Task CreateUserReview(CommunityPostUserReviewCreateRequest request)
     {
         await request.ValidateCommunityPostLikeArguments(context, userAuthValidation);
@@ -90,7 +112,7 @@ public class CommunityPostService(
 
         await CommunityPostHelperMethods.DeleteCommunityPostEntity(context, communityPostUuid, userAuthValidation);
 
-        if (communityPostEntity.PictureLocations != null)
+        if (communityPostEntity.PictureLocations.Count > 0)
             ModelHelperMethods.DeleteModelUuidFolderOnException(communityPostEntity.PictureLocations[0]
                 .PictureLocation);
     }

@@ -42,6 +42,13 @@ public class CommunityPostController(ICommunityPostService service) : Controller
     }
 
     [Authorize(Policy = "VerifiedUsers")]
+    [HttpPatch("edit-community-post")]
+    public async Task<ActionResult<CommunityPostResponse>> Patch([FromForm] CommunityPostPatchRequest request)
+    {
+        return await service.Patch(request);
+    }
+
+    [Authorize(Policy = "VerifiedUsers")]
     [HttpDelete("delete-user-review")]
     public async Task<ActionResult> DeleteUserReview([FromForm] CommunityPostUserReviewDeleteRequest request)
     {

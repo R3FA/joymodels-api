@@ -12,5 +12,5 @@ public class CommunityPostResponse
     public int CommunityPostLikes { get; set; }
     public int CommunityPostDislikes { get; set; }
     public CommunityPostTypeResponse CommunityPostType { get; set; } = null!;
-    public List<CommunityPostPictureResponse>? PictureLocations { get; set; }
+    public List<CommunityPostPictureResponse> PictureLocations { get; set; } = null!;
 }

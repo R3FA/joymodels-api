@@ -2,6 +2,7 @@ using JoyModels.Models.Database;
 using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.ImageSettings;
 using JoyModels.Models.DataTransferObjects.RequestTypes.CommunityPost;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.CommunityPost;
 using JoyModels.Models.Enums;
 using JoyModels.Models.Pagination;
 using JoyModels.Services.Extensions;
@@ -120,7 +121,7 @@ public static class CommunityPostHelperMethods
         return communityPostPicturePaths;
     }
 
-    public static List<CommunityPostPicture> CreateCommunityPostPictureEntities(Guid communityPostUuid,
+    public static List<CommunityPostPicture> CreateCommunityPostPictureEntityInstances(Guid communityPostUuid,
         List<string> communityPostPicturePaths)
     {
         var communityPostPictureEntities = new List<CommunityPostPicture>(communityPostPicturePaths.Count);
@@ -177,6 +178,61 @@ public static class CommunityPostHelperMethods
                 await CreateCommunityPostUserReview(request, context, userAuthValidation);
                 break;
         }
+    }
+
+    public static async Task PatchCommunityPostEntity(
+        this CommunityPostPatchRequest request,
+        CommunityPostResponse communityPostResponse,
+        ModelImageSettingsDetails modelImageSettingsDetails,
+        JoyModelsDbContext context)
+    {
+        if (!string.IsNullOrWhiteSpace(request.Title))
+            await context.CommunityPosts
+                .Where(x => x.Uuid == request.CommunityPostUuid)
+                .ExecuteUpdateAsync(x => x.SetProperty(z => z.Title, request.Title));
+
+        if (!string.IsNullOrWhiteSpace(request.Description))
+            await context.CommunityPosts
+                .Where(x => x.Uuid == request.CommunityPostUuid)
+                .ExecuteUpdateAsync(x => x.SetProperty(z => z.Description, request.Description));
+
+        if (request.PostTypeUuid != null)
+            await context.CommunityPosts
+                .Where(x => x.Uuid == request.CommunityPostUuid)
+                .ExecuteUpdateAsync(x => x.SetProperty(z => z.PostTypeUuid, request.PostTypeUuid));
+
+        if (!string.IsNullOrWhiteSpace(request.YoutubeVideoLink))
+            await context.CommunityPosts
+                .Where(x => x.Uuid == request.CommunityPostUuid)
+                .ExecuteUpdateAsync(x => x.SetProperty(z => z.YoutubeVideoLink, request.YoutubeVideoLink));
+
+        if (request.PicturesToAdd is not null && request.PicturesToAdd.Count != 0)
+        {
+            var communityPostPicturePaths =
+                await request.PicturesToAdd.SaveCommunityPostPictures(modelImageSettingsDetails,
+                    request.CommunityPostUuid);
+
+            var communityPostPictureEntities =
+                CreateCommunityPostPictureEntityInstances(request.CommunityPostUuid, communityPostPicturePaths);
+
+            await communityPostPictureEntities.CreateCommunityPostPictureEntities(context);
+        }
+
+        if (request.PicturesToRemove is not null && request.PicturesToRemove.Count != 0)
+        {
+            for (var i = 0; i < request.PicturesToRemove.Distinct().Count(); i++)
+            {
+                var totalRecords = await context.CommunityPostPictures
+                    .Where(x => x.CommunityPostUuid == request.CommunityPostUuid
+                                && string.Equals(x.PictureLocation, request.PicturesToRemove.ElementAt(i)))
+                    .ExecuteDeleteAsync();
+
+                if (File.Exists(request.PicturesToRemove[i]))
+                    File.Delete(request.PicturesToRemove[i]);
+            }
+        }
+
+        await context.SaveChangesAsync();
     }
 
     public static async Task DeleteCommunityPostUserReview(this CommunityPostUserReviewDeleteRequest request,
