@@ -1,6 +1,5 @@
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Categories;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.ModelAvailability;
-using JoyModels.Models.DataTransferObjects.ResponseTypes.ModelPicture;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Users;
 
 namespace JoyModels.Models.DataTransferObjects.ResponseTypes.Models;

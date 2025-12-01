@@ -1,6 +1,5 @@
 using AutoMapper;
 using JoyModels.Models.Database.Entities;
-using JoyModels.Models.DataTransferObjects.ResponseTypes.UserFollowers;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Users;
 
 namespace JoyModels.Models.AutoMapper;

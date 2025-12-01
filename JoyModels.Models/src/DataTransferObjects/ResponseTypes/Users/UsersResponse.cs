@@ -1,5 +1,3 @@
-using JoyModels.Models.DataTransferObjects.ResponseTypes.UserRole;
-
 namespace JoyModels.Models.DataTransferObjects.ResponseTypes.Users;
 
 public class UsersResponse

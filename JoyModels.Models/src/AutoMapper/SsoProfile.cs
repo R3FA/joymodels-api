@@ -3,7 +3,7 @@ using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Email;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Sso;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Sso;
-using JoyModels.Models.DataTransferObjects.ResponseTypes.UserRole;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.Users;
 
 namespace JoyModels.Models.AutoMapper;
 

@@ -1,4 +1,4 @@
-namespace JoyModels.Models.DataTransferObjects.ResponseTypes.ModelPicture;
+namespace JoyModels.Models.DataTransferObjects.ResponseTypes.Models;
 
 public class ModelPictureResponse
 {
