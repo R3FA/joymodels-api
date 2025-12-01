@@ -4,9 +4,18 @@ namespace JoyModels.Services.Validation;
 
 public static class ModelReviewTypeValidation
 {
-    public static void ValidateModelReviewTypeSearchArguments(this ModelReviewTypeSearchRequest request)
+    private static void ValidateModelReviewTypeName(string modelReviewTypeName)
     {
-        if (!string.IsNullOrWhiteSpace(request.ModelReviewTypeName))
-            RegularExpressionValidation.ValidateName(request.ModelReviewTypeName);
+        if (!string.IsNullOrWhiteSpace(modelReviewTypeName))
+            RegularExpressionValidation.ValidateName(modelReviewTypeName);
     }
+
+    public static void ValidateModelReviewTypeSearchArguments(this ModelReviewTypeSearchRequest request)
+        => ValidateModelReviewTypeName(request.ModelReviewTypeName!);
+
+    public static void ValidateModelReviewTypeCreateArguments(this ModelReviewTypeCreateRequest request)
+        => ValidateModelReviewTypeName(request.ModelReviewTypeName);
+
+    public static void ValidateModelReviewTypePatchArguments(this ModelReviewTypePatchRequest request)
+        => ValidateModelReviewTypeName(request.ModelReviewTypeName);
 }

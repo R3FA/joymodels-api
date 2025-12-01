@@ -8,4 +8,7 @@ public interface IModelReviewTypeService
 {
     Task<ModelReviewTypeResponse> GetByUuid(Guid modelReviewTypeUuid);
     Task<PaginationResponse<ModelReviewTypeResponse>> Search(ModelReviewTypeSearchRequest request);
+    Task<ModelReviewTypeResponse> Create(ModelReviewTypeCreateRequest request);
+    Task<ModelReviewTypeResponse> Patch(ModelReviewTypePatchRequest request);
+    Task Delete(Guid modelReviewTypeUuid);
 }

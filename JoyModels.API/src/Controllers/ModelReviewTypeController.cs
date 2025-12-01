@@ -26,26 +26,25 @@ public class ModelReviewTypeController(IModelReviewTypeService service) : Contro
         return await service.Search(request);
     }
 
-    // [Authorize(Policy = "HeadStaff")]
-    // [HttpPost("create")]
-    // public async Task<ActionResult<CategoryResponse>> Create([FromBody] CategoryCreateRequest request)
-    // {
-    //     return await service.Create(request);
-    // }
-    //
-    // [Authorize(Policy = "HeadStaff")]
-    // [HttpPatch("edit-category/{categoryUuid:guid}")]
-    // public async Task<ActionResult<CategoryResponse>> Patch([FromRoute] Guid categoryUuid,
-    //     [FromBody] CategoryPatchRequest request)
-    // {
-    //     return await service.Patch(categoryUuid, request);
-    // }
-    //
-    // [Authorize(Policy = "HeadStaff")]
-    // [HttpDelete("delete/{categoryUuid:guid}")]
-    // public async Task<ActionResult> Delete([FromRoute] Guid categoryUuid)
-    // {
-    //     await service.Delete(categoryUuid);
-    //     return NoContent();
-    // }
+    [Authorize(Policy = "HeadStaff")]
+    [HttpPost("create")]
+    public async Task<ActionResult<ModelReviewTypeResponse>> Create([FromForm] ModelReviewTypeCreateRequest request)
+    {
+        return await service.Create(request);
+    }
+
+    [Authorize(Policy = "HeadStaff")]
+    [HttpPatch("edit-model-review-type")]
+    public async Task<ActionResult<ModelReviewTypeResponse>> Patch([FromForm] ModelReviewTypePatchRequest request)
+    {
+        return await service.Patch(request);
+    }
+
+    [Authorize(Policy = "HeadStaff")]
+    [HttpDelete("delete/{modelReviewTypeUuid:guid}")]
+    public async Task<ActionResult> Delete([FromRoute] Guid modelReviewTypeUuid)
+    {
+        await service.Delete(modelReviewTypeUuid);
+        return NoContent();
+    }
 }

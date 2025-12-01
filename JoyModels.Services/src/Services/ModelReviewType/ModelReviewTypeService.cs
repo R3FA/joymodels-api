@@ -29,4 +29,28 @@ public class ModelReviewTypeService(
 
         return mapper.Map<PaginationResponse<ModelReviewTypeResponse>>(modelReviewTypeEntities);
     }
+
+    public async Task<ModelReviewTypeResponse> Create(ModelReviewTypeCreateRequest request)
+    {
+        request.ValidateModelReviewTypeCreateArguments();
+
+        var modelReviewTypeEntity = mapper.Map<JoyModels.Models.Database.Entities.ModelReviewType>(request);
+        await modelReviewTypeEntity.CreateModelReviewTypeEntity(context);
+
+        return await GetByUuid(modelReviewTypeEntity.Uuid);
+    }
+
+    public async Task<ModelReviewTypeResponse> Patch(ModelReviewTypePatchRequest request)
+    {
+        request.ValidateModelReviewTypePatchArguments();
+
+        await request.PatchModelReviewTypeEntity(context);
+
+        return await GetByUuid(request.ModelReviewTypeUuid);
+    }
+
+    public async Task Delete(Guid modelReviewTypeUuid)
+    {
+        await ModelReviewTypeHelperMethods.DeleteModelReviewTypeEntity(context, modelReviewTypeUuid);
+    }
 }
