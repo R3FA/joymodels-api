@@ -80,7 +80,7 @@ public class SsoService(
 
         SsoHelperMethods.SendEmail(emailSendUserDetailsRequest, messageProducer);
 
-        var updatedUserEntity = mapper.Map<User>(userEntity, opt => { opt.Items["UserRole"] = userRoleEntity; });
+        var updatedUserEntity = mapper.Map<User>(userEntity, opt => { opt.Items["UserRoleEntity"] = userRoleEntity; });
         return mapper.Map<SsoUserResponse>(updatedUserEntity);
     }
 

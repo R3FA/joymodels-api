@@ -1,4 +1,4 @@
-using JoyModels.Models.DataTransferObjects.ResponseTypes.Users;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.UserRole;
 
 namespace JoyModels.Models.DataTransferObjects.ResponseTypes.Sso;
 

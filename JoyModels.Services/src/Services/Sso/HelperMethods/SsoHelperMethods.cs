@@ -107,7 +107,8 @@ public static class SsoHelperMethods
         return pendingUsersEntity;
     }
 
-    public static async Task<UserRole> GetUserRoleEntity(JoyModelsDbContext context, Guid? roleUuid, string? roleName)
+    public static async Task<JoyModels.Models.Database.Entities.UserRole> GetUserRoleEntity(JoyModelsDbContext context,
+        Guid? roleUuid, string? roleName)
     {
         var baseQuery = context.UserRoles.AsNoTracking();
 
@@ -164,7 +165,7 @@ public static class SsoHelperMethods
     }
 
     public static User SetCustomValuesUserEntity(this User userEntity, SsoUserCreateRequest request,
-        UserRole userRoleEntity)
+        JoyModels.Models.Database.Entities.UserRole userRoleEntity)
     {
         userEntity.Uuid = Guid.NewGuid();
         userEntity.PasswordHash = SsoPasswordHasher.Hash(request, request.Password);

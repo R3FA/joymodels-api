@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace JoyModels.Models.DataTransferObjects.ResponseTypes.Users;
+namespace JoyModels.Models.DataTransferObjects.ResponseTypes.UserRole;
 
 public class UserRoleResponse
 {
