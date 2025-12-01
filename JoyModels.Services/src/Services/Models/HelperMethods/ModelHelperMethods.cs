@@ -4,13 +4,12 @@ using JoyModels.Models.DataTransferObjects.ImageSettings;
 using JoyModels.Models.DataTransferObjects.ModelSettings;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Models;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Models;
+using JoyModels.Models.Enums;
 using JoyModels.Models.Pagination;
 using JoyModels.Services.Extensions;
 using JoyModels.Services.Validation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using ModelAvailabilityEnum = JoyModels.Models.Enums.ModelAvailability;
-using UserRoleEnum = JoyModels.Models.Enums.UserRole;
 
 namespace JoyModels.Services.Services.Models.HelperMethods;
 
@@ -178,7 +177,7 @@ public static class ModelHelperMethods
         {
             foreach (var modelPicture in modelPictures)
             {
-                await ModelValidation.ValidateModelPicture(modelPicture, modelImageSettingsDetails);
+                await GlobalValidation.ValidateModelAndCommunityPostPicture(modelPicture, modelImageSettingsDetails);
 
                 var modelPictureName = $"model-picture-{Guid.NewGuid()}{Path.GetExtension(modelPicture.FileName)}";
 

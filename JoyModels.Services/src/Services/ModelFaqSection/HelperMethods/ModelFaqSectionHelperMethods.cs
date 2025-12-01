@@ -1,8 +1,8 @@
 using JoyModels.Models.Database;
 using JoyModels.Models.DataTransferObjects.RequestTypes.ModelFaqSection;
+using JoyModels.Models.Enums;
 using JoyModels.Services.Validation;
 using Microsoft.EntityFrameworkCore;
-using ModelAvailabilityEnum = JoyModels.Models.Enums.ModelAvailability;
 
 namespace JoyModels.Services.Services.ModelFaqSection.HelperMethods;
 

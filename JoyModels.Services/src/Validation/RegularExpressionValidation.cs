@@ -66,12 +66,25 @@ public static class RegularExpressionValidation
     public static void ValidateText(string text)
     {
         if (string.IsNullOrWhiteSpace(text))
-            throw new ArgumentException("Input cannot be empty string.");
+            throw new ArgumentException("Text cannot be empty string.");
 
         const string pattern = @"^[\p{L}\p{Nd}:.,\-\' ]{1,}$";
 
         if (!Regex.IsMatch(text, pattern))
             throw new ArgumentException(
                 "Invalid value: Must contain only letters (any language), digits, and the following characters: (:.,-').");
+    }
+
+    public static void ValidateYoutubeVideoLink(string url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+            throw new ArgumentException("Url cannot be empty string.");
+
+        const string pattern =
+            @"^https:\/\/(www\.)?(youtube\.com|youtu\.be)(\/[-a-zA-Z0-9()@:%_\+.~#?&//=]{0,2025})$";
+
+        if (!Regex.IsMatch(url, pattern))
+            throw new ArgumentException(
+                "Invalid URL format. Please provide a valid YouTube link (youtube.com or youtu.be) starting with https://");
     }
 }

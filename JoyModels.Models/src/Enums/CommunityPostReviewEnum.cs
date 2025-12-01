@@ -1,6 +1,6 @@
 namespace JoyModels.Models.Enums;
 
-public enum ModelReview
+public enum CommunityPostReviewEnum
 {
     All = 0,
     Negative = 1,

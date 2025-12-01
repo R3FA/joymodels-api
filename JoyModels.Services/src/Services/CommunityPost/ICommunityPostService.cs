@@ -1,0 +1,20 @@
+using JoyModels.Models.DataTransferObjects.RequestTypes.CommunityPost;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.CommunityPost;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
+
+namespace JoyModels.Services.Services.CommunityPost;
+
+public interface ICommunityPostService
+{
+    Task<CommunityPostResponse> GetByUuid(Guid communityPostUuid);
+    Task<PaginationResponse<CommunityPostResponse>> Search(CommunityPostSearchRequest request);
+
+    Task<PaginationResponse<CommunityPostUserReviewResponse>>
+        SearchReviewedUsers(CommunityPostSearchReviewedUsersRequest request);
+
+    Task<CommunityPostResponse> Create(CommunityPostCreateRequest request);
+    Task<CommunityPostResponse> Patch(CommunityPostPatchRequest request);
+    Task CreateUserReview(CommunityPostUserReviewCreateRequest request);
+    Task DeleteUserReview(CommunityPostUserReviewDeleteRequest request);
+    Task Delete(Guid communityPostUuid);
+}

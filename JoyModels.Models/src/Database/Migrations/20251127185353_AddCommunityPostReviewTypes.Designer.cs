@@ -4,6 +4,7 @@ using JoyModels.Models.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JoyModels.Models.src.Database.Migrations
 {
     [DbContext(typeof(JoyModelsDbContext))]
-    partial class JoyModelsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251127185353_AddCommunityPostReviewTypes")]
+    partial class AddCommunityPostReviewTypes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -200,22 +203,6 @@ namespace JoyModels.Models.src.Database.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("uuid");
 
-                    b.Property<int>("CommunityPostDislikes")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0)
-                        .HasColumnName("community_post_dislikes");
-
-                    b.Property<int>("CommunityPostLikes")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0)
-                        .HasColumnName("community_post_likes");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime")
-                        .HasColumnName("created_at");
-
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("text")
@@ -236,8 +223,8 @@ namespace JoyModels.Models.src.Database.Migrations
                         .HasColumnName("user_uuid");
 
                     b.Property<string>("YoutubeVideoLink")
-                        .HasMaxLength(2048)
-                        .HasColumnType("varchar(2048)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("youtube_video_link");
 
                     b.HasKey("Uuid")
@@ -266,11 +253,19 @@ namespace JoyModels.Models.src.Database.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("created_at");
 
+                    b.Property<int>("PictureHeight")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("picture_height");
+
                     b.Property<string>("PictureLocation")
                         .IsRequired()
                         .HasMaxLength(254)
                         .HasColumnType("varchar(254)")
                         .HasColumnName("picture_location");
+
+                    b.Property<int>("PictureWidth")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("picture_width");
 
                     b.HasKey("Uuid")
                         .HasName("PRIMARY");
@@ -375,18 +370,6 @@ namespace JoyModels.Models.src.Database.Migrations
                         .IsUnique();
 
                     b.ToTable("community_post_types", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Uuid = new Guid("458c69e7-3d86-44c2-a9c1-336354d81643"),
-                            CommunityPostName = "Guide"
-                        },
-                        new
-                        {
-                            Uuid = new Guid("662b1c39-8e30-4567-a874-d1188a88a8fb"),
-                            CommunityPostName = "Post"
-                        });
                 });
 
             modelBuilder.Entity("JoyModels.Models.Database.Entities.CommunityPostUserReview", b =>

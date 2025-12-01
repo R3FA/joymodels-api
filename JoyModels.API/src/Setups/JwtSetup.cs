@@ -1,8 +1,8 @@
 using System.Text;
 using JoyModels.Models.DataTransferObjects.Jwt;
+using JoyModels.Models.Enums;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using UserRoleEnum = JoyModels.Models.Enums.UserRole;
 
 namespace JoyModels.API.Setups;
 

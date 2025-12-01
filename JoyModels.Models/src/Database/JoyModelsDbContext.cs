@@ -242,8 +242,19 @@ public partial class JoyModelsDbContext : DbContext
                 .HasColumnName("title");
             entity.Property(e => e.UserUuid).HasColumnName("user_uuid");
             entity.Property(e => e.YoutubeVideoLink)
-                .HasMaxLength(255)
+                .HasMaxLength(2048)
                 .HasColumnName("youtube_video_link");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.CommunityPostLikes)
+                .HasColumnName("community_post_likes")
+                .HasDefaultValue(0)
+                .IsRequired();
+            entity.Property(e => e.CommunityPostDislikes)
+                .HasColumnName("community_post_dislikes")
+                .HasDefaultValue(0)
+                .IsRequired();
 
             entity.HasOne(d => d.PostTypeUu).WithMany(p => p.CommunityPosts)
                 .HasForeignKey(d => d.PostTypeUuid)
@@ -269,15 +280,9 @@ public partial class JoyModelsDbContext : DbContext
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
-            entity.Property(e => e.PictureHeight)
-                .HasColumnType("int(11)")
-                .HasColumnName("picture_height");
             entity.Property(e => e.PictureLocation)
                 .HasMaxLength(254)
                 .HasColumnName("picture_location");
-            entity.Property(e => e.PictureWidth)
-                .HasColumnType("int(11)")
-                .HasColumnName("picture_width");
 
             entity.HasOne(d => d.CommunityPostUu).WithMany(p => p.CommunityPostPictures)
                 .HasForeignKey(d => d.CommunityPostUuid)
@@ -335,6 +340,17 @@ public partial class JoyModelsDbContext : DbContext
             entity.Property(e => e.ReviewName)
                 .HasMaxLength(50)
                 .HasColumnName("review_name");
+
+            entity.HasData(
+                new
+                {
+                    Uuid = new Guid("86e4b752-2f94-4034-b22f-6dbf806b0fde"), ReviewName = "Negative"
+                },
+                new
+                {
+                    Uuid = new Guid("2e5c75b5-532f-4f5c-b86c-a9bdceb69e80"), ReviewName = "Positive"
+                }
+            );
         });
 
         modelBuilder.Entity<CommunityPostType>(entity =>
@@ -349,6 +365,19 @@ public partial class JoyModelsDbContext : DbContext
             entity.Property(e => e.CommunityPostName)
                 .HasMaxLength(50)
                 .HasColumnName("community_post_name");
+
+            entity.HasData(
+                new CommunityPostType
+                {
+                    Uuid = new Guid("458c69e7-3d86-44c2-a9c1-336354d81643"),
+                    CommunityPostName = "Guide"
+                },
+                new CommunityPostType
+                {
+                    Uuid = new Guid("662b1c39-8e30-4567-a874-d1188a88a8fb"),
+                    CommunityPostName = "Post"
+                }
+            );
         });
 
         modelBuilder.Entity<CommunityPostUserReview>(entity =>

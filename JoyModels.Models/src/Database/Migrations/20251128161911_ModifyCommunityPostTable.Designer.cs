@@ -4,6 +4,7 @@ using JoyModels.Models.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JoyModels.Models.src.Database.Migrations
 {
     [DbContext(typeof(JoyModelsDbContext))]
-    partial class JoyModelsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251128161911_ModifyCommunityPostTable")]
+    partial class ModifyCommunityPostTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -200,18 +203,6 @@ namespace JoyModels.Models.src.Database.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("uuid");
 
-                    b.Property<int>("CommunityPostDislikes")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0)
-                        .HasColumnName("community_post_dislikes");
-
-                    b.Property<int>("CommunityPostLikes")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0)
-                        .HasColumnName("community_post_likes");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime")
                         .HasColumnName("created_at");
@@ -266,11 +257,19 @@ namespace JoyModels.Models.src.Database.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("created_at");
 
+                    b.Property<int>("PictureHeight")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("picture_height");
+
                     b.Property<string>("PictureLocation")
                         .IsRequired()
                         .HasMaxLength(254)
                         .HasColumnType("varchar(254)")
                         .HasColumnName("picture_location");
+
+                    b.Property<int>("PictureWidth")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("picture_width");
 
                     b.HasKey("Uuid")
                         .HasName("PRIMARY");
