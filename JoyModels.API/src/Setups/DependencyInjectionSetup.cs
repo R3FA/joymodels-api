@@ -8,6 +8,7 @@ using JoyModels.Services.Services.CommunityPost;
 using JoyModels.Services.Services.ModelAvailability;
 using JoyModels.Services.Services.ModelFaqSection;
 using JoyModels.Services.Services.ModelReviews;
+using JoyModels.Services.Services.ModelReviewType;
 using JoyModels.Services.Services.Models;
 using JoyModels.Services.Services.Sso;
 using JoyModels.Services.Services.Users;
@@ -80,10 +81,11 @@ public static class DependencyInjectionSetup
         services.AddTransient<ISsoService, SsoService>();
         services.AddTransient<IUsersService, UsersService>();
         services.AddTransient<IModelService, ModelService>();
-        services.AddTransient<ICategoryService, CategoryService>();
         services.AddTransient<IModelAvailabilityService, ModelAvailabilityService>();
         services.AddTransient<IModelReviewService, ModelReviewService>();
         services.AddTransient<IModelFaqSectionService, ModelFaqSectionService>();
+        services.AddTransient<IModelReviewTypeService, ModelReviewTypeService>();
+        services.AddTransient<ICategoryService, CategoryService>();
         services.AddTransient<ICommunityPostService, CommunityPostService>();
 
         services
