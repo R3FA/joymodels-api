@@ -6,6 +6,7 @@ using JoyModels.Models.DataTransferObjects.ImageSettings;
 using JoyModels.Models.DataTransferObjects.RequestTypes.CommunityPost;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.CommunityPost;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.Users;
 using JoyModels.Services.Services.CommunityPost.HelperMethods;
 using JoyModels.Services.Services.Models.HelperMethods;
 using JoyModels.Services.Validation;
@@ -32,6 +33,14 @@ public class CommunityPostService(
         var communityPostEntities = await request.SearchCommunityPostEntities(context);
 
         return mapper.Map<PaginationResponse<CommunityPostResponse>>(communityPostEntities);
+    }
+
+    public async Task<PaginationResponse<CommunityPostUserReviewResponse>> SearchReviewedUsers(
+        CommunityPostSearchReviewedUsersRequest request)
+    {
+        var communityPostUserReviewEntities = await request.SearchCommunityPostUserReviewEntities(context);
+
+        return mapper.Map<PaginationResponse<CommunityPostUserReviewResponse>>(communityPostUserReviewEntities);
     }
 
     public async Task<CommunityPostResponse> Create(CommunityPostCreateRequest request)

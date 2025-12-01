@@ -90,6 +90,40 @@ public static class CommunityPostHelperMethods
         return communityPostEntities;
     }
 
+    public static async Task<PaginationBase<CommunityPostUserReview>>
+        SearchCommunityPostUserReviewEntities(
+            this CommunityPostSearchReviewedUsersRequest request,
+            JoyModelsDbContext context)
+    {
+        var baseQuery = context.CommunityPostUserReviews
+            .AsNoTracking()
+            .Include(x => x.UserUu)
+            .Include(x => x.UserUu.UserRoleUu)
+            .Include(x => x.ReviewTypeUu)
+            .Where(x => x.CommunityPostUuid == request.CommunityPostUuid)
+            .AsQueryable();
+
+        baseQuery = request.CommunityPostReviewType switch
+        {
+            ModelReviewEnum.Negative => baseQuery.Where(x =>
+                x.ReviewTypeUu.ReviewName == nameof(ModelReviewEnum.Negative)),
+            ModelReviewEnum.Positive => baseQuery.Where(x =>
+                x.ReviewTypeUu.ReviewName == nameof(ModelReviewEnum.Positive)),
+            _ => baseQuery
+        };
+
+        var resultQuery =
+            GlobalHelperMethods<CommunityPostUserReview>.OrderBy(baseQuery, request.OrderBy);
+
+        var communityPostUserReviewEntities = await PaginationBase<CommunityPostUserReview>.CreateAsync(
+            resultQuery,
+            request.PageNumber,
+            request.PageSize,
+            request.OrderBy);
+
+        return communityPostUserReviewEntities;
+    }
+
     public static async Task<List<string>> SaveCommunityPostPictures(this List<IFormFile> communityPostPictures,
         ModelImageSettingsDetails modelImageSettingsDetails, Guid communityPostUuid)
     {

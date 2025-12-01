@@ -27,6 +27,14 @@ public class CommunityPostController(ICommunityPostService service) : Controller
     }
 
     [Authorize(Policy = "VerifiedUsers")]
+    [HttpGet("search-reviewed-users")]
+    public async Task<ActionResult<PaginationResponse<CommunityPostUserReviewResponse>>> SearchReviewedUsers(
+        [FromQuery] CommunityPostSearchReviewedUsersRequest request)
+    {
+        return await service.SearchReviewedUsers(request);
+    }
+
+    [Authorize(Policy = "VerifiedUsers")]
     [HttpPost("create")]
     public async Task<ActionResult<CommunityPostResponse>> Create([FromForm] CommunityPostCreateRequest request)
     {
