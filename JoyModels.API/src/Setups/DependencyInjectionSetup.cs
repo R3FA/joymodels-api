@@ -5,6 +5,7 @@ using JoyModels.Communications.Setups;
 using JoyModels.Models.Database;
 using JoyModels.Services.Services.Categories;
 using JoyModels.Services.Services.CommunityPost;
+using JoyModels.Services.Services.CommunityPostReviewType;
 using JoyModels.Services.Services.CommunityPostType;
 using JoyModels.Services.Services.ModelAvailability;
 using JoyModels.Services.Services.ModelFaqSection;
@@ -91,6 +92,7 @@ public static class DependencyInjectionSetup
         services.AddTransient<ICategoryService, CategoryService>();
         services.AddTransient<ICommunityPostService, CommunityPostService>();
         services.AddTransient<ICommunityPostTypeService, CommunityPostTypeService>();
+        services.AddTransient<ICommunityPostReviewTypeService, CommunityPostReviewTypeService>();
 
         services
             .AddControllers()
