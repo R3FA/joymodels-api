@@ -20,7 +20,5 @@ public class ModelReviewProfile : Profile
             .ForMember(x => x.ReviewText, o => o.MapFrom(z => z.ModelReviewText))
             .AfterMap((_, dest) => dest.Uuid = Guid.NewGuid())
             .AfterMap((_, dest) => dest.CreatedAt = DateTime.Now);
-        CreateMap<ModelReviewType, ModelReviewTypeResponse>()
-            .ForMember(x => x.ReviewType, o => o.MapFrom(z => z.ReviewName));
     }
 }

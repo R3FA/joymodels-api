@@ -1,6 +1,4 @@
-using JoyModels.Models.DataTransferObjects.ResponseTypes.Users;
-
-namespace JoyModels.Models.DataTransferObjects.ResponseTypes.UserFollowers;
+namespace JoyModels.Models.DataTransferObjects.ResponseTypes.Users;
 
 public class UserFollowingResponse
 {

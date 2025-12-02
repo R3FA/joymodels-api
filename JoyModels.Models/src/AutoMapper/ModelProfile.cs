@@ -1,7 +1,6 @@
 using AutoMapper;
 using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Models;
-using JoyModels.Models.DataTransferObjects.ResponseTypes.ModelPicture;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Models;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Users;
 

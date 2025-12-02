@@ -9,10 +9,6 @@ public class CommunityPostProfile : Profile
 {
     public CommunityPostProfile()
     {
-        CreateMap<CommunityPostType, CommunityPostTypeResponse>();
-
-        CreateMap<CommunityPostReviewType, CommunityPostReviewTypeResponse>();
-
         CreateMap<CommunityPostUserReview, CommunityPostUserReviewResponse>()
             .ForMember(dest => dest.User,
                 opt => opt.MapFrom(src => src.UserUu))

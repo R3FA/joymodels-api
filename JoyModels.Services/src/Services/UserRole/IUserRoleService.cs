@@ -1,0 +1,14 @@
+using JoyModels.Models.DataTransferObjects.RequestTypes.UserRole;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.UserRole;
+
+namespace JoyModels.Services.Services.UserRole;
+
+public interface IUserRoleService
+{
+    Task<UserRoleResponse> GetByUuid(Guid userRoleUuid);
+    Task<PaginationResponse<UserRoleResponse>> Search(UserRoleSearchRequest request);
+    Task<UserRoleResponse> Create(UserRoleCreateRequest request);
+    Task<UserRoleResponse> Patch(UserRolePatchRequest request);
+    Task Delete(Guid userRoleUuid);
+}

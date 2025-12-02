@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace JoyModels.Models.Pagination;
 
-public class PaginationBase<T>
+public sealed class PaginationBase<T>
 {
     public int PageNumber { get; set; }
     public int PageSize { get; set; }

@@ -5,11 +5,15 @@ using JoyModels.Communications.Setups;
 using JoyModels.Models.Database;
 using JoyModels.Services.Services.Categories;
 using JoyModels.Services.Services.CommunityPost;
+using JoyModels.Services.Services.CommunityPostReviewType;
+using JoyModels.Services.Services.CommunityPostType;
 using JoyModels.Services.Services.ModelAvailability;
 using JoyModels.Services.Services.ModelFaqSection;
 using JoyModels.Services.Services.ModelReviews;
+using JoyModels.Services.Services.ModelReviewType;
 using JoyModels.Services.Services.Models;
 using JoyModels.Services.Services.Sso;
+using JoyModels.Services.Services.UserRole;
 using JoyModels.Services.Services.Users;
 using JoyModels.Services.Validation;
 using JoyModels.Utilities.RabbitMQ.MessageConsumer;
@@ -79,12 +83,16 @@ public static class DependencyInjectionSetup
         // Custom Defined Services
         services.AddTransient<ISsoService, SsoService>();
         services.AddTransient<IUsersService, UsersService>();
+        services.AddTransient<IUserRoleService, UserRoleService>();
         services.AddTransient<IModelService, ModelService>();
-        services.AddTransient<ICategoryService, CategoryService>();
         services.AddTransient<IModelAvailabilityService, ModelAvailabilityService>();
         services.AddTransient<IModelReviewService, ModelReviewService>();
         services.AddTransient<IModelFaqSectionService, ModelFaqSectionService>();
+        services.AddTransient<IModelReviewTypeService, ModelReviewTypeService>();
+        services.AddTransient<ICategoryService, CategoryService>();
         services.AddTransient<ICommunityPostService, CommunityPostService>();
+        services.AddTransient<ICommunityPostTypeService, CommunityPostTypeService>();
+        services.AddTransient<ICommunityPostReviewTypeService, CommunityPostReviewTypeService>();
 
         services
             .AddControllers()
