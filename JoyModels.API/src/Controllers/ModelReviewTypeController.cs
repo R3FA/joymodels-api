@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace JoyModels.API.Controllers;
 
-[Route("api/model-review-type/")]
+[Route("api/model-review-types/")]
 [ApiController]
 public class ModelReviewTypeController(IModelReviewTypeService service) : ControllerBase
 {

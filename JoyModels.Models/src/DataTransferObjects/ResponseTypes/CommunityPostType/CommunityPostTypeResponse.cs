@@ -1,4 +1,4 @@
-namespace JoyModels.Models.DataTransferObjects.ResponseTypes.CommunityPost;
+namespace JoyModels.Models.DataTransferObjects.ResponseTypes.CommunityPostType;
 
 public class CommunityPostTypeResponse
 {

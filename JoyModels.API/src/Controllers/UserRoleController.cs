@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace JoyModels.API.Controllers;
 
-[Route("api/user-role/")]
+[Route("api/user-roles/")]
 [ApiController]
 [Authorize(Policy = "HeadStaff")]
 public class UserRoleController(IUserRoleService service) : ControllerBase

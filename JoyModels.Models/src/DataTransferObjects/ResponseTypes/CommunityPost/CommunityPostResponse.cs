@@ -1,3 +1,4 @@
+using JoyModels.Models.DataTransferObjects.ResponseTypes.CommunityPostType;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Users;
 
 namespace JoyModels.Models.DataTransferObjects.ResponseTypes.CommunityPost;
