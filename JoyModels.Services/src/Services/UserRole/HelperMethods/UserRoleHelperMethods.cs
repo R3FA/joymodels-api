@@ -1,5 +1,4 @@
 using JoyModels.Models.Database;
-using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.RequestTypes.UserRole;
 using JoyModels.Models.Pagination;
 using JoyModels.Services.Extensions;
@@ -43,5 +42,37 @@ public static class UserRoleHelperMethods
             request.OrderBy);
 
         return userRoleEntities;
+    }
+
+    public static async Task CreateUserRoleEntity(this JoyModels.Models.Database.Entities.UserRole userRoleEntity,
+        JoyModelsDbContext context)
+    {
+        await context.UserRoles.AddAsync(userRoleEntity);
+        await context.SaveChangesAsync();
+    }
+
+    public static async Task PatchUserRoleEntity(this UserRolePatchRequest request, JoyModelsDbContext context)
+    {
+        var totalRecords = await context.UserRoles
+            .Where(x => x.Uuid == request.RoleUuid)
+            .ExecuteUpdateAsync(y => y.SetProperty(z => z.RoleName,
+                z => request.RoleName));
+
+        if (totalRecords <= 0)
+            throw new KeyNotFoundException("User role with sent values is not found for patching.");
+
+        await context.SaveChangesAsync();
+    }
+
+    public static async Task DeleteUserRole(JoyModelsDbContext context, Guid userRoleUuid)
+    {
+        var totalRecords = await context.UserRoles
+            .Where(x => x.Uuid == userRoleUuid)
+            .ExecuteDeleteAsync();
+        await context.SaveChangesAsync();
+
+        if (totalRecords <= 0)
+            throw new KeyNotFoundException(
+                $"UserRole with UUID `{userRoleUuid}` does not exist.");
     }
 }

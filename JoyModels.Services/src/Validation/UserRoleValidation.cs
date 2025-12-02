@@ -12,4 +12,10 @@ public static class UserRoleValidation
 
     public static void ValidateUserRoleSearchArguments(this UserRoleSearchRequest request)
         => ValidateRoleName(request.RoleName!);
+
+    public static void ValidateUserRoleCreateArguments(this UserRoleCreateRequest request)
+        => ValidateRoleName(request.RoleName);
+
+    public static void ValidateUserRolePatchArguments(this UserRolePatchRequest request)
+        => ValidateRoleName(request.RoleName);
 }

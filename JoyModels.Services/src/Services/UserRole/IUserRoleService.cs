@@ -8,4 +8,7 @@ public interface IUserRoleService
 {
     Task<UserRoleResponse> GetByUuid(Guid userRoleUuid);
     Task<PaginationResponse<UserRoleResponse>> Search(UserRoleSearchRequest request);
+    Task<UserRoleResponse> Create(UserRoleCreateRequest request);
+    Task<UserRoleResponse> Patch(UserRolePatchRequest request);
+    Task Delete(Guid userRoleUuid);
 }

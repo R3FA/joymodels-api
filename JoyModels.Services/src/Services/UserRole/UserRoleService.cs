@@ -26,4 +26,28 @@ public class UserRoleService(
 
         return mapper.Map<PaginationResponse<UserRoleResponse>>(userRoleEntities);
     }
+
+    public async Task<UserRoleResponse> Create(UserRoleCreateRequest request)
+    {
+        request.ValidateUserRoleCreateArguments();
+
+        var userRoleEntity = mapper.Map<JoyModels.Models.Database.Entities.UserRole>(request);
+        await userRoleEntity.CreateUserRoleEntity(context);
+
+        return await GetByUuid(userRoleEntity.Uuid);
+    }
+
+    public async Task<UserRoleResponse> Patch(UserRolePatchRequest request)
+    {
+        request.ValidateUserRolePatchArguments();
+
+        await request.PatchUserRoleEntity(context);
+
+        return await GetByUuid(request.RoleUuid);
+    }
+
+    public async Task Delete(Guid userRoleUuid)
+    {
+        await UserRoleHelperMethods.DeleteUserRole(context, userRoleUuid);
+    }
 }

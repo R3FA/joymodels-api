@@ -25,22 +25,22 @@ public class UserRoleController(IUserRoleService service) : ControllerBase
         return await service.Search(request);
     }
 
-    // [HttpPost("create")]
-    // public async Task<ActionResult<ModelReviewTypeResponse>> Create([FromForm] ModelReviewTypeCreateRequest request)
-    // {
-    //     return await service.Create(request);
-    // }
-    //
-    // [HttpPatch("edit-model-review-type")]
-    // public async Task<ActionResult<ModelReviewTypeResponse>> Patch([FromForm] ModelReviewTypePatchRequest request)
-    // {
-    //     return await service.Patch(request);
-    // }
-    //
-    // [HttpDelete("delete/{modelReviewTypeUuid:guid}")]
-    // public async Task<ActionResult> Delete([FromRoute] Guid modelReviewTypeUuid)
-    // {
-    //     await service.Delete(modelReviewTypeUuid);
-    //     return NoContent();
-    // }
+    [HttpPost("create")]
+    public async Task<ActionResult<UserRoleResponse>> Create([FromForm] UserRoleCreateRequest request)
+    {
+        return await service.Create(request);
+    }
+
+    [HttpPatch("edit-user-role")]
+    public async Task<ActionResult<UserRoleResponse>> Patch([FromForm] UserRolePatchRequest request)
+    {
+        return await service.Patch(request);
+    }
+
+    [HttpDelete("delete/{userRoleUuid:guid}")]
+    public async Task<ActionResult> Delete([FromRoute] Guid userRoleUuid)
+    {
+        await service.Delete(userRoleUuid);
+        return NoContent();
+    }
 }
