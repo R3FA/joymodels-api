@@ -12,6 +12,7 @@ public class CommunityPostResponse
     public string? YoutubeVideoLink { get; set; }
     public int CommunityPostLikes { get; set; }
     public int CommunityPostDislikes { get; set; }
+    public int CommunityPostCommentCount { get; set; }
     public CommunityPostTypeResponse CommunityPostType { get; set; } = null!;
     public List<CommunityPostPictureResponse> PictureLocations { get; set; } = null!;
 }

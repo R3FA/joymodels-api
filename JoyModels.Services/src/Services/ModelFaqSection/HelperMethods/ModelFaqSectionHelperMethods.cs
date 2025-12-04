@@ -37,7 +37,8 @@ public static class ModelFaqSectionHelperMethods
         await context.SaveChangesAsync();
     }
 
-    public static async Task PatchModelEntity(this ModelFaqSectionPatchRequest request, JoyModelsDbContext context,
+    public static async Task PatchModelFaqSectionEntity(this ModelFaqSectionPatchRequest request,
+        JoyModelsDbContext context,
         UserAuthValidation userAuthValidation)
     {
         var totalRecords = await context.ModelFaqSections

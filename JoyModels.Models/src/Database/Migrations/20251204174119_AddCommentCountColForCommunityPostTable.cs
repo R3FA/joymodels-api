@@ -31,12 +31,18 @@ namespace JoyModels.Models.src.Database.Migrations
             // Decrement comment count when community post comment is deleted
             migrationBuilder.Sql(@"
                CREATE TRIGGER trg_community_post_comment_delete
-                AFTER DELETE ON community_post_question_section
+                BEFORE DELETE ON community_post_question_section
                 FOR EACH ROW
                 BEGIN
+                    DECLARE reply_count INT;
+                    
+                    SELECT COUNT(*) INTO reply_count 
+                    FROM community_post_question_section 
+                    WHERE parent_message_uuid = OLD.uuid;
+                    
                     UPDATE community_posts
-                    SET community_post_comment_count = community_post_comment_count - 1
-                    WHERE uuid = OLD.community_post_uuid;
+                    SET community_post_comment_count = community_post_comment_count - 1 - reply_count
+                    WHERE uuid = OLD. community_post_uuid;
                 END;");
         }
 
