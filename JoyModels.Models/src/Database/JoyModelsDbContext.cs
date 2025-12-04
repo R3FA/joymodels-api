@@ -255,6 +255,10 @@ public partial class JoyModelsDbContext : DbContext
                 .HasColumnName("community_post_dislikes")
                 .HasDefaultValue(0)
                 .IsRequired();
+            entity.Property(e => e.CommunityPostCommentCount)
+                .HasColumnName("community_post_comment_count")
+                .HasDefaultValue(0)
+                .IsRequired();
 
             entity.HasOne(d => d.PostTypeUu).WithMany(p => p.CommunityPosts)
                 .HasForeignKey(d => d.PostTypeUuid)

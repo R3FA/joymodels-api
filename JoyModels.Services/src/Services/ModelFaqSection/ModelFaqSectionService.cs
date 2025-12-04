@@ -48,7 +48,7 @@ public class ModelFaqSectionService(
     {
         request.ValidateModelFaqSectionPatchArguments();
 
-        await request.PatchModelEntity(context, userAuthValidation);
+        await request.PatchModelFaqSectionEntity(context, userAuthValidation);
 
         return await GetByUuid(request.ModelFaqSectionUuid);
     }
