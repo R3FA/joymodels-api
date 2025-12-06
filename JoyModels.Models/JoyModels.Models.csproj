@@ -7,7 +7,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Folder Include="src\Database\Entities\"/>
         <Folder Include="src\Database\Migrations\"/>
     </ItemGroup>
 

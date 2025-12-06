@@ -48,4 +48,5 @@ public partial class User
     public virtual UserRole UserRoleUu { get; set; } = null!;
 
     public virtual ICollection<UserToken> UserTokens { get; set; } = new List<UserToken>();
+    public virtual ICollection<ShoppingCart> ShoppingCartItems { get; set; } = new List<ShoppingCart>();
 }
