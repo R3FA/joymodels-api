@@ -48,10 +48,15 @@ public static class CategoryHelperMethods
 
     public static async Task PatchCategoryEntity(this CategoryPatchRequest request, JoyModelsDbContext context)
     {
-        await context.Categories
+        var totalRecords = await context.Categories
             .Where(x => x.Uuid == request.Uuid)
             .ExecuteUpdateAsync(y => y.SetProperty(z => z.CategoryName,
                 z => request.CategoryName));
+
+        if (totalRecords <= 0)
+            throw new KeyNotFoundException(
+                $"Category with UUID `{request.Uuid}` does not exist.");
+
         await context.SaveChangesAsync();
     }
 
