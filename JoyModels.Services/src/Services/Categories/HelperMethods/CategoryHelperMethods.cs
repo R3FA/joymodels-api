@@ -15,38 +15,38 @@ public static class CategoryHelperMethods
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Uuid == categoryUuid);
 
-        return categoryEntity ?? throw new KeyNotFoundException("Category with sent values is not found.");
+        return categoryEntity ?? throw new KeyNotFoundException($"Category with UUID `{categoryUuid}` does not exist.");
     }
 
     public static async Task<PaginationBase<Category>> SearchCategoryEntities(JoyModelsDbContext context,
-        CategorySearchRequest categorySearchRequestDto)
+        CategorySearchRequest request)
     {
         var baseQuery = context.Categories
             .AsNoTracking();
 
-        var filteredQuery = categorySearchRequestDto.CategoryName switch
+        var filteredQuery = request.CategoryName switch
         {
-            not null => baseQuery.Where(x => x.CategoryName.Contains(categorySearchRequestDto.CategoryName)),
+            not null => baseQuery.Where(x => x.CategoryName.Contains(request.CategoryName)),
             _ => baseQuery
         };
 
-        filteredQuery = GlobalHelperMethods<Category>.OrderBy(filteredQuery, categorySearchRequestDto.OrderBy);
+        filteredQuery = GlobalHelperMethods<Category>.OrderBy(filteredQuery, request.OrderBy);
 
         var categoryEntities = await PaginationBase<Category>.CreateAsync(filteredQuery,
-            categorySearchRequestDto.PageNumber,
-            categorySearchRequestDto.PageSize,
-            categorySearchRequestDto.OrderBy);
+            request.PageNumber,
+            request.PageSize,
+            request.OrderBy);
 
         return categoryEntities;
     }
 
-    public static async Task CreateCategory(this Category categoryEntity, JoyModelsDbContext context)
+    public static async Task CreateCategoryEntity(this Category categoryEntity, JoyModelsDbContext context)
     {
         await context.Categories.AddAsync(categoryEntity);
         await context.SaveChangesAsync();
     }
 
-    public static async Task PatchCategory(this CategoryPatchRequest request, JoyModelsDbContext context)
+    public static async Task PatchCategoryEntity(this CategoryPatchRequest request, JoyModelsDbContext context)
     {
         await context.Categories
             .Where(x => x.Uuid == request.Uuid)
@@ -55,15 +55,16 @@ public static class CategoryHelperMethods
         await context.SaveChangesAsync();
     }
 
-    public static async Task DeleteCategory(JoyModelsDbContext context, Guid categoryUuid)
+    public static async Task DeleteCategoryEntity(JoyModelsDbContext context, Guid categoryUuid)
     {
-        var numberOfDeletedRows = await context.Categories
+        var totalRecords = await context.Categories
             .Where(x => x.Uuid == categoryUuid)
             .ExecuteDeleteAsync();
-        await context.SaveChangesAsync();
 
-        if (numberOfDeletedRows == 0)
+        if (totalRecords <= 0)
             throw new KeyNotFoundException(
                 $"Category with UUID `{categoryUuid}` does not exist.");
+
+        await context.SaveChangesAsync();
     }
 }

@@ -10,6 +10,6 @@ public interface ICategoryService
 
     Task<PaginationResponse<CategoryResponse>> Search(CategorySearchRequest request);
     Task<CategoryResponse> Create(CategoryCreateRequest request);
-    Task<CategoryResponse> Patch(Guid categoryUuid, CategoryPatchRequest request);
+    Task<CategoryResponse> Patch(CategoryPatchRequest request);
     Task Delete(Guid categoryUuid);
 }
