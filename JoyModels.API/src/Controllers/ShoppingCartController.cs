@@ -26,7 +26,7 @@ public class ShoppingCartController(IShoppingCartService service) : ControllerBa
     }
 
     [HttpPost("create")]
-    public async Task<ActionResult<ShoppingCartResponse>> Create([FromBody] ShoppingCartCreateRequest request)
+    public async Task<ActionResult<ShoppingCartResponse>> Create([FromForm] ShoppingCartCreateRequest request)
     {
         return await service.Create(request);
     }
