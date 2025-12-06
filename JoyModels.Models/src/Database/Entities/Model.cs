@@ -30,4 +30,5 @@ public partial class Model
     public virtual ICollection<UserModelLike> UserModelLikes { get; set; } = new List<UserModelLike>();
 
     public virtual User UserUu { get; set; } = null!;
+    public virtual ICollection<ShoppingCart> ShoppingCartItems { get; set; } = new List<ShoppingCart>();
 }

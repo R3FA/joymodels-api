@@ -54,6 +54,8 @@ public partial class JoyModelsDbContext : DbContext
 
     public virtual DbSet<UserToken> UserTokens { get; set; }
 
+    public virtual DbSet<ShoppingCart> ShoppingCartItems { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder
@@ -803,6 +805,40 @@ public partial class JoyModelsDbContext : DbContext
             entity.HasOne(d => d.UserUu).WithMany(p => p.UserTokens)
                 .HasForeignKey(d => d.UserUuid)
                 .HasConstraintName("user_tokens_ibfk_1");
+        });
+
+        modelBuilder.Entity<ShoppingCart>(entity =>
+        {
+            entity.HasKey(e => e.Uuid).HasName("PRIMARY");
+
+            entity.ToTable("shopping_cart");
+
+            entity.HasIndex(e => e.UserUuid, "user_uuid");
+            entity.HasIndex(e => e.ModelUuid, "model_uuid");
+            entity.HasIndex(e => new { e.UserUuid, e.ModelUuid }, "uq_user_model").IsUnique();
+
+            entity.Property(e => e.Uuid)
+                .HasColumnName("uuid");
+
+            entity.Property(e => e.UserUuid)
+                .HasColumnName("user_uuid");
+
+            entity.Property(e => e.ModelUuid)
+                .HasColumnName("model_uuid");
+
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+
+            entity.HasOne(d => d.UserUu)
+                .WithMany(p => p.ShoppingCartItems)
+                .HasForeignKey(d => d.UserUuid)
+                .HasConstraintName("shopping_cart_items_ibfk_1");
+
+            entity.HasOne(d => d.ModelUu)
+                .WithMany(p => p.ShoppingCartItems)
+                .HasForeignKey(d => d.ModelUuid)
+                .HasConstraintName("shopping_cart_items_ibfk_2");
         });
 
         OnModelCreatingPartial(modelBuilder);

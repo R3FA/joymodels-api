@@ -13,6 +13,7 @@ using JoyModels.Services.Services.ModelFaqSection;
 using JoyModels.Services.Services.ModelReviews;
 using JoyModels.Services.Services.ModelReviewType;
 using JoyModels.Services.Services.Models;
+using JoyModels.Services.Services.ShoppingCart;
 using JoyModels.Services.Services.Sso;
 using JoyModels.Services.Services.UserRole;
 using JoyModels.Services.Services.Users;
@@ -95,6 +96,7 @@ public static class DependencyInjectionSetup
         services.AddTransient<ICommunityPostTypeService, CommunityPostTypeService>();
         services.AddTransient<ICommunityPostReviewTypeService, CommunityPostReviewTypeService>();
         services.AddTransient<ICommunityPostQuestionSectionService, CommunityPostQuestionSectionService>();
+        services.AddTransient<IShoppingCartService, ShoppingCartService>();
 
         services
             .AddControllers()
