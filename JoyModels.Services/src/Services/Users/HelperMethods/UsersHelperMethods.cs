@@ -199,11 +199,13 @@ public static class UsersHelperMethods
             _ => baseQuery.Where(x => x.Uuid == userUuid && x.Uuid == userAuthValidation.GetUserClaimUuid())
         };
 
-        var totalCount = await baseQuery.ExecuteDeleteAsync();
+        var totalRecords = await baseQuery.ExecuteDeleteAsync();
 
-        if (totalCount <= 0)
+        if (totalRecords <= 0)
             throw new KeyNotFoundException(
                 "User either doesn't exist or you don't own the account that you want to delete.");
+
+        await context.SaveChangesAsync();
     }
 
     public static UserFollower CreateUserFollowerObject(Guid targetUserUuid, UserAuthValidation userAuthValidation)

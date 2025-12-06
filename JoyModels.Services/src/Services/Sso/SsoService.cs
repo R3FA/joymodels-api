@@ -84,10 +84,9 @@ public class SsoService(
         return mapper.Map<SsoUserResponse>(updatedUserEntity);
     }
 
-    public async Task<SsoUserResponse> Verify(Guid userUuid, SsoVerifyRequest request)
+    public async Task<SsoUserResponse> Verify(SsoVerifyRequest request)
     {
-        userAuthValidation.ValidateUserAuthRequest(userUuid);
-        GlobalValidation.ValidateRequestUuids(userUuid, request.UserUuid);
+        userAuthValidation.ValidateUserAuthRequest(request.UserUuid);
         RegularExpressionValidation.ValidateOtpCode(request.OtpCode);
         var accessTokenChangeRequest = mapper.Map<SsoAccessTokenChangeRequest>(request);
         await accessTokenChangeRequest.ValidateUserRefreshToken(context, mapper);
@@ -121,10 +120,9 @@ public class SsoService(
             opt => { opt.Items["UserAccessToken"] = ssoAccessTokenChangeResponse.UserAccessToken; });
     }
 
-    public async Task RequestNewOtpCode(Guid userUuid, SsoNewOtpCodeRequest request)
+    public async Task RequestNewOtpCode(SsoNewOtpCodeRequest request)
     {
-        userAuthValidation.ValidateUserAuthRequest(userUuid);
-        GlobalValidation.ValidateRequestUuids(userUuid, request.UserUuid);
+        userAuthValidation.ValidateUserAuthRequest(request.UserUuid);
 
         var userEntity = await SsoHelperMethods.GetUserEntity(context, request.UserUuid, null);
 
@@ -165,11 +163,9 @@ public class SsoService(
         return ssoLoginResponse;
     }
 
-    public async Task<SsoAccessTokenChangeResponse> RequestAccessTokenChange(Guid userUuid,
-        SsoAccessTokenChangeRequest request)
+    public async Task<SsoAccessTokenChangeResponse> RequestAccessTokenChange(SsoAccessTokenChangeRequest request)
     {
-        userAuthValidation.ValidateUserAuthRequest(userUuid);
-        GlobalValidation.ValidateRequestUuids(userUuid, request.UserUuid);
+        userAuthValidation.ValidateUserAuthRequest(request.UserUuid);
 
         await request.ValidateUserRefreshToken(context, mapper);
 
@@ -178,29 +174,24 @@ public class SsoService(
         return SsoHelperMethods.SetCustomValuesSsoAccessTokenChangeResponse(userEntity, jwtClaimDetails);
     }
 
-    public async Task Logout(Guid userUuid, SsoLogoutRequest request)
+    public async Task Logout(SsoLogoutRequest request)
     {
-        userAuthValidation.ValidateUserAuthRequest(userUuid);
-        GlobalValidation.ValidateRequestUuids(userUuid, request.UserUuid);
+        userAuthValidation.ValidateUserAuthRequest(request.UserUuid);
 
         await request.DeleteUserRefreshToken(context);
     }
 
-    public async Task RequestPasswordChange(Guid userUuid,
-        SsoPasswordChangeRequest request)
+    public async Task RequestPasswordChange(SsoPasswordChangeRequest request)
     {
-        userAuthValidation.ValidateUserAuthRequest(userUuid);
-        GlobalValidation.ValidateRequestUuids(userUuid, request.UserUuid);
+        userAuthValidation.ValidateUserAuthRequest(request.UserUuid);
         request.ValidateUserPasswordChangeRequestArguments();
 
         await SsoHelperMethods.CheckIfUserExists(context, request.UserUuid);
         await request.UpdateUsersPassword(context);
     }
 
-    public async Task SetRole(Guid userUuid, SsoSetRoleRequest request)
+    public async Task SetRole(SsoSetRoleRequest request)
     {
-        GlobalValidation.ValidateRequestUuids(userUuid, request.UserUuid);
-
         var userEntity = await SsoHelperMethods.GetUserEntity(context, request.UserUuid, null);
         userEntity.CheckIfUserIsUnverified();
 

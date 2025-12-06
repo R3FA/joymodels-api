@@ -32,60 +32,55 @@ public class SsoController(ISsoService service) : ControllerBase
     }
 
     [Authorize(Policy = "UnverifiedUsers")]
-    [HttpPost("verify/{userUuid:guid}")]
-    public async Task<ActionResult<SsoUserResponse>> Verify([FromRoute] Guid userUuid,
-        [FromBody] SsoVerifyRequest request)
+    [HttpPost("verify")]
+    public async Task<ActionResult<SsoUserResponse>> Verify([FromForm] SsoVerifyRequest request)
     {
-        return await service.Verify(userUuid, request);
+        return await service.Verify(request);
     }
 
     [Authorize(Policy = "UnverifiedUsers")]
-    [HttpPost("request-new-otp-code/{userUuid:guid}")]
-    public async Task<ActionResult> RequestNewOtpCode([FromRoute] Guid userUuid,
-        [FromBody] SsoNewOtpCodeRequest request)
+    [HttpPost("request-new-otp-code")]
+    public async Task<ActionResult> RequestNewOtpCode([FromForm] SsoNewOtpCodeRequest request)
     {
-        await service.RequestNewOtpCode(userUuid, request);
+        await service.RequestNewOtpCode(request);
         return Created();
     }
 
     [HttpPost("login")]
-    public async Task<ActionResult<SsoLoginResponse>> Login([FromBody] SsoLoginRequest request)
+    public async Task<ActionResult<SsoLoginResponse>> Login([FromForm] SsoLoginRequest request)
     {
         return await service.Login(request);
     }
 
     [Authorize(Policy = "VerifiedUsers")]
-    [HttpPost("request-access-token-change/{userUuid:guid}")]
+    [HttpPost("request-access-token-change")]
     public async Task<ActionResult<SsoAccessTokenChangeResponse>> RequestAccessTokenChange(
-        [FromRoute] Guid userUuid, [FromBody] SsoAccessTokenChangeRequest request)
+        [FromForm] SsoAccessTokenChangeRequest request)
     {
-        return await service.RequestAccessTokenChange(userUuid, request);
+        return await service.RequestAccessTokenChange(request);
     }
 
     [Authorize(Policy = "VerifiedUsers")]
-    [HttpPost("logout/{userUuid:guid}")]
-    public async Task<ActionResult> Logout([FromRoute] Guid userUuid,
-        [FromBody] SsoLogoutRequest request)
+    [HttpPost("logout")]
+    public async Task<ActionResult> Logout([FromForm] SsoLogoutRequest request)
     {
-        await service.Logout(userUuid, request);
+        await service.Logout(request);
         return NoContent();
     }
 
     [Authorize(Policy = "VerifiedUsers")]
-    [HttpPatch("request-password-change/{userUuid:guid}")]
-    public async Task<ActionResult> RequestPasswordChange([FromRoute] Guid userUuid,
-        [FromBody] SsoPasswordChangeRequest request)
+    [HttpPatch("request-password-change")]
+    public async Task<ActionResult> RequestPasswordChange([FromForm] SsoPasswordChangeRequest request)
     {
-        await service.RequestPasswordChange(userUuid, request);
+        await service.RequestPasswordChange(request);
         return NoContent();
     }
 
     [Authorize(Policy = "HeadStaff")]
-    [HttpPatch("set-role/{userUuid:guid}")]
-    public async Task<ActionResult> SetRole([FromRoute] Guid userUuid,
-        [FromBody] SsoSetRoleRequest request)
+    [HttpPatch("set-role")]
+    public async Task<ActionResult> SetRole([FromForm] SsoSetRoleRequest request)
     {
-        await service.SetRole(userUuid, request);
+        await service.SetRole(request);
         return NoContent();
     }
 

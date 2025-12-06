@@ -11,7 +11,7 @@ public interface IModelService
     Task<PaginationResponse<ModelResponse>> AdminSearch(ModelAdminSearchRequest request);
     Task<ModelResponse> Create(ModelCreateRequest request);
     Task ModelLike(Guid modelUuid);
-    Task<ModelResponse> Patch(Guid modelUuid, ModelPatchRequest request);
+    Task<ModelResponse> Patch(ModelPatchRequest request);
     Task ModelUnlike(Guid modelUuid);
     Task Delete(Guid modelUuid);
 }

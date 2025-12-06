@@ -30,7 +30,8 @@ public static class CommunityPostQuestionSectionHelperMethods
             .FirstOrDefaultAsync(x => x.Uuid == communityPostQuestionSectionUuid);
 
         return communityPostQuestionSectionEntity ??
-               throw new KeyNotFoundException("Community Post Question Section with sent values is not found.");
+               throw new KeyNotFoundException(
+                   $"Community Post Question Section with sent UUID {communityPostQuestionSectionUuid} is not found.");
     }
 
     public static async Task CreateCommunityPostQuestionSectionEntity(

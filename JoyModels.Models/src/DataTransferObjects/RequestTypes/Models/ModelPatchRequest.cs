@@ -10,7 +10,7 @@ public class ModelPatchRequest
     [MaxLength(100, ErrorMessage = "Name cannot exceed 100 characters.")]
     public string? Name { get; set; }
 
-    [MaxLength(1500, ErrorMessage = "Description cannot exceed 1500 characters.")]
+    [MaxLength(5000, ErrorMessage = "Description cannot exceed 5000 characters.")]
     public string? Description { get; set; }
 
     public decimal? Price { get; set; }

@@ -7,6 +7,6 @@ public class ModelFaqSectionPatchRequest
     [Required] public Guid ModelFaqSectionUuid { get; set; }
     [Required] public Guid ModelUuid { get; set; }
 
-    [Required, MaxLength(1500, ErrorMessage = "MessageText cannot exceed 1500 characters.")]
+    [Required, MaxLength(5000, ErrorMessage = "MessageText cannot exceed 5000 characters.")]
     public string MessageText { get; set; } = string.Empty;
 }

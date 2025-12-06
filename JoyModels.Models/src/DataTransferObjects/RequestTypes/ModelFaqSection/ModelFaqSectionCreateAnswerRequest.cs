@@ -8,6 +8,6 @@ public class ModelFaqSectionCreateAnswerRequest
 
     [Required] public Guid ParentMessageUuid { get; set; }
 
-    [Required, MaxLength(1500, ErrorMessage = "MessageText cannot exceed 1500 characters.")]
+    [Required, MaxLength(5000, ErrorMessage = "MessageText cannot exceed 5000 characters.")]
     public string MessageText { get; set; } = string.Empty;
 }

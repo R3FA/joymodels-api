@@ -49,11 +49,10 @@ public class ModelController(IModelService service) : ControllerBase
     }
 
     [Authorize(Policy = "VerifiedUsers")]
-    [HttpPatch("edit-model/{modelUuid:guid}")]
-    public async Task<ActionResult<ModelResponse>> Patch([FromRoute] Guid modelUuid,
-        [FromForm] ModelPatchRequest request)
+    [HttpPatch("edit-model")]
+    public async Task<ActionResult<ModelResponse>> Patch([FromForm] ModelPatchRequest request)
     {
-        return await service.Patch(modelUuid, request);
+        return await service.Patch(request);
     }
 
     [Authorize(Policy = "VerifiedUsers")]
