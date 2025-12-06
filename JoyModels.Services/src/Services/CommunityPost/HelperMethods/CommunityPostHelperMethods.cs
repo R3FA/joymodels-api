@@ -2,7 +2,6 @@ using JoyModels.Models.Database;
 using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.ImageSettings;
 using JoyModels.Models.DataTransferObjects.RequestTypes.CommunityPost;
-using JoyModels.Models.DataTransferObjects.ResponseTypes.CommunityPost;
 using JoyModels.Models.Enums;
 using JoyModels.Models.Pagination;
 using JoyModels.Services.Extensions;
@@ -52,7 +51,8 @@ public static class CommunityPostHelperMethods
             .Include(x => x.CommunityPostPictures)
             .FirstOrDefaultAsync(x => x.Uuid == communityPostUuid);
 
-        return communityPostEntity ?? throw new KeyNotFoundException("Community post with sent values is not found.");
+        return communityPostEntity ??
+               throw new KeyNotFoundException($"Community post with sent UUID {communityPostUuid} is not found.");
     }
 
     public static async Task<PaginationBase<JoyModels.Models.Database.Entities.CommunityPost>>
@@ -216,7 +216,6 @@ public static class CommunityPostHelperMethods
 
     public static async Task PatchCommunityPostEntity(
         this CommunityPostPatchRequest request,
-        CommunityPostResponse communityPostResponse,
         ModelImageSettingsDetails modelImageSettingsDetails,
         JoyModelsDbContext context)
     {
@@ -256,7 +255,7 @@ public static class CommunityPostHelperMethods
         {
             for (var i = 0; i < request.PicturesToRemove.Distinct().Count(); i++)
             {
-                var totalRecords = await context.CommunityPostPictures
+                await context.CommunityPostPictures
                     .Where(x => x.CommunityPostUuid == request.CommunityPostUuid
                                 && string.Equals(x.PictureLocation, request.PicturesToRemove.ElementAt(i)))
                     .ExecuteDeleteAsync();
@@ -297,9 +296,9 @@ public static class CommunityPostHelperMethods
                 x.Uuid == communityPostUuid && x.UserUuid == userAuthValidation.GetUserClaimUuid())
         };
 
-        var totalCount = await baseQuery.ExecuteDeleteAsync();
+        var totalRecords = await baseQuery.ExecuteDeleteAsync();
 
-        if (totalCount <= 0)
+        if (totalRecords <= 0)
             throw new KeyNotFoundException("Community post either doesn't exist or isn't under your ownership.");
 
         await context.SaveChangesAsync();
