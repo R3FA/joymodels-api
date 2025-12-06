@@ -9,16 +9,15 @@ namespace JoyModels.API.Controllers;
 
 [Route("api/community-posts/")]
 [ApiController]
+[Authorize(Policy = "VerifiedUsers")]
 public class CommunityPostController(ICommunityPostService service) : ControllerBase
 {
-    [Authorize(Policy = "VerifiedUsers")]
     [HttpGet("get/{communityPostUuid:guid}")]
     public async Task<ActionResult<CommunityPostResponse>> GetByUuid([FromRoute] Guid communityPostUuid)
     {
         return await service.GetByUuid(communityPostUuid);
     }
 
-    [Authorize(Policy = "VerifiedUsers")]
     [HttpGet("search")]
     public async Task<ActionResult<PaginationResponse<CommunityPostResponse>>> Search(
         [FromQuery] CommunityPostSearchRequest request)
@@ -26,7 +25,6 @@ public class CommunityPostController(ICommunityPostService service) : Controller
         return await service.Search(request);
     }
 
-    [Authorize(Policy = "VerifiedUsers")]
     [HttpGet("search-reviewed-users")]
     public async Task<ActionResult<PaginationResponse<CommunityPostUserReviewResponse>>> SearchReviewedUsers(
         [FromQuery] CommunityPostSearchReviewedUsersRequest request)
@@ -34,14 +32,12 @@ public class CommunityPostController(ICommunityPostService service) : Controller
         return await service.SearchReviewedUsers(request);
     }
 
-    [Authorize(Policy = "VerifiedUsers")]
     [HttpPost("create")]
     public async Task<ActionResult<CommunityPostResponse>> Create([FromForm] CommunityPostCreateRequest request)
     {
         return await service.Create(request);
     }
 
-    [Authorize(Policy = "VerifiedUsers")]
     [HttpPost("create-user-review")]
     public async Task<ActionResult> CreateUserReview([FromForm] CommunityPostUserReviewCreateRequest request)
     {
@@ -49,14 +45,12 @@ public class CommunityPostController(ICommunityPostService service) : Controller
         return NoContent();
     }
 
-    [Authorize(Policy = "VerifiedUsers")]
     [HttpPatch("edit-community-post")]
     public async Task<ActionResult<CommunityPostResponse>> Patch([FromForm] CommunityPostPatchRequest request)
     {
         return await service.Patch(request);
     }
 
-    [Authorize(Policy = "VerifiedUsers")]
     [HttpDelete("delete-user-review")]
     public async Task<ActionResult> DeleteUserReview([FromForm] CommunityPostUserReviewDeleteRequest request)
     {
@@ -64,7 +58,6 @@ public class CommunityPostController(ICommunityPostService service) : Controller
         return NoContent();
     }
 
-    [Authorize(Policy = "VerifiedUsers")]
     [HttpDelete("delete/{communityPostUuid:guid}")]
     public async Task<ActionResult> Delete([FromRoute] Guid communityPostUuid)
     {

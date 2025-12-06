@@ -32,23 +32,22 @@ public class CategoryService(JoyModelsDbContext context, IMapper mapper)
         request.ValidateCategoryCreateArguments();
 
         var categoryEntity = mapper.Map<Category>(request);
-        await categoryEntity.CreateCategory(context);
+        await categoryEntity.CreateCategoryEntity(context);
 
         return mapper.Map<CategoryResponse>(categoryEntity);
     }
 
-    public async Task<CategoryResponse> Patch(Guid categoryUuid, CategoryPatchRequest request)
+    public async Task<CategoryResponse> Patch(CategoryPatchRequest request)
     {
-        GlobalValidation.ValidateRequestUuids(categoryUuid, request.Uuid);
         request.ValidateCategoryPatchArguments();
 
-        await request.PatchCategory(context);
+        await request.PatchCategoryEntity(context);
 
         return mapper.Map<CategoryResponse>(request);
     }
 
     public async Task Delete(Guid categoryUuid)
     {
-        await CategoryHelperMethods.DeleteCategory(context, categoryUuid);
+        await CategoryHelperMethods.DeleteCategoryEntity(context, categoryUuid);
     }
 }

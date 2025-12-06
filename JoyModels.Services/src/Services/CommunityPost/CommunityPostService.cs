@@ -6,7 +6,6 @@ using JoyModels.Models.DataTransferObjects.ImageSettings;
 using JoyModels.Models.DataTransferObjects.RequestTypes.CommunityPost;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.CommunityPost;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
-using JoyModels.Models.DataTransferObjects.ResponseTypes.Users;
 using JoyModels.Services.Services.CommunityPost.HelperMethods;
 using JoyModels.Services.Services.Models.HelperMethods;
 using JoyModels.Services.Validation;
@@ -91,7 +90,7 @@ public class CommunityPostService(
         var transaction = await context.Database.BeginTransactionAsync();
         try
         {
-            await request.PatchCommunityPostEntity(communityPostResponse, modelImageSettingsDetails, context);
+            await request.PatchCommunityPostEntity(modelImageSettingsDetails, context);
 
             await transaction.CommitAsync();
         }
