@@ -56,15 +56,20 @@ public static class ModelFaqSectionHelperMethods
     public static async Task DeleteModelFaqSectionEntity(this ModelFaqSectionDeleteRequest request,
         JoyModelsDbContext context, UserAuthValidation userAuthValidation)
     {
-        var numberOfDeletedRows = await context.ModelFaqSections
-            .Where(x => x.UserUuid == userAuthValidation.GetUserClaimUuid()
-                        && x.Uuid == request.ModelFaqSectionUuid
-                        && x.ModelUuid == request.ModelUuid)
-            .ExecuteDeleteAsync();
+        var baseQuery = context.ModelFaqSections.AsQueryable();
 
-        if (numberOfDeletedRows == 0)
-            throw new KeyNotFoundException(
-                "No question or answer found for deletion.");
+        baseQuery = userAuthValidation.GetUserClaimRole() switch
+        {
+            nameof(UserRoleEnum.Admin) or nameof(UserRoleEnum.Root) => baseQuery.Where(x =>
+                x.Uuid == request.ModelFaqSectionUuid),
+            _ => baseQuery.Where(x =>
+                x.Uuid == request.ModelFaqSectionUuid && x.UserUuid == userAuthValidation.GetUserClaimUuid())
+        };
+
+        var totalCount = await baseQuery.ExecuteDeleteAsync();
+
+        if (totalCount <= 0)
+            throw new KeyNotFoundException("ModelFaqSectionEntity either doesn't exist or isn't under your ownership.");
 
         await context.SaveChangesAsync();
     }

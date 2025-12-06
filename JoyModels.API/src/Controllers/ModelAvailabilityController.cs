@@ -28,17 +28,16 @@ public class ModelAvailabilityController(IModelAvailabilityService service) : Co
 
     [Authorize(Policy = "HeadStaff")]
     [HttpPost("create")]
-    public async Task<ActionResult<ModelAvailabilityResponse>> Create([FromBody] ModelAvailabilityCreateRequest request)
+    public async Task<ActionResult<ModelAvailabilityResponse>> Create([FromForm] ModelAvailabilityCreateRequest request)
     {
         return await service.Create(request);
     }
 
     [Authorize(Policy = "HeadStaff")]
-    [HttpPatch("edit-model-availability/{modelAvailabilityUuid:guid}")]
-    public async Task<ActionResult<ModelAvailabilityResponse>> Patch([FromRoute] Guid modelAvailabilityUuid,
-        [FromBody] ModelAvailabilityPatchRequest request)
+    [HttpPatch("edit-model-availability")]
+    public async Task<ActionResult<ModelAvailabilityResponse>> Patch([FromForm] ModelAvailabilityPatchRequest request)
     {
-        return await service.Patch(modelAvailabilityUuid, request);
+        return await service.Patch(request);
     }
 
     [Authorize(Policy = "HeadStaff")]

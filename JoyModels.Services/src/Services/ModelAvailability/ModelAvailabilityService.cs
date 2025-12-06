@@ -38,10 +38,8 @@ public class ModelAvailabilityService(JoyModelsDbContext context, IMapper mapper
         return mapper.Map<ModelAvailabilityResponse>(modelAvailabilityEntity);
     }
 
-    public async Task<ModelAvailabilityResponse> Patch(Guid modelAvailabilityUuid,
-        ModelAvailabilityPatchRequest request)
+    public async Task<ModelAvailabilityResponse> Patch(ModelAvailabilityPatchRequest request)
     {
-        GlobalValidation.ValidateRequestUuids(modelAvailabilityUuid, request.Uuid);
         request.ValidateModelAvailabilityPatchArguments();
 
         await request.PatchModelAvailability(context);

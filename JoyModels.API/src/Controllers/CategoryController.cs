@@ -28,17 +28,16 @@ public class CategoryController(ICategoryService service) : ControllerBase
 
     [Authorize(Policy = "HeadStaff")]
     [HttpPost("create")]
-    public async Task<ActionResult<CategoryResponse>> Create([FromBody] CategoryCreateRequest request)
+    public async Task<ActionResult<CategoryResponse>> Create([FromForm] CategoryCreateRequest request)
     {
         return await service.Create(request);
     }
 
     [Authorize(Policy = "HeadStaff")]
-    [HttpPatch("edit-category/{categoryUuid:guid}")]
-    public async Task<ActionResult<CategoryResponse>> Patch([FromRoute] Guid categoryUuid,
-        [FromBody] CategoryPatchRequest request)
+    [HttpPatch("edit-category")]
+    public async Task<ActionResult<CategoryResponse>> Patch([FromForm] CategoryPatchRequest request)
     {
-        return await service.Patch(categoryUuid, request);
+        return await service.Patch(request);
     }
 
     [Authorize(Policy = "HeadStaff")]

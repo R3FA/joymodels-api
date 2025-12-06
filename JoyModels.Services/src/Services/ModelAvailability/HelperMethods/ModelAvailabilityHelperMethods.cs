@@ -20,27 +20,26 @@ public static class ModelAvailabilityHelperMethods
     }
 
     public static async Task<PaginationBase<JoyModels.Models.Database.Entities.ModelAvailability>>
-        SearchModelAvailabilityEntities(JoyModelsDbContext context,
-            ModelAvailabilitySearchRequest modelAvailabilitySearchRequestDto)
+        SearchModelAvailabilityEntities(JoyModelsDbContext context, ModelAvailabilitySearchRequest request)
     {
         var baseQuery = context.ModelAvailabilities
             .AsNoTracking();
 
-        var filteredQuery = modelAvailabilitySearchRequestDto.AvailabilityName switch
+        var filteredQuery = request.AvailabilityName switch
         {
             not null => baseQuery.Where(x =>
-                x.AvailabilityName.Contains(modelAvailabilitySearchRequestDto.AvailabilityName)),
+                x.AvailabilityName.Contains(request.AvailabilityName)),
             _ => baseQuery
         };
 
         filteredQuery =
             GlobalHelperMethods<JoyModels.Models.Database.Entities.ModelAvailability>.OrderBy(filteredQuery,
-                modelAvailabilitySearchRequestDto.OrderBy);
+                request.OrderBy);
 
         return await PaginationBase<JoyModels.Models.Database.Entities.ModelAvailability>.CreateAsync(filteredQuery,
-            modelAvailabilitySearchRequestDto.PageNumber,
-            modelAvailabilitySearchRequestDto.PageSize,
-            modelAvailabilitySearchRequestDto.OrderBy);
+            request.PageNumber,
+            request.PageSize,
+            request.OrderBy);
     }
 
     public static async Task CreateModelAvailability(
@@ -53,21 +52,26 @@ public static class ModelAvailabilityHelperMethods
     public static async Task PatchModelAvailability(this ModelAvailabilityPatchRequest request,
         JoyModelsDbContext context)
     {
-        await context.ModelAvailabilities
+        var totalRecords = await context.ModelAvailabilities
             .Where(x => x.Uuid == request.Uuid)
             .ExecuteUpdateAsync(y => y.SetProperty(z => z.AvailabilityName,
                 z => request.AvailabilityName));
+
+        if (totalRecords <= 0)
+            throw new KeyNotFoundException(
+                $"Model availability with UUID `{request.Uuid}` does not exist.");
+
         await context.SaveChangesAsync();
     }
 
     public static async Task DeleteModelAvailability(JoyModelsDbContext context, Guid modelAvailabilityUuid)
     {
-        var numberOfDeletedRows = await context.ModelAvailabilities
+        var totalRecords = await context.ModelAvailabilities
             .Where(x => x.Uuid == modelAvailabilityUuid)
             .ExecuteDeleteAsync();
         await context.SaveChangesAsync();
 
-        if (numberOfDeletedRows == 0)
+        if (totalRecords <= 0)
             throw new KeyNotFoundException(
                 $"Model availability with UUID `{modelAvailabilityUuid}` does not exist.");
     }

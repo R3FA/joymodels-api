@@ -40,13 +40,13 @@ public class CommunityPostQuestionSectionService(
     {
         await request.ValidateCommunityPostSectionCreateAnswerArguments(context);
 
-        var modelFaqSectionEntity =
+        var communityPostQuestionSectionEntity =
             mapper.Map<JoyModels.Models.Database.Entities.CommunityPostQuestionSection>(request);
-        modelFaqSectionEntity.UserUuid = userAuthValidation.GetUserClaimUuid();
+        communityPostQuestionSectionEntity.UserUuid = userAuthValidation.GetUserClaimUuid();
 
-        await modelFaqSectionEntity.CreateCommunityPostQuestionSectionEntity(context);
+        await communityPostQuestionSectionEntity.CreateCommunityPostQuestionSectionEntity(context);
 
-        return await GetByUuid(modelFaqSectionEntity.Uuid);
+        return await GetByUuid(communityPostQuestionSectionEntity.Uuid);
     }
 
     public async Task<CommunityPostQuestionSectionResponse> Patch(CommunityPostQuestionSectionPatchRequest request)

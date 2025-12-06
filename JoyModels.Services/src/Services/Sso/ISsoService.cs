@@ -9,12 +9,12 @@ public interface ISsoService
     Task<SsoUserResponse> GetByUuid(Guid userUuid);
     Task<PaginationResponse<SsoUserResponse>> Search(SsoSearchRequest request);
     Task<SsoUserResponse> Create(SsoUserCreateRequest request);
-    Task<SsoUserResponse> Verify(Guid userUuid, SsoVerifyRequest request);
-    Task RequestNewOtpCode(Guid userUuid, SsoNewOtpCodeRequest request);
+    Task<SsoUserResponse> Verify(SsoVerifyRequest request);
+    Task RequestNewOtpCode(SsoNewOtpCodeRequest request);
     Task<SsoLoginResponse> Login(SsoLoginRequest request);
-    Task<SsoAccessTokenChangeResponse> RequestAccessTokenChange(Guid userUuid, SsoAccessTokenChangeRequest request);
-    Task Logout(Guid userUuid, SsoLogoutRequest request);
-    Task RequestPasswordChange(Guid userUuid, SsoPasswordChangeRequest request);
-    Task SetRole(Guid userUuid, SsoSetRoleRequest request);
+    Task<SsoAccessTokenChangeResponse> RequestAccessTokenChange(SsoAccessTokenChangeRequest request);
+    Task Logout(SsoLogoutRequest request);
+    Task RequestPasswordChange(SsoPasswordChangeRequest request);
+    Task SetRole(SsoSetRoleRequest request);
     Task Delete(Guid userUuid);
 }

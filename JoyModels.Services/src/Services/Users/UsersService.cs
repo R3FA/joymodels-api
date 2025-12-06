@@ -71,18 +71,17 @@ public class UsersService(
         await userFollowerEntity.CreateUserFollowerEntity(context);
     }
 
-    public async Task<UsersResponse> Patch(Guid userUuid, UsersPatchRequest request)
+    public async Task<UsersResponse> Patch(UsersPatchRequest request)
     {
-        userAuthValidation.ValidateUserAuthRequest(userUuid);
-        GlobalValidation.ValidateRequestUuids(userUuid, request.UserUuid);
+        userAuthValidation.ValidateUserAuthRequest(request.UserUuid);
         request.ValidateUserPatchArguments();
         await request.ValidateUserPatchArgumentsDuplicatedFields(context);
 
-        var userResponse = await GetByUuid(userUuid);
+        var userResponse = await GetByUuid(request.UserUuid);
 
         await request.PatchUserEntity(context, userResponse, userImageSettingsDetails);
 
-        return await GetByUuid(userUuid);
+        return await GetByUuid(request.UserUuid);
     }
 
     public async Task UnfollowAnUser(Guid targetUserUuid)

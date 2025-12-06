@@ -90,10 +90,9 @@ public class ModelService(
         await userModelLikeEntity.CreateUserModelLikeEntity(context);
     }
 
-    public async Task<ModelResponse> Patch(Guid modelUuid, ModelPatchRequest request)
+    public async Task<ModelResponse> Patch(ModelPatchRequest request)
     {
-        GlobalValidation.ValidateRequestUuids(modelUuid, request.Uuid);
-        var modelResponse = await GetByUuidWithAllAvailabilities(modelUuid);
+        var modelResponse = await GetByUuidWithAllAvailabilities(request.Uuid);
         userAuthValidation.ValidateUserAuthRequest(modelResponse.UserUuid);
         request.ValidateModelPatchArguments();
         await request.ValidateModelPatchArgumentsDuplicatedFields(context);
@@ -110,7 +109,7 @@ public class ModelService(
             throw new TransactionException(ex.Message);
         }
 
-        return await GetByUuidWithAllAvailabilities(modelUuid);
+        return await GetByUuidWithAllAvailabilities(request.Uuid);
     }
 
     public async Task ModelUnlike(Guid modelUuid)

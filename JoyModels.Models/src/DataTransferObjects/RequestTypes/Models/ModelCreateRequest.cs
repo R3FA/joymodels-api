@@ -10,7 +10,7 @@ public class ModelCreateRequest
 
     [Required, MaxLength(8)] public List<IFormFile> Pictures { get; set; } = null!;
 
-    [MaxLength(1500, ErrorMessage = "Description cannot exceed 1500 characters.")]
+    [MaxLength(5000, ErrorMessage = "Description cannot exceed 5000 characters.")]
     [Required]
     public string Description { get; set; } = string.Empty;
 
