@@ -18,6 +18,13 @@ public class UsersController(IUsersService service) : ControllerBase
         return await service.GetByUuid(userUuid);
     }
 
+    [HttpGet("get/{userUuid:guid}/avatar")]
+    public async Task<ActionResult> GetUserAvatar([FromRoute] Guid userUuid)
+    {
+        var files = await service.GetUserAvatar(userUuid);
+        return File(files.FileBytes, files.ContentType);
+    }
+
     [HttpGet("search")]
     public async Task<ActionResult<PaginationResponse<UsersResponse>>> Search([FromQuery] UsersSearchRequest request)
     {
