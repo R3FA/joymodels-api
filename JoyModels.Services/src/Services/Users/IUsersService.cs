@@ -7,6 +7,7 @@ namespace JoyModels.Services.Services.Users;
 public interface IUsersService
 {
     Task<UsersResponse> GetByUuid(Guid userUuid);
+    Task<UserAvatarResponse> GetUserAvatar(Guid userUuid);
     Task<PaginationResponse<UsersResponse>> Search(UsersSearchRequest request);
     Task<PaginationResponse<UserFollowingResponse>> SearchFollowingUsers(UserFollowerSearchRequest request);
     Task<PaginationResponse<UserFollowerResponse>> SearchFollowerUsers(UserFollowerSearchRequest request);

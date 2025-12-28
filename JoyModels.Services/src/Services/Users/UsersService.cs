@@ -6,6 +6,7 @@ using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Users;
 using JoyModels.Services.Services.Users.HelperMethods;
 using JoyModels.Services.Validation;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace JoyModels.Services.Services.Users;
 
@@ -21,6 +22,26 @@ public class UsersService(
         var userEntity = await UsersHelperMethods.GetUserEntity(context, userUuid);
 
         return mapper.Map<UsersResponse>(userEntity);
+    }
+
+    public async Task<UserAvatarResponse> GetUserAvatar(Guid userUuid)
+    {
+        var userResponse = await GetByUuid(userUuid);
+
+        if (!File.Exists(userResponse.UserPictureLocation))
+            throw new KeyNotFoundException("User avatar doesn't exist");
+
+        var provider = new FileExtensionContentTypeProvider();
+        if (!provider.TryGetContentType(userResponse.UserPictureLocation, out var contentType))
+            contentType = "application/octet-stream";
+
+        var fileBytes = await File.ReadAllBytesAsync(userResponse.UserPictureLocation);
+
+        return new UserAvatarResponse
+        {
+            FileBytes = fileBytes,
+            ContentType = contentType,
+        };
     }
 
     public async Task<PaginationResponse<UsersResponse>> Search(UsersSearchRequest request)
