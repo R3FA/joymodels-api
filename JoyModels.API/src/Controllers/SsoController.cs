@@ -52,7 +52,6 @@ public class SsoController(ISsoService service) : ControllerBase
         return await service.Login(request);
     }
 
-    [Authorize(Policy = "VerifiedUsers")]
     [HttpPost("request-access-token-change")]
     public async Task<ActionResult<SsoAccessTokenChangeResponse>> RequestAccessTokenChange(
         [FromForm] SsoAccessTokenChangeRequest request)
