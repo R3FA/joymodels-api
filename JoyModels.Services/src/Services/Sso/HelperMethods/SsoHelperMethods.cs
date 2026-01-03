@@ -37,7 +37,7 @@ public static class SsoHelperMethods
             issuer: jwtClaimDetails.JwtIssuer,
             audience: jwtClaimDetails.JwtAudience,
             claims: claims,
-            expires: DateTime.Now.AddDays(1),
+            expires: DateTime.Now.AddSeconds(10),
             signingCredentials: signingCredentials
         );
 

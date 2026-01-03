@@ -165,8 +165,6 @@ public class SsoService(
 
     public async Task<SsoAccessTokenChangeResponse> RequestAccessTokenChange(SsoAccessTokenChangeRequest request)
     {
-        userAuthValidation.ValidateUserAuthRequest(request.UserUuid);
-
         await request.ValidateUserRefreshToken(context, mapper);
 
         var userEntity = await SsoHelperMethods.GetUserEntity(context, request.UserUuid, null);
