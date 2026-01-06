@@ -36,6 +36,7 @@ public class ModelService(
     public async Task<PaginationResponse<ModelResponse>> Search(ModelSearchRequest request)
     {
         ModelValidation.ValidateModelSearchArguments(request.ModelName!);
+        ModelValidation.ValidateModelSearchArguments(request.CategoryName!);
 
         var modelEntities = await ModelHelperMethods.SearchModelEntities(context, request, userAuthValidation);
 

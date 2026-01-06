@@ -75,6 +75,10 @@ public static class ModelHelperMethods
         if (!string.IsNullOrWhiteSpace(modelSearchRequestDto.ModelName))
             baseQuery = baseQuery.Where(x => x.Name.Contains(modelSearchRequestDto.ModelName));
 
+        if (!string.IsNullOrWhiteSpace(modelSearchRequestDto.CategoryName))
+            baseQuery = baseQuery.Where(x =>
+                x.ModelCategories.Any(y => y.CategoryUu.CategoryName.Contains(modelSearchRequestDto.CategoryName)));
+
         baseQuery = modelSearchRequestDto.ArePrivateUserModelsSearched switch
         {
             true => baseQuery
