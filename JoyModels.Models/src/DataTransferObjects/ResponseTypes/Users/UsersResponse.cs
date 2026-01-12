@@ -14,5 +14,6 @@ public class UsersResponse
     public int UserFollowerCount { get; set; }
     public int UserFollowingCount { get; set; }
     public int UserLikedModelsCount { get; set; }
+    public int UserModelsCount { get; set; }
     public virtual UserRoleResponse UserRole { get; set; } = null!;
 }

@@ -21,6 +21,7 @@ public partial class User
     public int UserFollowerCount { get; set; }
     public int UserFollowingCount { get; set; }
     public int UserLikedModelsCount { get; set; }
+    public int UserModelsCount { get; set; }
 
     public virtual ICollection<CommunityPostQuestionSection> CommunityPostQuestionSectionUserUus { get; set; } =
         new List<CommunityPostQuestionSection>();
