@@ -54,6 +54,15 @@ public class UsersService(
         return mapper.Map<PaginationResponse<UsersResponse>>(userEntities);
     }
 
+    public async Task<PaginationResponse<UsersResponse>> SearchTopArtists(UsersSearchRequest request)
+    {
+        request.ValidateUserSearchArguments();
+
+        var userEntities = await UsersHelperMethods.SearchTopArtistEntities(context, request);
+
+        return mapper.Map<PaginationResponse<UsersResponse>>(userEntities);
+    }
+
     public async Task<PaginationResponse<UserFollowingResponse>> SearchFollowingUsers(
         UserFollowerSearchRequest request)
     {

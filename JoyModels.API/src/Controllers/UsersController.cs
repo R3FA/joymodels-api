@@ -31,6 +31,13 @@ public class UsersController(IUsersService service) : ControllerBase
         return await service.Search(request);
     }
 
+    [HttpGet("search-top-artists")]
+    public async Task<ActionResult<PaginationResponse<UsersResponse>>> SearchTopArtists(
+        [FromQuery] UsersSearchRequest request)
+    {
+        return await service.SearchTopArtists(request);
+    }
+
     [HttpGet("search-following-users")]
     public async Task<ActionResult<PaginationResponse<UserFollowingResponse>>> SearchFollowingUsers(
         [FromQuery] UserFollowerSearchRequest request)

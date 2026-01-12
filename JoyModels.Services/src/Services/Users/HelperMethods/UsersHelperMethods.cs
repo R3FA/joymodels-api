@@ -49,6 +49,30 @@ public static class UsersHelperMethods
         return userEntities;
     }
 
+    public static async Task<PaginationBase<User>> SearchTopArtistEntities(JoyModelsDbContext context,
+        UsersSearchRequest request)
+    {
+        var baseQuery = context.Users
+            .AsNoTracking()
+            .Include(x => x.UserRoleUu)
+            .Where(x => x.UserRoleUu.RoleName != nameof(UserRoleEnum.Unverified) && x.UserModelsCount >= 10);
+
+        var filteredQuery = request.Nickname switch
+        {
+            not null => baseQuery.Where(x => x.NickName.Contains(request.Nickname)),
+            _ => baseQuery
+        };
+
+        filteredQuery = GlobalHelperMethods<User>.OrderBy(filteredQuery, request.OrderBy);
+
+        var userEntities = await PaginationBase<User>.CreateAsync(filteredQuery,
+            request.PageNumber,
+            request.PageSize,
+            request.OrderBy);
+
+        return userEntities;
+    }
+
     public static async Task<PaginationBase<UserFollower>> SearchFollowingUsers(JoyModelsDbContext context,
         UserFollowerSearchRequest request)
     {
