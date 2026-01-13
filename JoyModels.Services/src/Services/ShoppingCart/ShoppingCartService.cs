@@ -20,8 +20,6 @@ public class ShoppingCartService(JoyModelsDbContext context, IMapper mapper, Use
 
     public async Task<PaginationResponse<ShoppingCartResponse>> Search(ShoppingCartSearchRequest request)
     {
-        ModelValidation.ValidateModelSearchArguments(request.ModelName!);
-
         var shoppingCartItemEntities =
             await ShoppingCartHelperMethods.SearchShoppingCartItemEntities(context, userAuthValidation, request);
 

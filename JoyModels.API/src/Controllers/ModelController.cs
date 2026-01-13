@@ -18,6 +18,14 @@ public class ModelController(IModelService service) : ControllerBase
         return await service.GetByUuid(request);
     }
 
+    [HttpGet("get/{modelUuid:guid}/images/{modelPictureLocationPath}")]
+    public async Task<ActionResult> GetModelPictures([FromRoute] Guid modelUuid,
+        [FromRoute] string modelPictureLocationPath)
+    {
+        var files = await service.GetModelPictures(modelUuid, modelPictureLocationPath);
+        return File(files.FileBytes, files.ContentType);
+    }
+
     [Authorize(Policy = "VerifiedUsers")]
     [HttpGet("search")]
     public async Task<ActionResult<PaginationResponse<ModelResponse>>> Search([FromQuery] ModelSearchRequest request)

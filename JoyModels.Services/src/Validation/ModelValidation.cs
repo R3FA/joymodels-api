@@ -10,12 +10,6 @@ namespace JoyModels.Services.Validation;
 
 public static class ModelValidation
 {
-    public static void ValidateModelSearchArguments(string requestName)
-    {
-        if (!string.IsNullOrWhiteSpace(requestName))
-            RegularExpressionValidation.ValidateText(requestName);
-    }
-
     public static void ValidateModelCreateArguments(this ModelCreateRequest request)
     {
         if (!string.IsNullOrWhiteSpace(request.Name))

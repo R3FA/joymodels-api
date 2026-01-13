@@ -1,6 +1,6 @@
-namespace JoyModels.Models.DataTransferObjects.ResponseTypes.Users;
+namespace JoyModels.Models.DataTransferObjects.ResponseTypes.Core;
 
-public class UserAvatarResponse
+public class PictureResponse
 {
     public byte[] FileBytes { get; set; } = null!;
     public string ContentType { get; set; } = string.Empty;

@@ -2,6 +2,7 @@ using AutoMapper;
 using JoyModels.Models.Database;
 using JoyModels.Models.DataTransferObjects.ImageSettings;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Users;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.Core;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Users;
 using JoyModels.Services.Services.Users.HelperMethods;
@@ -24,7 +25,7 @@ public class UsersService(
         return mapper.Map<UsersResponse>(userEntity);
     }
 
-    public async Task<UserAvatarResponse> GetUserAvatar(Guid userUuid)
+    public async Task<PictureResponse> GetUserAvatar(Guid userUuid)
     {
         var userResponse = await GetByUuid(userUuid);
 
@@ -37,7 +38,7 @@ public class UsersService(
 
         var fileBytes = await File.ReadAllBytesAsync(userResponse.UserPictureLocation);
 
-        return new UserAvatarResponse
+        return new PictureResponse
         {
             FileBytes = fileBytes,
             ContentType = contentType,
@@ -49,6 +50,15 @@ public class UsersService(
         request.ValidateUserSearchArguments();
 
         var userEntities = await UsersHelperMethods.SearchUserEntities(context, request);
+
+        return mapper.Map<PaginationResponse<UsersResponse>>(userEntities);
+    }
+
+    public async Task<PaginationResponse<UsersResponse>> SearchTopArtists(UsersSearchRequest request)
+    {
+        request.ValidateUserSearchArguments();
+
+        var userEntities = await UsersHelperMethods.SearchTopArtistEntities(context, request);
 
         return mapper.Map<PaginationResponse<UsersResponse>>(userEntities);
     }

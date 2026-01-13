@@ -5,10 +5,12 @@ using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.ImageSettings;
 using JoyModels.Models.DataTransferObjects.ModelSettings;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Models;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.Core;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Models;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Services.Services.Models.HelperMethods;
 using JoyModels.Services.Validation;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace JoyModels.Services.Services.Models;
 
@@ -33,11 +35,30 @@ public class ModelService(
         return mapper.Map<ModelResponse>(modelEntity);
     }
 
+    public async Task<PictureResponse> GetModelPictures(Guid modelUuid, string modelPictureLocationPath)
+    {
+        await GetByUuid(new ModelGetByUuidRequest { ModelUuid = modelUuid });
+
+        var realPath = Uri.UnescapeDataString(modelPictureLocationPath);
+
+        if (!File.Exists(realPath))
+            throw new KeyNotFoundException("Model picture doesn't exist");
+
+        var provider = new FileExtensionContentTypeProvider();
+        if (!provider.TryGetContentType(realPath, out var contentType))
+            contentType = "application/octet-stream";
+
+        var fileBytes = await File.ReadAllBytesAsync(realPath);
+
+        return new PictureResponse
+        {
+            FileBytes = fileBytes,
+            ContentType = contentType,
+        };
+    }
+
     public async Task<PaginationResponse<ModelResponse>> Search(ModelSearchRequest request)
     {
-        ModelValidation.ValidateModelSearchArguments(request.ModelName!);
-        ModelValidation.ValidateModelSearchArguments(request.CategoryName!);
-
         var modelEntities = await ModelHelperMethods.SearchModelEntities(context, request, userAuthValidation);
 
         return mapper.Map<PaginationResponse<ModelResponse>>(modelEntities);
@@ -45,8 +66,6 @@ public class ModelService(
 
     public async Task<PaginationResponse<ModelResponse>> AdminSearch(ModelAdminSearchRequest request)
     {
-        ModelValidation.ValidateModelSearchArguments(request.ModelName!);
-
         var modelEntities = await ModelHelperMethods.SearchAdminModelEntities(context, request);
 
         return mapper.Map<PaginationResponse<ModelResponse>>(modelEntities);

@@ -710,6 +710,11 @@ public partial class JoyModelsDbContext : DbContext
                 .HasDefaultValue(0)
                 .IsRequired();
 
+            entity.Property(e => e.UserModelsCount)
+                .HasColumnName("user_models_count")
+                .HasDefaultValue(0)
+                .IsRequired();
+
             entity.HasOne(d => d.UserRoleUu).WithMany(p => p.Users)
                 .HasForeignKey(d => d.UserRoleUuid)
                 .OnDelete(DeleteBehavior.ClientSetNull)
