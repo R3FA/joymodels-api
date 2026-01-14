@@ -94,17 +94,11 @@ public static class ModelReviewHelperMethods
         var positiveReviewsPercent = 100.0 * positiveReviewsCount / allReviewsCount;
         var negativeReviewsPercent = 100.0 * negativeReviewsCount / allReviewsCount;
 
-        if (positiveReviewsPercent >= 49 && positiveReviewsPercent <= 59)
+        if ((positiveReviewsPercent >= 49 && positiveReviewsPercent <= 59)
+            || (negativeReviewsPercent >= 49 && negativeReviewsPercent <= 59))
             return new ModelCalculatedReviewsResponse
             {
-                ReviewPercentage = $"{positiveReviewsCount} of {allReviewsCount}",
-                ModelReviewResponse = nameof(ModelReviewEnum.Mixed)
-            };
-
-        if (negativeReviewsPercent >= 49 && negativeReviewsPercent <= 59)
-            return new ModelCalculatedReviewsResponse
-            {
-                ReviewPercentage = $"{negativeReviewsCount} of {allReviewsCount}",
+                ReviewPercentage = $"{positiveReviewsCount + negativeReviewsCount}",
                 ModelReviewResponse = nameof(ModelReviewEnum.Mixed)
             };
 
