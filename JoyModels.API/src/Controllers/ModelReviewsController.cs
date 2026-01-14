@@ -25,6 +25,12 @@ public class ModelReviewsController(IModelReviewService service) : ControllerBas
         return await service.Search(request);
     }
 
+    [HttpGet("calculate-reviews/{modelUuid:guid}")]
+    public async Task<ActionResult<ModelCalculatedReviewsResponse>> CalculateReviews([FromRoute] Guid modelUuid)
+    {
+        return await service.CalculateReviews(modelUuid);
+    }
+
     [HttpPost("create")]
     public async Task<ActionResult<ModelReviewResponse>> Create([FromForm] ModelReviewCreateRequest request)
     {
