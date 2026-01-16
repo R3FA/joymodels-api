@@ -42,6 +42,13 @@ public class ModelController(IModelService service) : ControllerBase
     }
 
     [Authorize(Policy = "VerifiedUsers")]
+    [HttpGet("is-model-liked/{modelUuid:guid}")]
+    public async Task<ActionResult<bool>> IsModelLiked([FromRoute] Guid modelUuid)
+    {
+        return await service.IsModelLiked(modelUuid);
+    }
+
+    [Authorize(Policy = "VerifiedUsers")]
     [HttpPost("create")]
     public async Task<ActionResult<ModelResponse>> Create([FromForm] ModelCreateRequest request)
     {
