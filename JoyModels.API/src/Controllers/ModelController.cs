@@ -18,6 +18,7 @@ public class ModelController(IModelService service) : ControllerBase
         return await service.GetByUuid(request);
     }
 
+    [Authorize(Policy = "VerifiedUsers")]
     [HttpGet("get/{modelUuid:guid}/images/{modelPictureLocationPath}")]
     public async Task<ActionResult> GetModelPictures([FromRoute] Guid modelUuid,
         [FromRoute] string modelPictureLocationPath)
