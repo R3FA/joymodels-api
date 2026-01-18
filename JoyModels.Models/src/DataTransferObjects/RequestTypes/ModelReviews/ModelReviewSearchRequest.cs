@@ -6,5 +6,6 @@ namespace JoyModels.Models.DataTransferObjects.RequestTypes.ModelReviews;
 
 public class ModelReviewSearchRequest : PaginationRequest
 {
+    public Guid ModelUuid { get; set; }
     [DefaultValue(ModelReviewEnum.All)] public ModelReviewEnum ModelReviewType { get; set; }
 }

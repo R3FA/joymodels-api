@@ -47,6 +47,7 @@ public static class ModelReviewHelperMethods
             .ThenInclude(x => x.CategoryUu)
             .Include(x => x.ModelUu.ModelPictures)
             .Include(x => x.ReviewTypeUu)
+            .Where(x => x.ModelUuid == request.ModelUuid)
             .AsQueryable();
 
         baseQuery = request.ModelReviewType.ToString() switch
