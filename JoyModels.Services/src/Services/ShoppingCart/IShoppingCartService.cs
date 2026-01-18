@@ -6,8 +6,8 @@ namespace JoyModels.Services.Services.ShoppingCart;
 
 public interface IShoppingCartService
 {
-    Task<ShoppingCartResponse> GetByUuid(Guid shoppingCartItemUuid);
+    Task<ShoppingCartResponse> GetByUuid(Guid modelUuid);
     Task<PaginationResponse<ShoppingCartResponse>> Search(ShoppingCartSearchRequest request);
     Task<ShoppingCartResponse> Create(ShoppingCartCreateRequest request);
-    Task Delete(Guid shoppingCartItemUuid);
+    Task Delete(Guid modelUuid);
 }

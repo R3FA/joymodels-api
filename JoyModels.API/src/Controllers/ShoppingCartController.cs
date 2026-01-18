@@ -12,10 +12,10 @@ namespace JoyModels.API.Controllers;
 [Authorize(Policy = "VerifiedUsers")]
 public class ShoppingCartController(IShoppingCartService service) : ControllerBase
 {
-    [HttpGet("get/{shoppingCartItemUuid:guid}")]
-    public async Task<ActionResult<ShoppingCartResponse>> GetByUuid([FromRoute] Guid shoppingCartItemUuid)
+    [HttpGet("get/{modelUuid:guid}")]
+    public async Task<ActionResult<ShoppingCartResponse>> GetByUuid([FromRoute] Guid modelUuid)
     {
-        return await service.GetByUuid(shoppingCartItemUuid);
+        return await service.GetByUuid(modelUuid);
     }
 
     [HttpGet("search")]
@@ -31,10 +31,10 @@ public class ShoppingCartController(IShoppingCartService service) : ControllerBa
         return await service.Create(request);
     }
 
-    [HttpDelete("delete/{shoppingCartItemUuid:guid}")]
-    public async Task<ActionResult> Delete([FromRoute] Guid shoppingCartItemUuid)
+    [HttpDelete("delete/{modelUuid:guid}")]
+    public async Task<ActionResult> Delete([FromRoute] Guid modelUuid)
     {
-        await service.Delete(shoppingCartItemUuid);
+        await service.Delete(modelUuid);
         return NoContent();
     }
 }
