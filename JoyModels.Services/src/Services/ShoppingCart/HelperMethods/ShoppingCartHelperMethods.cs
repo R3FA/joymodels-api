@@ -10,16 +10,21 @@ namespace JoyModels.Services.Services.ShoppingCart.HelperMethods;
 public static class ShoppingCartHelperMethods
 {
     public static async Task<JoyModels.Models.Database.Entities.ShoppingCart> GetShoppingCartEntity(
-        JoyModelsDbContext context, UserAuthValidation userAuthValidation, Guid shoppingCartItemUuid)
+        JoyModelsDbContext context, UserAuthValidation userAuthValidation, Guid modelUuid)
     {
         var shoppingCartItemEntity = await context.ShoppingCartItems
             .AsNoTracking()
             .Include(x => x.ModelUu)
+            .ThenInclude(x => x.UserUu)
+            .ThenInclude(x => x.UserRoleUu)
+            .Include(x => x.ModelUu.ModelAvailabilityUu)
+            .Include(x => x.ModelUu.ModelAvailabilityUu)
+            .Include(x => x.ModelUu.ModelPictures)
             .FirstOrDefaultAsync(x =>
-                x.Uuid == shoppingCartItemUuid && x.UserUuid == userAuthValidation.GetUserClaimUuid());
+                x.ModelUuid == modelUuid && x.UserUuid == userAuthValidation.GetUserClaimUuid());
 
         return shoppingCartItemEntity ??
-               throw new KeyNotFoundException($"ShoppingCartItem with UUID `{shoppingCartItemUuid}` does not exist.");
+               throw new KeyNotFoundException($"Model with UUID `{modelUuid}` does not exist in shopping cart.");
     }
 
     public static async Task<PaginationBase<JoyModels.Models.Database.Entities.ShoppingCart>>
@@ -29,6 +34,11 @@ public static class ShoppingCartHelperMethods
         var baseQuery = context.ShoppingCartItems
             .AsNoTracking()
             .Include(x => x.ModelUu)
+            .ThenInclude(x => x.UserUu)
+            .ThenInclude(x => x.UserRoleUu)
+            .Include(x => x.ModelUu.ModelAvailabilityUu)
+            .Include(x => x.ModelUu.ModelAvailabilityUu)
+            .Include(x => x.ModelUu.ModelPictures)
             .Where(x => x.UserUuid == userAuthValidation.GetUserClaimUuid());
 
         var filteredQuery = request.ModelName switch
@@ -59,15 +69,15 @@ public static class ShoppingCartHelperMethods
     }
 
     public static async Task DeleteShoppingCartItem(JoyModelsDbContext context, UserAuthValidation userAuthValidation,
-        Guid shoppingCartItemUuid)
+        Guid modelUuid)
     {
         var totalRecords = await context.ShoppingCartItems
-            .Where(x => x.Uuid == shoppingCartItemUuid && x.UserUuid == userAuthValidation.GetUserClaimUuid())
+            .Where(x => x.ModelUuid == modelUuid && x.UserUuid == userAuthValidation.GetUserClaimUuid())
             .ExecuteDeleteAsync();
 
         if (totalRecords <= 0)
             throw new KeyNotFoundException(
-                $"ShoppingCartItem with UUID `{shoppingCartItemUuid}` does not exist.");
+                $"Model with UUID `{modelUuid}` does not exist in shopping cart.");
 
         await context.SaveChangesAsync();
     }

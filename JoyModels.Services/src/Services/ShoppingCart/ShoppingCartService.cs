@@ -11,10 +11,10 @@ namespace JoyModels.Services.Services.ShoppingCart;
 public class ShoppingCartService(JoyModelsDbContext context, IMapper mapper, UserAuthValidation userAuthValidation)
     : IShoppingCartService
 {
-    public async Task<ShoppingCartResponse> GetByUuid(Guid shoppingCartItemUuid)
+    public async Task<ShoppingCartResponse> GetByUuid(Guid modelUuid)
     {
         var shoppingCartItemEntity =
-            await ShoppingCartHelperMethods.GetShoppingCartEntity(context, userAuthValidation, shoppingCartItemUuid);
+            await ShoppingCartHelperMethods.GetShoppingCartEntity(context, userAuthValidation, modelUuid);
         return mapper.Map<ShoppingCartResponse>(shoppingCartItemEntity);
     }
 
@@ -36,8 +36,8 @@ public class ShoppingCartService(JoyModelsDbContext context, IMapper mapper, Use
         return await GetByUuid(shoppingCartItemEntity.Uuid);
     }
 
-    public async Task Delete(Guid shoppingCartItemUuid)
+    public async Task Delete(Guid modelUuid)
     {
-        await ShoppingCartHelperMethods.DeleteShoppingCartItem(context, userAuthValidation, shoppingCartItemUuid);
+        await ShoppingCartHelperMethods.DeleteShoppingCartItem(context, userAuthValidation, modelUuid);
     }
 }
