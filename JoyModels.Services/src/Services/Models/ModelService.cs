@@ -11,6 +11,7 @@ using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Services.Services.Models.HelperMethods;
 using JoyModels.Services.Validation;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.EntityFrameworkCore;
 
 namespace JoyModels.Services.Services.Models;
 
@@ -69,6 +70,14 @@ public class ModelService(
         var modelEntities = await ModelHelperMethods.SearchAdminModelEntities(context, request);
 
         return mapper.Map<PaginationResponse<ModelResponse>>(modelEntities);
+    }
+
+    public async Task<bool> IsModelLiked(Guid modelUuid)
+    {
+        return await context.UserModelLikes
+            .AnyAsync(x =>
+                x.UserUuid == userAuthValidation.GetUserClaimUuid()
+                && x.ModelUuid == modelUuid);
     }
 
     public async Task<ModelResponse> Create(ModelCreateRequest request)

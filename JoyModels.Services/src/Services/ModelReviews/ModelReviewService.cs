@@ -32,6 +32,11 @@ public class ModelReviewService(
         return mapper.Map<PaginationResponse<ModelReviewResponse>>(modelReviewEntities);
     }
 
+    public async Task<ModelCalculatedReviewsResponse> CalculateReviews(Guid modelUuid)
+    {
+        return await ModelReviewHelperMethods.CalculateReviews(context, modelUuid);
+    }
+
     public async Task<ModelReviewResponse> Create(ModelReviewCreateRequest request)
     {
         var modelResponse = await modelService.GetByUuid(new ModelGetByUuidRequest

@@ -1,6 +1,7 @@
 using JoyModels.Models.Database;
 using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.RequestTypes.ModelReviews;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.ModelReviews;
 using JoyModels.Models.Enums;
 using JoyModels.Models.Pagination;
 using JoyModels.Services.Extensions;
@@ -46,6 +47,7 @@ public static class ModelReviewHelperMethods
             .ThenInclude(x => x.CategoryUu)
             .Include(x => x.ModelUu.ModelPictures)
             .Include(x => x.ReviewTypeUu)
+            .Where(x => x.ModelUuid == request.ModelUuid)
             .AsQueryable();
 
         baseQuery = request.ModelReviewType.ToString() switch
@@ -66,6 +68,56 @@ public static class ModelReviewHelperMethods
             request.OrderBy);
 
         return modelReviewEntities;
+    }
+
+    public static async Task<ModelCalculatedReviewsResponse> CalculateReviews(
+        JoyModelsDbContext context,
+        Guid modelUuid)
+    {
+        var modelExists = await context.Models.AnyAsync(m => m.Uuid == modelUuid);
+        if (!modelExists)
+            throw new KeyNotFoundException("Invalid model uuid!");
+
+        var reviews = await context.ModelReviews
+            .Include(x => x.ReviewTypeUu)
+            .Where(x => x.ModelUuid == modelUuid)
+            .ToListAsync();
+
+        var allReviewsCount = reviews.Count;
+
+        if (allReviewsCount == 0)
+            return new ModelCalculatedReviewsResponse
+                { ReviewPercentage = "No reviews yet.", ModelReviewResponse = string.Empty };
+
+        var positiveReviewsCount = reviews.Count(x => x.ReviewTypeUu.ReviewName == nameof(ModelReviewEnum.Positive));
+        var negativeReviewsCount = reviews.Count(x => x.ReviewTypeUu.ReviewName == nameof(ModelReviewEnum.Negative));
+
+        var positiveReviewsPercent = 100.0 * positiveReviewsCount / allReviewsCount;
+        var negativeReviewsPercent = 100.0 * negativeReviewsCount / allReviewsCount;
+
+        if ((positiveReviewsPercent >= 49 && positiveReviewsPercent <= 59)
+            || (negativeReviewsPercent >= 49 && negativeReviewsPercent <= 59))
+            return new ModelCalculatedReviewsResponse
+            {
+                ReviewPercentage = $"{positiveReviewsCount + negativeReviewsCount}",
+                ModelReviewResponse = nameof(ModelReviewEnum.Mixed)
+            };
+
+        if (positiveReviewsPercent > negativeReviewsPercent)
+            return new ModelCalculatedReviewsResponse
+            {
+                ReviewPercentage = $"{positiveReviewsCount} of {allReviewsCount}",
+                ModelReviewResponse = nameof(ModelReviewEnum.Positive)
+            };
+
+        if (negativeReviewsPercent > positiveReviewsPercent)
+            return new ModelCalculatedReviewsResponse
+            {
+                ReviewPercentage = $"{negativeReviewsCount} of {allReviewsCount}",
+                ModelReviewResponse = nameof(ModelReviewEnum.Negative)
+            };
+
+        throw new Exception("Invalid model review calculation!");
     }
 
     public static async Task CreateModelReviewEntity(this ModelReview modelReviewEntity, JoyModelsDbContext context)

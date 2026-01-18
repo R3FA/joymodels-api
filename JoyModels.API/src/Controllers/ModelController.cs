@@ -18,6 +18,7 @@ public class ModelController(IModelService service) : ControllerBase
         return await service.GetByUuid(request);
     }
 
+    [Authorize(Policy = "VerifiedUsers")]
     [HttpGet("get/{modelUuid:guid}/images/{modelPictureLocationPath}")]
     public async Task<ActionResult> GetModelPictures([FromRoute] Guid modelUuid,
         [FromRoute] string modelPictureLocationPath)
@@ -39,6 +40,13 @@ public class ModelController(IModelService service) : ControllerBase
         [FromQuery] ModelAdminSearchRequest request)
     {
         return await service.AdminSearch(request);
+    }
+
+    [Authorize(Policy = "VerifiedUsers")]
+    [HttpGet("is-model-liked/{modelUuid:guid}")]
+    public async Task<ActionResult<bool>> IsModelLiked([FromRoute] Guid modelUuid)
+    {
+        return await service.IsModelLiked(modelUuid);
     }
 
     [Authorize(Policy = "VerifiedUsers")]
