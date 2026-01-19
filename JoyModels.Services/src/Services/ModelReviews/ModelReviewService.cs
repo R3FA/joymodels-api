@@ -8,6 +8,7 @@ using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Services.Services.ModelReviews.HelperMethods;
 using JoyModels.Services.Services.Models;
 using JoyModels.Services.Validation;
+using Microsoft.EntityFrameworkCore;
 
 namespace JoyModels.Services.Services.ModelReviews;
 
@@ -30,6 +31,12 @@ public class ModelReviewService(
         var modelReviewEntities = await ModelReviewHelperMethods.SearchModelReviewEntities(context, request);
 
         return mapper.Map<PaginationResponse<ModelReviewResponse>>(modelReviewEntities);
+    }
+
+    public async Task<bool> HasUserReviewed(Guid modelUuid)
+    {
+        return await context.ModelReviews.AnyAsync(x =>
+            x.ModelUuid == modelUuid && x.UserUuid == userAuthValidation.GetUserClaimUuid());
     }
 
     public async Task<ModelCalculatedReviewsResponse> CalculateReviews(Guid modelUuid)

@@ -1,5 +1,6 @@
 using JoyModels.Models.DataTransferObjects.RequestTypes.ModelFaqSection;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.ModelFaqSection;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Services.Services.ModelFaqSection;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,13 @@ public class ModelFaqSectionController(IModelFaqSectionService service) : Contro
     public async Task<ActionResult<ModelFaqSectionResponse>> GetByUuid([FromRoute] Guid modelFaqSectionUuid)
     {
         return await service.GetByUuid(modelFaqSectionUuid);
+    }
+
+    [HttpGet("search")]
+    public async Task<ActionResult<PaginationResponse<ModelFaqSectionResponse>>> Search(
+        [FromQuery] ModelFaqSectionSearchRequest request)
+    {
+        return await service.Search(request);
     }
 
     [HttpPost("create")]

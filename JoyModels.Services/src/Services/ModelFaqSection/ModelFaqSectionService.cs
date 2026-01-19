@@ -2,6 +2,7 @@ using AutoMapper;
 using JoyModels.Models.Database;
 using JoyModels.Models.DataTransferObjects.RequestTypes.ModelFaqSection;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.ModelFaqSection;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Services.Services.ModelFaqSection.HelperMethods;
 using JoyModels.Services.Validation;
 
@@ -18,6 +19,13 @@ public class ModelFaqSectionService(
         var modelFaqSectionEntity =
             await ModelFaqSectionHelperMethods.GetModelFaqSectionEntity(context, modelFaqSectionUuid);
         return mapper.Map<ModelFaqSectionResponse>(modelFaqSectionEntity);
+    }
+
+    public async Task<PaginationResponse<ModelFaqSectionResponse>> Search(ModelFaqSectionSearchRequest request)
+    {
+        var modelFaqEntities = await ModelFaqSectionHelperMethods.SearchModelFaqEntities(context, request);
+
+        return mapper.Map<PaginationResponse<ModelFaqSectionResponse>>(modelFaqEntities);
     }
 
     public async Task<ModelFaqSectionResponse> Create(ModelFaqSectionCreateRequest request)

@@ -16,7 +16,9 @@ public class ModelProfile : Profile
             .ForMember(dest => dest.ModelAvailability,
                 opt => opt.MapFrom(src => src.ModelAvailabilityUu))
             .ForMember(dest => dest.ModelCategories,
-                opt => opt.MapFrom(src => src.ModelCategories.Select(x => x.CategoryUu)));
+                opt => opt.MapFrom(src => src.ModelCategories.Select(x => x.CategoryUu)))
+            .ForMember(dest => dest.ModelPictures,
+                opt => opt.MapFrom(src => src.ModelPictures));
         CreateMap<ModelCreateRequest, Model>()
             .AfterMap((_, dest) => dest.Uuid = Guid.NewGuid())
             .AfterMap((_, dest) => dest.CreatedAt = DateTime.Now);
