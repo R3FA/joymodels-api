@@ -1,6 +1,8 @@
 using JoyModels.Models.Database;
 using JoyModels.Models.DataTransferObjects.RequestTypes.ModelFaqSection;
 using JoyModels.Models.Enums;
+using JoyModels.Models.Pagination;
+using JoyModels.Services.Extensions;
 using JoyModels.Services.Validation;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,14 +26,57 @@ public static class ModelFaqSectionHelperMethods
             .Include(x => x.ModelUu.ModelPictures)
             .Include(x => x.ParentMessage)
             .ThenInclude(y => y!.UserUu)
+            .ThenInclude(u => u.UserRoleUu)
             .Include(x => x.Replies)
             .ThenInclude(y => y.UserUu)
+            .ThenInclude(u => u.UserRoleUu)
             .Where(x => string.Equals(x.ModelUu.ModelAvailabilityUu.AvailabilityName,
                 nameof(ModelAvailabilityEnum.Public)))
             .FirstOrDefaultAsync(x => x.Uuid == modelFaqSectionUuid);
 
         return modelFaqSectionEntity ??
                throw new KeyNotFoundException("Model FAQ Section with sent values is not found.");
+    }
+
+    public static async Task<PaginationBase<JoyModels.Models.Database.Entities.ModelFaqSection>> SearchModelFaqEntities(
+        JoyModelsDbContext context,
+        ModelFaqSectionSearchRequest request)
+    {
+        var baseQuery = context.ModelFaqSections
+            .AsNoTracking()
+            .Include(x => x.UserUu)
+            .ThenInclude(y => y.UserRoleUu)
+            .Include(x => x.ModelUu)
+            .ThenInclude(y => y.UserUu)
+            .ThenInclude(y => y.UserRoleUu)
+            .Include(x => x.ModelUu.ModelAvailabilityUu)
+            .Include(x => x.ModelUu.ModelCategories)
+            .ThenInclude(mc => mc.CategoryUu)
+            .Include(x => x.ModelUu.ModelPictures)
+            .Include(x => x.ParentMessage)
+            .ThenInclude(y => y!.UserUu)
+            .ThenInclude(u => u.UserRoleUu)
+            .Include(x => x.Replies)
+            .ThenInclude(y => y.UserUu)
+            .ThenInclude(u => u.UserRoleUu)
+            .Where(x => string.Equals(x.ModelUu.ModelAvailabilityUu.AvailabilityName,
+                            nameof(ModelAvailabilityEnum.Public)) && x.ModelUuid == request.ModelUuid &&
+                        x.ParentMessageUuid == null)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(request.FaqMessage))
+            baseQuery = baseQuery.Where(x => x.MessageText.Contains(request.FaqMessage));
+
+        var resultQuery =
+            GlobalHelperMethods<JoyModels.Models.Database.Entities.ModelFaqSection>.OrderBy(baseQuery, request.OrderBy);
+
+        var modelEntities = await PaginationBase<JoyModels.Models.Database.Entities.ModelFaqSection>.CreateAsync(
+            resultQuery,
+            request.PageNumber,
+            request.PageSize,
+            request.OrderBy);
+
+        return modelEntities;
     }
 
     public static async Task CreateModelFaqSectionEntity(
