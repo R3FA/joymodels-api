@@ -42,7 +42,8 @@ public static class UsersValidation
     {
         if (string.IsNullOrWhiteSpace(request.FirstName)
             && string.IsNullOrWhiteSpace(request.LastName)
-            && string.IsNullOrWhiteSpace(request.Nickname))
+            && string.IsNullOrWhiteSpace(request.Nickname)
+            && request.UserPicture == null)
             throw new ArgumentException("You cannot send an empty request!");
 
         if (!string.IsNullOrWhiteSpace(request.FirstName))
