@@ -24,7 +24,7 @@ public static class ModelHelperMethods
             .Include(x => x.UserUu.UserModelLikes)
             .Include(x => x.ModelAvailabilityUu)
             .Include(x => x.ModelCategories)
-            .ThenInclude(x => x.CategoryUu)
+            .ThenInclude(y => y.CategoryUu)
             .Include(x => x.ModelPictures)
             .FirstOrDefaultAsync(x => x.Uuid == modelUuid);
 
@@ -193,7 +193,7 @@ public static class ModelHelperMethods
                 await using var stream = new FileStream(modelPicturePath, FileMode.Create);
                 await modelPicture.CopyToAsync(stream);
 
-                modelPicturePaths.Add(modelPicturePath);
+                modelPicturePaths.Add(modelPictureName);
             }
         }
         catch (Exception e)
@@ -320,8 +320,11 @@ public static class ModelHelperMethods
                                     modelResponse.ModelPictures.ElementAt(i).PictureLocation))
                     .ExecuteDeleteAsync();
 
-                if (File.Exists(request.ModelPictureLocationsToDelete[i]))
-                    File.Delete(request.ModelPictureLocationsToDelete[i]);
+                var fullPath = Path.Combine(modelImageSettingsDetails.SavePath, "models", request.Uuid.ToString(),
+                    request.ModelPictureLocationsToDelete[i]);
+
+                if (File.Exists(fullPath))
+                    File.Delete(fullPath);
             }
         }
 

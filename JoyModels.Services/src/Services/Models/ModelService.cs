@@ -36,11 +36,13 @@ public class ModelService(
         return mapper.Map<ModelResponse>(modelEntity);
     }
 
-    public async Task<PictureResponse> GetModelPictures(Guid modelUuid, string modelPictureLocationPath)
+    public async Task<PictureResponse> GetModelPictures(Guid modelUuid, string modelPictureFileName)
     {
         await GetByUuid(new ModelGetByUuidRequest { ModelUuid = modelUuid });
 
-        var realPath = Uri.UnescapeDataString(modelPictureLocationPath);
+        var fileName = Uri.UnescapeDataString(modelPictureFileName);
+
+        var realPath = Path.Combine(modelImageSettingsDetails.SavePath, "models", modelUuid.ToString(), fileName);
 
         if (!File.Exists(realPath))
             throw new KeyNotFoundException("Model picture doesn't exist");

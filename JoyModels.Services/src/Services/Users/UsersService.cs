@@ -30,14 +30,17 @@ public class UsersService(
     {
         var userResponse = await GetByUuid(userUuid);
 
-        if (!File.Exists(userResponse.UserPictureLocation))
+        var fullPath = Path.Combine(userImageSettingsDetails.SavePath, "users", userResponse.Uuid.ToString(),
+            userResponse.UserPictureLocation);
+
+        if (!File.Exists(fullPath))
             throw new KeyNotFoundException("User avatar doesn't exist");
 
         var provider = new FileExtensionContentTypeProvider();
         if (!provider.TryGetContentType(userResponse.UserPictureLocation, out var contentType))
             contentType = "application/octet-stream";
 
-        var fileBytes = await File.ReadAllBytesAsync(userResponse.UserPictureLocation);
+        var fileBytes = await File.ReadAllBytesAsync(fullPath);
 
         return new PictureResponse
         {

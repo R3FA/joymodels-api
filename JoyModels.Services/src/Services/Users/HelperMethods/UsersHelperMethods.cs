@@ -187,14 +187,16 @@ public static class UsersHelperMethods
                     await SsoHelperMethods.SaveUserPicture(request.UserPicture, userImageSettingsDetails,
                         request.UserUuid);
 
-                SsoHelperMethods.DeleteUserPictureOnException(userResponse.UserPictureLocation);
+                SsoHelperMethods.DeleteUserPictureOnException(userResponse.UserPictureLocation, userResponse.Uuid,
+                    userImageSettingsDetails);
 
                 await context.Users.Where(x => x.Uuid == request.UserUuid)
                     .ExecuteUpdateAsync(x => x.SetProperty(z => z.UserPictureLocation, userPicturePath));
             }
             catch (Exception e)
             {
-                SsoHelperMethods.DeleteUserPictureOnException(userPicturePath);
+                SsoHelperMethods.DeleteUserPictureOnException(userPicturePath, userResponse.Uuid,
+                    userImageSettingsDetails);
                 throw new Exception(e.Message);
             }
         }

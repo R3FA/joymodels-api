@@ -237,7 +237,7 @@ public static class SsoHelperMethods
             await using var stream = new FileStream(userPicturePath, FileMode.Create);
             await userPicture.CopyToAsync(stream);
 
-            return userPicturePath;
+            return userPictureName;
         }
         catch (Exception e)
         {
@@ -317,10 +317,12 @@ public static class SsoHelperMethods
         if (Directory.Exists(userPictureFolder)) Directory.Delete(userPictureFolder, true);
     }
 
-    public static void DeleteUserPictureOnException(string userPicturePath)
+    public static void DeleteUserPictureOnException(string userPictureFileName, Guid userUuid,
+        UserImageSettingsDetails userImageSettingsDetails)
     {
-        var userPicture = Path.GetFullPath(userPicturePath);
-        if (File.Exists(userPicture)) File.Delete(userPicture);
+        var fullPath = Path.Combine(userImageSettingsDetails.SavePath, "users", userUuid.ToString(),
+            userPictureFileName);
+        if (File.Exists(fullPath)) File.Delete(fullPath);
     }
 
     public static void SendEmail(EmailSendUserDetailsRequest emailSendUserDetailsRequest,
