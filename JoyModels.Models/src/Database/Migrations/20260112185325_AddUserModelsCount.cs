@@ -37,6 +37,15 @@ namespace JoyModels.Models.src.Database.Migrations
                     WHERE uuid = OLD.user_uuid
                       AND user_models_count > 0;
                 END;");
+            
+            migrationBuilder.Sql(@"
+                CREATE TRIGGER trg_model_delete_likes
+                BEFORE DELETE ON models
+                FOR EACH ROW
+                BEGIN
+                    DELETE FROM user_model_likes 
+                    WHERE model_uuid = OLD.uuid;
+                END;");
         }
 
         /// <inheritdoc />
@@ -44,6 +53,7 @@ namespace JoyModels.Models.src.Database.Migrations
         {
             migrationBuilder.Sql("DROP TRIGGER IF EXISTS trg_model_insert;");
             migrationBuilder.Sql("DROP TRIGGER IF EXISTS trg_model_delete;");
+            migrationBuilder.Sql("DROP TRIGGER IF EXISTS trg_model_delete_likes;");
             
             migrationBuilder.DropColumn(
                 name: "user_models_count",
