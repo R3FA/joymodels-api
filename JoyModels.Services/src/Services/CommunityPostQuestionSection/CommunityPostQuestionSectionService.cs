@@ -2,6 +2,7 @@ using AutoMapper;
 using JoyModels.Models.Database;
 using JoyModels.Models.DataTransferObjects.RequestTypes.CommunityPostQuestionSection;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.CommunityPostQuestionSection;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Services.Services.CommunityPostQuestionSection.HelperMethods;
 using JoyModels.Services.Validation;
 
@@ -20,6 +21,16 @@ public class CommunityPostQuestionSectionService(
                 communityPostQuestionSectionUuid);
 
         return mapper.Map<CommunityPostQuestionSectionResponse>(communityPostQuestionSectionEntity);
+    }
+
+    public async Task<PaginationResponse<CommunityPostQuestionSectionResponse>> Search(
+        CommunityPostQuestionSectionSearchRequest request)
+    {
+        var communityPostQuestionSectionEntities =
+            await CommunityPostQuestionSectionHelperMethods.SearchCommunityPostEntities(context, request);
+
+        return mapper.Map<PaginationResponse<CommunityPostQuestionSectionResponse>>(
+            communityPostQuestionSectionEntities);
     }
 
     public async Task<CommunityPostQuestionSectionResponse> Create(CommunityPostQuestionSectionCreateRequest request)

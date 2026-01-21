@@ -1,5 +1,6 @@
 using JoyModels.Models.DataTransferObjects.RequestTypes.CommunityPostQuestionSection;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.CommunityPostQuestionSection;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Services.Services.CommunityPostQuestionSection;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +17,13 @@ public class CommunityPostQuestionSectionController(ICommunityPostQuestionSectio
         [FromRoute] Guid communityPostQuestionSectionUuid)
     {
         return await service.GetByUuid(communityPostQuestionSectionUuid);
+    }
+
+    [HttpGet("search")]
+    public async Task<ActionResult<PaginationResponse<CommunityPostQuestionSectionResponse>>> Search(
+        [FromQuery] CommunityPostQuestionSectionSearchRequest request)
+    {
+        return await service.Search(request);
     }
 
     [HttpPost("create")]
