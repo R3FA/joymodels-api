@@ -14,6 +14,7 @@ public interface IUsersService
     Task<PaginationResponse<UserFollowingResponse>> SearchFollowingUsers(UserFollowerSearchRequest request);
     Task<PaginationResponse<UserFollowerResponse>> SearchFollowerUsers(UserFollowerSearchRequest request);
     Task<PaginationResponse<UserModelLikesSearchResponse>> SearchUserModelLikes(UserModelLikesSearchRequest request);
+    Task<bool> IsFollowingUser(Guid targetUserUuid);
     Task FollowAnUser(Guid targetUserUuid);
     Task<UsersResponse> Patch(UsersPatchRequest request);
     Task UnfollowAnUser(Guid targetUserUuid);

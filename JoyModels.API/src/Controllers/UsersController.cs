@@ -59,6 +59,12 @@ public class UsersController(IUsersService service) : ControllerBase
         return await service.SearchUserModelLikes(request);
     }
 
+    [HttpGet("is-following-user/{targetUserUuid:guid}")]
+    public async Task<ActionResult<bool>> IsFollowingUser([FromRoute] Guid targetUserUuid)
+    {
+        return await service.IsFollowingUser(targetUserUuid);
+    }
+
     [HttpPost("follow-an-user/{targetUserUuid:guid}")]
     public async Task<ActionResult> FollowAnUser([FromRoute] Guid targetUserUuid)
     {

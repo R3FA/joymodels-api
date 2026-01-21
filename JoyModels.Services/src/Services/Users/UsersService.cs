@@ -8,6 +8,7 @@ using JoyModels.Models.DataTransferObjects.ResponseTypes.Users;
 using JoyModels.Services.Services.Users.HelperMethods;
 using JoyModels.Services.Validation;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.EntityFrameworkCore;
 
 namespace JoyModels.Services.Services.Users;
 
@@ -29,14 +30,17 @@ public class UsersService(
     {
         var userResponse = await GetByUuid(userUuid);
 
-        if (!File.Exists(userResponse.UserPictureLocation))
+        var fullPath = Path.Combine(userImageSettingsDetails.SavePath, "users", userResponse.Uuid.ToString(),
+            userResponse.UserPictureLocation);
+
+        if (!File.Exists(fullPath))
             throw new KeyNotFoundException("User avatar doesn't exist");
 
         var provider = new FileExtensionContentTypeProvider();
         if (!provider.TryGetContentType(userResponse.UserPictureLocation, out var contentType))
             contentType = "application/octet-stream";
 
-        var fileBytes = await File.ReadAllBytesAsync(userResponse.UserPictureLocation);
+        var fileBytes = await File.ReadAllBytesAsync(fullPath);
 
         return new PictureResponse
         {
@@ -92,6 +96,14 @@ public class UsersService(
             mapper.Map<PaginationResponse<UserModelLikesSearchResponse>>(userModelLikeEntities);
 
         return userModelLikeResponses;
+    }
+
+    public async Task<bool> IsFollowingUser(Guid targetUserUuid)
+    {
+        return await context.UserFollowers
+            .AnyAsync(x =>
+                x.UserOriginUuid == userAuthValidation.GetUserClaimUuid()
+                && x.UserTargetUuid == targetUserUuid);
     }
 
     public async Task FollowAnUser(Guid targetUserUuid)

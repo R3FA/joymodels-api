@@ -144,7 +144,7 @@ public static class CommunityPostHelperMethods
                 await using var stream = new FileStream(communityPostPicturePath, FileMode.Create);
                 await communityPostPicture.CopyToAsync(stream);
 
-                communityPostPicturePaths.Add(communityPostPicturePath);
+                communityPostPicturePaths.Add(communityPostPictureName);
             }
         }
         catch (Exception e)
@@ -255,13 +255,18 @@ public static class CommunityPostHelperMethods
         {
             for (var i = 0; i < request.PicturesToRemove.Distinct().Count(); i++)
             {
+                var fileName = request.PicturesToRemove.ElementAt(i);
+
                 await context.CommunityPostPictures
                     .Where(x => x.CommunityPostUuid == request.CommunityPostUuid
-                                && string.Equals(x.PictureLocation, request.PicturesToRemove.ElementAt(i)))
+                                && string.Equals(x.PictureLocation, fileName))
                     .ExecuteDeleteAsync();
 
-                if (File.Exists(request.PicturesToRemove[i]))
-                    File.Delete(request.PicturesToRemove[i]);
+                var fullPath = Path.Combine(modelImageSettingsDetails.SavePath, "community-posts",
+                    request.CommunityPostUuid.ToString(), fileName);
+
+                if (File.Exists(fullPath))
+                    File.Delete(fullPath);
             }
         }
 
