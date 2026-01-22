@@ -1,6 +1,6 @@
 using AutoMapper;
-using JoyModels.Models.Constants;
 using JoyModels.Models.Database;
+using JoyModels.Models.Enums;
 using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Order;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Order;
@@ -35,25 +35,38 @@ public class OrderService(
         if (cartItems.Count == 0)
             throw new ArgumentException("Shopping cart is empty.");
 
-        // 2. Check if user already owns any of these models
+        // 2. Validate all models have a price > 0
+        var invalidModels = cartItems.Where(x => x.ModelUu.Price <= 0).Select(x => x.ModelUu.Name).ToList();
+        if (invalidModels.Count > 0)
+            throw new ArgumentException($"These models cannot be purchased: {string.Join(", ", invalidModels)}");
+
+        // 3. Check if user already owns any of these models
         await OrderHelperMethods.ValidateModelsNotAlreadyOwned(context, userUuid, cartItems);
 
-        // 3. Calculate total amount
+        // 4. Cancel any existing pending orders for these models (cleanup from abandoned checkouts)
+        var modelUuids = cartItems.Select(x => x.ModelUuid).ToList();
+        await context.Orders
+            .Where(x => x.UserUuid == userUuid
+                        && modelUuids.Contains(x.ModelUuid)
+                        && x.Status == nameof(OrderStatus.Pending))
+            .ExecuteDeleteAsync();
+
+        // 5. Calculate total amount
         var totalAmount = cartItems.Sum(x => x.ModelUu.Price);
         var amountInCents = (long)(totalAmount * 100);
 
-        // 4. Get or create Stripe Customer
+        // 6. Get or create Stripe Customer
         var user = await context.Users.FirstAsync(x => x.Uuid == userUuid);
         var customerId = await GetOrCreateStripeCustomer(user);
 
-        // 5. Create Ephemeral Key for Payment Sheet
+        // 7. Create Ephemeral Key for Payment Sheet
         var ephemeralKey = await _ephemeralKeyService.CreateAsync(new EphemeralKeyCreateOptions
         {
             Customer = customerId,
             StripeVersion = "2025-01-27.acacia"
         });
 
-        // 6. Create PaymentIntent
+        // 8. Create PaymentIntent
         var paymentIntent = await _paymentIntentService.CreateAsync(new PaymentIntentCreateOptions
         {
             Amount = amountInCents,
@@ -66,7 +79,7 @@ public class OrderService(
             }
         });
 
-        // 7. Create Order for each model (status: pending)
+        // 9. Create Order for each model (status: pending)
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
         {
@@ -78,7 +91,7 @@ public class OrderService(
                     UserUuid = userUuid,
                     ModelUuid = cartItem.ModelUuid,
                     Amount = cartItem.ModelUu.Price,
-                    Status = OrderStatus.Pending,
+                    Status = nameof(OrderStatus.Pending),
                     StripePaymentIntentId = paymentIntent.Id,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
@@ -95,7 +108,7 @@ public class OrderService(
             throw;
         }
 
-        // 8. Return response for Flutter
+        // 10. Return response for Flutter
         return new OrderCheckoutResponse
         {
             ClientSecret = paymentIntent.ClientSecret,
@@ -175,7 +188,7 @@ public class OrderService(
         if (orders.Count == 0) return;
 
         // Check if already processed (idempotency)
-        if (orders.All(o => o.Status == OrderStatus.Completed))
+        if (orders.All(o => o.Status == nameof(OrderStatus.Completed)))
             return;
 
         var userUuid = orders.First().UserUuid;
@@ -185,7 +198,7 @@ public class OrderService(
         // 2. Update status to completed
         foreach (var order in orders)
         {
-            order.Status = OrderStatus.Completed;
+            order.Status = nameof(OrderStatus.Completed);
             order.UpdatedAt = DateTime.UtcNow;
         }
 
@@ -230,7 +243,7 @@ public class OrderService(
 
         foreach (var order in orders)
         {
-            order.Status = OrderStatus.Failed;
+            order.Status = nameof(OrderStatus.Failed);
             order.UpdatedAt = DateTime.UtcNow;
         }
 
