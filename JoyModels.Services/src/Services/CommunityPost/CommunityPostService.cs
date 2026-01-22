@@ -72,6 +72,14 @@ public class CommunityPostService(
         return mapper.Map<PaginationResponse<CommunityPostUserReviewResponse>>(communityPostUserReviewEntities);
     }
 
+    public async Task<PaginationResponse<CommunityPostResponse>> SearchUsersLikedPosts(
+        CommunityPostSearchUserLikedPosts request)
+    {
+        var userLikedCommunityPosts = await request.SearchUserLikedCommunityPosts(context);
+
+        return mapper.Map<PaginationResponse<CommunityPostResponse>>(userLikedCommunityPosts);
+    }
+
     public async Task<CommunityPostResponse> Create(CommunityPostCreateRequest request)
     {
         await request.ValidateCommunityPostCreateArguments(modelImageSettingsDetails);

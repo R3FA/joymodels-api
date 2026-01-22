@@ -14,6 +14,7 @@ public interface ICommunityPostService
     Task<PaginationResponse<CommunityPostUserReviewResponse>>
         SearchReviewedUsers(CommunityPostSearchReviewedUsersRequest request);
 
+    Task<PaginationResponse<CommunityPostResponse>> SearchUsersLikedPosts(CommunityPostSearchUserLikedPosts request);
     Task<CommunityPostResponse> Create(CommunityPostCreateRequest request);
     Task<CommunityPostResponse> Patch(CommunityPostPatchRequest request);
     Task<bool> IsLiked(Guid communityPostUuid);

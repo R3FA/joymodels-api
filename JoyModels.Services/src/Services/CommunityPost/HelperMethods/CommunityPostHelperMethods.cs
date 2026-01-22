@@ -124,6 +124,39 @@ public static class CommunityPostHelperMethods
         return communityPostUserReviewEntities;
     }
 
+    public static async Task<PaginationBase<JoyModels.Models.Database.Entities.CommunityPost>>
+        SearchUserLikedCommunityPosts(
+            this CommunityPostSearchUserLikedPosts request,
+            JoyModelsDbContext context)
+    {
+        var baseQuery = context.CommunityPostUserReviews
+            .AsNoTracking()
+            .Include(x => x.ReviewTypeUu)
+            .Include(x => x.CommunityPostUu)
+            .ThenInclude(cp => cp.UserUu)
+            .ThenInclude(u => u.UserRoleUu)
+            .Include(x => x.CommunityPostUu)
+            .ThenInclude(cp => cp.CommunityPostPictures)
+            .Include(x => x.CommunityPostUu)
+            .ThenInclude(cp => cp.PostTypeUu)
+            .Where(x => x.UserUuid == request.UserUuid)
+            .Where(x => x.ReviewTypeUu.ReviewName == nameof(ModelReviewEnum.Positive))
+            .Select(x => x.CommunityPostUu)
+            .AsQueryable();
+
+        var resultQuery =
+            GlobalHelperMethods<JoyModels.Models.Database.Entities.CommunityPost>.OrderBy(baseQuery, request.OrderBy);
+
+        var userLikedCommunityPosts =
+            await PaginationBase<JoyModels.Models.Database.Entities.CommunityPost>.CreateAsync(
+                resultQuery,
+                request.PageNumber,
+                request.PageSize,
+                request.OrderBy);
+
+        return userLikedCommunityPosts;
+    }
+
     public static async Task<List<string>> SaveCommunityPostPictures(this List<IFormFile> communityPostPictures,
         ModelImageSettingsDetails modelImageSettingsDetails, Guid communityPostUuid)
     {

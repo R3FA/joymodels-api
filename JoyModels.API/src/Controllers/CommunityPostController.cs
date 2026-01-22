@@ -40,6 +40,13 @@ public class CommunityPostController(ICommunityPostService service) : Controller
         return await service.SearchReviewedUsers(request);
     }
 
+    [HttpGet("search-users-liked-posts")]
+    public async Task<ActionResult<PaginationResponse<CommunityPostResponse>>> SearchUsersLikedPosts(
+        [FromQuery] CommunityPostSearchUserLikedPosts request)
+    {
+        return await service.SearchUsersLikedPosts(request);
+    }
+
     [HttpPost("create")]
     public async Task<ActionResult<CommunityPostResponse>> Create([FromForm] CommunityPostCreateRequest request)
     {
