@@ -1,6 +1,8 @@
 using JoyModels.Models.Database;
 using JoyModels.Models.DataTransferObjects.RequestTypes.CommunityPostQuestionSection;
 using JoyModels.Models.Enums;
+using JoyModels.Models.Pagination;
+using JoyModels.Services.Extensions;
 using JoyModels.Services.Validation;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,6 +34,42 @@ public static class CommunityPostQuestionSectionHelperMethods
         return communityPostQuestionSectionEntity ??
                throw new KeyNotFoundException(
                    $"Community Post Question Section with sent UUID {communityPostQuestionSectionUuid} is not found.");
+    }
+
+    public static async Task<PaginationBase<JoyModels.Models.Database.Entities.CommunityPostQuestionSection>>
+        SearchCommunityPostEntities(JoyModelsDbContext context,
+            CommunityPostQuestionSectionSearchRequest request)
+    {
+        var baseQuery = context.CommunityPostQuestionSections
+            .AsNoTracking()
+            .Include(x => x.UserUu)
+            .ThenInclude(x => x.UserRoleUu)
+            .Include(x => x.CommunityPostUu)
+            .ThenInclude(x => x.UserUu)
+            .ThenInclude(x => x.UserRoleUu)
+            .Include(x => x.CommunityPostUu)
+            .ThenInclude(x => x.PostTypeUu)
+            .Include(x => x.ParentMessage)
+            .ThenInclude(x => x!.UserUu)
+            .ThenInclude(x => x.UserRoleUu)
+            .Include(x => x.Replies)
+            .ThenInclude(x => x.UserUu)
+            .ThenInclude(x => x.UserRoleUu)
+            .Where(x => x.CommunityPostUuid == request.CommunityPostUuid)
+            .AsQueryable();
+
+        var resultQuery =
+            GlobalHelperMethods<JoyModels.Models.Database.Entities.CommunityPostQuestionSection>.OrderBy(baseQuery,
+                request.OrderBy);
+
+        var communityPostQuestionEntities =
+            await PaginationBase<JoyModels.Models.Database.Entities.CommunityPostQuestionSection>.CreateAsync(
+                resultQuery,
+                request.PageNumber,
+                request.PageSize,
+                request.OrderBy);
+
+        return communityPostQuestionEntities;
     }
 
     public static async Task CreateCommunityPostQuestionSectionEntity(

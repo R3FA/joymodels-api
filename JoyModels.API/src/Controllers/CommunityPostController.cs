@@ -18,6 +18,14 @@ public class CommunityPostController(ICommunityPostService service) : Controller
         return await service.GetByUuid(communityPostUuid);
     }
 
+    [HttpGet("get/{communityPostUuid:guid}/images/{communityPostPictureLocationPath}")]
+    public async Task<ActionResult> GetCommunityPostPictures([FromRoute] Guid communityPostUuid,
+        [FromRoute] string communityPostPictureLocationPath)
+    {
+        var files = await service.GetCommunityPostPictures(communityPostUuid, communityPostPictureLocationPath);
+        return File(files.FileBytes, files.ContentType);
+    }
+
     [HttpGet("search")]
     public async Task<ActionResult<PaginationResponse<CommunityPostResponse>>> Search(
         [FromQuery] CommunityPostSearchRequest request)
@@ -32,10 +40,23 @@ public class CommunityPostController(ICommunityPostService service) : Controller
         return await service.SearchReviewedUsers(request);
     }
 
+    [HttpGet("search-users-liked-posts")]
+    public async Task<ActionResult<PaginationResponse<CommunityPostResponse>>> SearchUsersLikedPosts(
+        [FromQuery] CommunityPostSearchUserLikedPosts request)
+    {
+        return await service.SearchUsersLikedPosts(request);
+    }
+
     [HttpPost("create")]
     public async Task<ActionResult<CommunityPostResponse>> Create([FromForm] CommunityPostCreateRequest request)
     {
         return await service.Create(request);
+    }
+
+    [HttpGet("is-liked/{communityPostUuid:guid}")]
+    public async Task<ActionResult<bool>> IsLiked([FromRoute] Guid communityPostUuid)
+    {
+        return await service.IsLiked(communityPostUuid);
     }
 
     [HttpPost("create-user-review")]
@@ -49,6 +70,12 @@ public class CommunityPostController(ICommunityPostService service) : Controller
     public async Task<ActionResult<CommunityPostResponse>> Patch([FromForm] CommunityPostPatchRequest request)
     {
         return await service.Patch(request);
+    }
+
+    [HttpGet("is-disliked/{communityPostUuid:guid}")]
+    public async Task<ActionResult<bool>> IsDisliked([FromRoute] Guid communityPostUuid)
+    {
+        return await service.IsDisliked(communityPostUuid);
     }
 
     [HttpDelete("delete-user-review")]

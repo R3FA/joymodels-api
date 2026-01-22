@@ -5,10 +5,13 @@ using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.ImageSettings;
 using JoyModels.Models.DataTransferObjects.RequestTypes.CommunityPost;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.CommunityPost;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.Core;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Services.Services.CommunityPost.HelperMethods;
 using JoyModels.Services.Services.Models.HelperMethods;
 using JoyModels.Services.Validation;
+using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.EntityFrameworkCore;
 
 namespace JoyModels.Services.Services.CommunityPost;
 
@@ -23,6 +26,33 @@ public class CommunityPostService(
         var communityPostEntity = await CommunityPostHelperMethods.GetCommunityPostEntity(context, communityPostUuid);
 
         return mapper.Map<CommunityPostResponse>(communityPostEntity);
+    }
+
+    public async Task<PictureResponse> GetCommunityPostPictures(Guid communityPostUuid,
+        string communityPostPictureLocationPath)
+    {
+        var communityPostResponse = await GetByUuid(communityPostUuid);
+
+        var fileName = Uri.UnescapeDataString(communityPostPictureLocationPath);
+
+        var realPath = Path.Combine(modelImageSettingsDetails.SavePath, "community-posts",
+            communityPostResponse.Uuid.ToString(),
+            fileName);
+
+        if (!File.Exists(realPath))
+            throw new KeyNotFoundException("Community post picture doesn't exist");
+
+        var provider = new FileExtensionContentTypeProvider();
+        if (!provider.TryGetContentType(realPath, out var contentType))
+            contentType = "application/octet-stream";
+
+        var fileBytes = await File.ReadAllBytesAsync(realPath);
+
+        return new PictureResponse
+        {
+            FileBytes = fileBytes,
+            ContentType = contentType,
+        };
     }
 
     public async Task<PaginationResponse<CommunityPostResponse>> Search(CommunityPostSearchRequest request)
@@ -40,6 +70,14 @@ public class CommunityPostService(
         var communityPostUserReviewEntities = await request.SearchCommunityPostUserReviewEntities(context);
 
         return mapper.Map<PaginationResponse<CommunityPostUserReviewResponse>>(communityPostUserReviewEntities);
+    }
+
+    public async Task<PaginationResponse<CommunityPostResponse>> SearchUsersLikedPosts(
+        CommunityPostSearchUserLikedPosts request)
+    {
+        var userLikedCommunityPosts = await request.SearchUserLikedCommunityPosts(context);
+
+        return mapper.Map<PaginationResponse<CommunityPostResponse>>(userLikedCommunityPosts);
     }
 
     public async Task<CommunityPostResponse> Create(CommunityPostCreateRequest request)
@@ -102,11 +140,31 @@ public class CommunityPostService(
         return await GetByUuid(request.CommunityPostUuid);
     }
 
+    public async Task<bool> IsLiked(Guid communityPostUuid)
+    {
+        return await context.CommunityPostUserReviews
+            .Include(x => x.ReviewTypeUu)
+            .AnyAsync(x =>
+                x.UserUuid == userAuthValidation.GetUserClaimUuid()
+                && x.CommunityPostUuid == communityPostUuid
+                && x.ReviewTypeUu.ReviewName == "Positive");
+    }
+
     public async Task CreateUserReview(CommunityPostUserReviewCreateRequest request)
     {
         await request.ValidateCommunityPostLikeArguments(context, userAuthValidation);
 
         await request.CreateCommunityPostUserReviewEntity(context, userAuthValidation);
+    }
+
+    public async Task<bool> IsDisliked(Guid communityPostUuid)
+    {
+        return await context.CommunityPostUserReviews
+            .Include(x => x.ReviewTypeUu)
+            .AnyAsync(x =>
+                x.UserUuid == userAuthValidation.GetUserClaimUuid()
+                && x.CommunityPostUuid == communityPostUuid
+                && x.ReviewTypeUu.ReviewName == "Negative");
     }
 
     public async Task DeleteUserReview(CommunityPostUserReviewDeleteRequest request)
