@@ -56,6 +56,10 @@ public partial class JoyModelsDbContext : DbContext
 
     public virtual DbSet<ShoppingCart> ShoppingCartItems { get; set; }
 
+    public virtual DbSet<Order> Orders { get; set; }
+
+    public virtual DbSet<Library> Libraries { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder
@@ -844,6 +848,82 @@ public partial class JoyModelsDbContext : DbContext
                 .WithMany(p => p.ShoppingCartItems)
                 .HasForeignKey(d => d.ModelUuid)
                 .HasConstraintName("shopping_cart_items_ibfk_2");
+        });
+
+        modelBuilder.Entity<Order>(entity =>
+        {
+            entity.HasKey(e => e.Uuid).HasName("PRIMARY");
+
+            entity.ToTable("orders");
+
+            entity.HasIndex(e => e.UserUuid, "user_uuid");
+            entity.HasIndex(e => e.ModelUuid, "model_uuid");
+            entity.HasIndex(e => e.StripePaymentIntentId, "stripe_payment_intent_id").IsUnique();
+            entity.HasIndex(e => e.Status, "status");
+
+            entity.Property(e => e.Uuid).HasColumnName("uuid");
+            entity.Property(e => e.UserUuid).HasColumnName("user_uuid");
+            entity.Property(e => e.ModelUuid).HasColumnName("model_uuid");
+            entity.Property(e => e.Amount)
+                .HasPrecision(10, 2)
+                .HasColumnName("amount");
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .HasColumnName("status");
+            entity.Property(e => e.StripePaymentIntentId)
+                .HasMaxLength(255)
+                .HasColumnName("stripe_payment_intent_id");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
+
+            entity.HasOne(d => d.User)
+                .WithMany(p => p.Orders)
+                .HasForeignKey(d => d.UserUuid)
+                .HasConstraintName("orders_ibfk_1");
+
+            entity.HasOne(d => d.Model)
+                .WithMany(p => p.Orders)
+                .HasForeignKey(d => d.ModelUuid)
+                .HasConstraintName("orders_ibfk_2");
+        });
+
+        modelBuilder.Entity<Library>(entity =>
+        {
+            entity.HasKey(e => e.Uuid).HasName("PRIMARY");
+
+            entity.ToTable("libraries");
+
+            entity.HasIndex(e => e.UserUuid, "user_uuid");
+            entity.HasIndex(e => e.ModelUuid, "model_uuid");
+            entity.HasIndex(e => e.OrderUuid, "order_uuid");
+            entity.HasIndex(e => new { e.UserUuid, e.ModelUuid }, "uq_library_user_model").IsUnique();
+
+            entity.Property(e => e.Uuid).HasColumnName("uuid");
+            entity.Property(e => e.UserUuid).HasColumnName("user_uuid");
+            entity.Property(e => e.ModelUuid).HasColumnName("model_uuid");
+            entity.Property(e => e.OrderUuid).HasColumnName("order_uuid");
+            entity.Property(e => e.AcquiredAt)
+                .HasColumnType("datetime")
+                .HasColumnName("acquired_at");
+
+            entity.HasOne(d => d.User)
+                .WithMany(p => p.Libraries)
+                .HasForeignKey(d => d.UserUuid)
+                .HasConstraintName("libraries_ibfk_1");
+
+            entity.HasOne(d => d.Model)
+                .WithMany(p => p.Libraries)
+                .HasForeignKey(d => d.ModelUuid)
+                .HasConstraintName("libraries_ibfk_2");
+
+            entity.HasOne(d => d.Order)
+                .WithMany()
+                .HasForeignKey(d => d.OrderUuid)
+                .HasConstraintName("libraries_ibfk_3");
         });
 
         OnModelCreatingPartial(modelBuilder);
