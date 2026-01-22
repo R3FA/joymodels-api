@@ -719,6 +719,10 @@ public partial class JoyModelsDbContext : DbContext
                 .HasDefaultValue(0)
                 .IsRequired();
 
+            entity.Property(e => e.StripeCustomerId)
+                .HasMaxLength(255)
+                .HasColumnName("stripe_customer_id");
+
             entity.HasOne(d => d.UserRoleUu).WithMany(p => p.Users)
                 .HasForeignKey(d => d.UserRoleUuid)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -858,7 +862,7 @@ public partial class JoyModelsDbContext : DbContext
 
             entity.HasIndex(e => e.UserUuid, "user_uuid");
             entity.HasIndex(e => e.ModelUuid, "model_uuid");
-            entity.HasIndex(e => e.StripePaymentIntentId, "stripe_payment_intent_id").IsUnique();
+            entity.HasIndex(e => e.StripePaymentIntentId, "stripe_payment_intent_id");
             entity.HasIndex(e => e.Status, "status");
 
             entity.Property(e => e.Uuid).HasColumnName("uuid");

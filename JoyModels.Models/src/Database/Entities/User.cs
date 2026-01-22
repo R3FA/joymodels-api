@@ -22,6 +22,7 @@ public partial class User
     public int UserFollowingCount { get; set; }
     public int UserLikedModelsCount { get; set; }
     public int UserModelsCount { get; set; }
+    public string? StripeCustomerId { get; set; }
 
     public virtual ICollection<CommunityPostQuestionSection> CommunityPostQuestionSectionUserUus { get; set; } =
         new List<CommunityPostQuestionSection>();
