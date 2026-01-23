@@ -31,4 +31,6 @@ public partial class Model
 
     public virtual User UserUu { get; set; } = null!;
     public virtual ICollection<ShoppingCart> ShoppingCartItems { get; set; } = new List<ShoppingCart>();
+    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+    public virtual ICollection<Library> Libraries { get; set; } = new List<Library>();
 }

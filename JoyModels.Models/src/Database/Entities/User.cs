@@ -22,6 +22,7 @@ public partial class User
     public int UserFollowingCount { get; set; }
     public int UserLikedModelsCount { get; set; }
     public int UserModelsCount { get; set; }
+    public string? StripeCustomerId { get; set; }
 
     public virtual ICollection<CommunityPostQuestionSection> CommunityPostQuestionSectionUserUus { get; set; } =
         new List<CommunityPostQuestionSection>();
@@ -50,4 +51,6 @@ public partial class User
 
     public virtual ICollection<UserToken> UserTokens { get; set; } = new List<UserToken>();
     public virtual ICollection<ShoppingCart> ShoppingCartItems { get; set; } = new List<ShoppingCart>();
+    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+    public virtual ICollection<Library> Libraries { get; set; } = new List<Library>();
 }

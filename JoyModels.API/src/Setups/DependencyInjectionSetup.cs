@@ -13,6 +13,8 @@ using JoyModels.Services.Services.ModelFaqSection;
 using JoyModels.Services.Services.ModelReviews;
 using JoyModels.Services.Services.ModelReviewType;
 using JoyModels.Services.Services.Models;
+using JoyModels.Services.Services.Library;
+using JoyModels.Services.Services.Orders;
 using JoyModels.Services.Services.ShoppingCart;
 using JoyModels.Services.Services.Sso;
 using JoyModels.Services.Services.UserRole;
@@ -82,6 +84,9 @@ public static class DependencyInjectionSetup
         // ModelSettings DI
         services.AddSingleton(ModelSettingsSetup.RegisterModelSettingsDetails(configuration));
 
+        // Stripe DI
+        services.AddSingleton(StripeSetup.RegisterStripeDetails(configuration));
+
         // Custom Defined Services
         services.AddTransient<ISsoService, SsoService>();
         services.AddTransient<IUsersService, UsersService>();
@@ -97,6 +102,8 @@ public static class DependencyInjectionSetup
         services.AddTransient<ICommunityPostReviewTypeService, CommunityPostReviewTypeService>();
         services.AddTransient<ICommunityPostQuestionSectionService, CommunityPostQuestionSectionService>();
         services.AddTransient<IShoppingCartService, ShoppingCartService>();
+        services.AddTransient<IOrderService, OrderService>();
+        services.AddTransient<ILibraryService, LibraryService>();
 
         services
             .AddControllers()

@@ -4,6 +4,7 @@ using JoyModels.Models.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JoyModels.Models.src.Database.Migrations
 {
     [DbContext(typeof(JoyModelsDbContext))]
-    partial class JoyModelsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260122194436_AddOrdersAndLibraryTable")]
+    partial class AddOrdersAndLibraryTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -784,7 +787,8 @@ namespace JoyModels.Models.src.Database.Migrations
 
                     b.HasIndex(new[] { "Status" }, "status");
 
-                    b.HasIndex(new[] { "StripePaymentIntentId" }, "stripe_payment_intent_id");
+                    b.HasIndex(new[] { "StripePaymentIntentId" }, "stripe_payment_intent_id")
+                        .IsUnique();
 
                     b.HasIndex(new[] { "UserUuid" }, "user_uuid")
                         .HasDatabaseName("user_uuid4");
@@ -903,11 +907,6 @@ namespace JoyModels.Models.src.Database.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)")
                         .HasColumnName("password_hash");
-
-                    b.Property<string>("StripeCustomerId")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("stripe_customer_id");
 
                     b.Property<int>("UserFollowerCount")
                         .ValueGeneratedOnAdd()
