@@ -25,6 +25,15 @@ public static class LibraryHelperMethods
             .Include(x => x.Model.ModelAvailabilityUu)
             .Include(x => x.Model.ModelPictures)
             .Include(x => x.Order)
+            .ThenInclude(o => o.Model)
+            .ThenInclude(m => m.UserUu)
+            .ThenInclude(u => u.UserRoleUu)
+            .Include(x => x.Order)
+            .ThenInclude(o => o.Model)
+            .ThenInclude(m => m.ModelAvailabilityUu)
+            .Include(x => x.Order)
+            .ThenInclude(o => o.Model)
+            .ThenInclude(m => m.ModelPictures)
             .FirstOrDefaultAsync(x => x.Uuid == libraryUuid && x.UserUuid == userUuid);
 
         return libraryEntity ??
@@ -46,6 +55,15 @@ public static class LibraryHelperMethods
             .Include(x => x.Model.ModelAvailabilityUu)
             .Include(x => x.Model.ModelPictures)
             .Include(x => x.Order)
+            .ThenInclude(o => o.Model)
+            .ThenInclude(m => m.UserUu)
+            .ThenInclude(u => u.UserRoleUu)
+            .Include(x => x.Order)
+            .ThenInclude(o => o.Model)
+            .ThenInclude(m => m.ModelAvailabilityUu)
+            .Include(x => x.Order)
+            .ThenInclude(o => o.Model)
+            .ThenInclude(m => m.ModelPictures)
             .FirstOrDefaultAsync(x => x.ModelUuid == modelUuid && x.UserUuid == userUuid);
 
         return libraryEntity ??
@@ -67,6 +85,15 @@ public static class LibraryHelperMethods
             .Include(x => x.Model.ModelAvailabilityUu)
             .Include(x => x.Model.ModelPictures)
             .Include(x => x.Order)
+            .ThenInclude(o => o.Model)
+            .ThenInclude(m => m.UserUu)
+            .ThenInclude(u => u.UserRoleUu)
+            .Include(x => x.Order)
+            .ThenInclude(o => o.Model)
+            .ThenInclude(m => m.ModelAvailabilityUu)
+            .Include(x => x.Order)
+            .ThenInclude(o => o.Model)
+            .ThenInclude(m => m.ModelPictures)
             .Where(x => x.UserUuid == userUuid);
 
         var filteredQuery = request.ModelName switch

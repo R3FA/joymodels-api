@@ -63,7 +63,7 @@ public class OrderService(
         var ephemeralKey = await _ephemeralKeyService.CreateAsync(new EphemeralKeyCreateOptions
         {
             Customer = customerId,
-            StripeVersion = "2026-1-17"
+            StripeVersion = "2024-06-20"
         });
 
         // 8. Create PaymentIntent
