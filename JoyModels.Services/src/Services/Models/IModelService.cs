@@ -11,6 +11,7 @@ public interface IModelService
     Task<PictureResponse> GetModelPictures(Guid modelUuid, string modelPictureLocationPath);
     Task<PaginationResponse<ModelResponse>> Search(ModelSearchRequest request);
     Task<PaginationResponse<ModelResponse>> AdminSearch(ModelAdminSearchRequest request);
+    Task<PaginationResponse<ModelResponse>> BestSelling(ModelBestSellingRequest request);
     Task<bool> IsModelLiked(Guid modelUuid);
     Task<ModelResponse> Create(ModelCreateRequest request);
     Task ModelLike(Guid modelUuid);

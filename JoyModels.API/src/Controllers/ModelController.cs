@@ -43,6 +43,14 @@ public class ModelController(IModelService service) : ControllerBase
     }
 
     [Authorize(Policy = "VerifiedUsers")]
+    [HttpGet("best-selling")]
+    public async Task<ActionResult<PaginationResponse<ModelResponse>>> BestSelling(
+        [FromQuery] ModelBestSellingRequest request)
+    {
+        return await service.BestSelling(request);
+    }
+
+    [Authorize(Policy = "VerifiedUsers")]
     [HttpGet("is-model-liked/{modelUuid:guid}")]
     public async Task<ActionResult<bool>> IsModelLiked([FromRoute] Guid modelUuid)
     {

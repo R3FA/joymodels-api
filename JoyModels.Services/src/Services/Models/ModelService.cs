@@ -78,6 +78,13 @@ public class ModelService(
         return mapper.Map<PaginationResponse<ModelResponse>>(modelEntities);
     }
 
+    public async Task<PaginationResponse<ModelResponse>> BestSelling(ModelBestSellingRequest request)
+    {
+        var modelEntities = await ModelHelperMethods.SearchBestSellingModelEntities(context, request);
+
+        return mapper.Map<PaginationResponse<ModelResponse>>(modelEntities);
+    }
+
     public async Task<bool> IsModelLiked(Guid modelUuid)
     {
         return await context.UserModelLikes
