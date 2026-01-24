@@ -18,6 +18,7 @@ using JoyModels.Services.Services.Orders;
 using JoyModels.Services.Services.ShoppingCart;
 using JoyModels.Services.Services.Sso;
 using JoyModels.Services.Services.UserRole;
+using JoyModels.Services.Services.Notification;
 using JoyModels.Services.Services.Users;
 using JoyModels.Services.Validation;
 using JoyModels.Utilities.RabbitMQ.MessageConsumer;
@@ -32,11 +33,9 @@ public static class DependencyInjectionSetup
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        // GlobalExceptionHandler DI
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
 
-        // Swagger DI
         services.AddSwaggerGen(x =>
         {
             x.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -58,36 +57,28 @@ public static class DependencyInjectionSetup
             });
         });
 
-        // IHttpContext DI
         services.AddHttpContextAccessor();
 
-        // AutoMapper DI
         services.AddAutoMapper(cfg =>
         {
             var dataAccessAssembly = Assembly.GetAssembly(typeof(JoyModelsDbContext));
             cfg.AddMaps(dataAccessAssembly);
         });
 
-        // JWT DI
         services.AddSingleton(JwtSetup.RegisterJwtDetails(configuration));
         services.AddTransient<UserAuthValidation>();
 
-        // RabbitMQ DI
         services.AddSingleton(RabbitMqSetup.RegisterRabbitMqDetails(configuration));
         services.AddTransient<IMessageProducer, MessageProducer>();
         services.AddTransient<IMessageConsumer, MessageConsumer>();
 
-        // ImageSettings DI
         services.AddSingleton(ImageSettingsSetup.RegisterModelImageSettingsDetails(configuration));
         services.AddSingleton(ImageSettingsSetup.RegisterUserImageSettingsDetails(configuration));
 
-        // ModelSettings DI
         services.AddSingleton(ModelSettingsSetup.RegisterModelSettingsDetails(configuration));
 
-        // Stripe DI
         services.AddSingleton(StripeSetup.RegisterStripeDetails(configuration));
 
-        // Custom Defined Services
         services.AddTransient<ISsoService, SsoService>();
         services.AddTransient<IUsersService, UsersService>();
         services.AddTransient<IUserRoleService, UserRoleService>();
@@ -104,6 +95,7 @@ public static class DependencyInjectionSetup
         services.AddTransient<IShoppingCartService, ShoppingCartService>();
         services.AddTransient<IOrderService, OrderService>();
         services.AddTransient<ILibraryService, LibraryService>();
+        services.AddTransient<INotificationService, NotificationService>();
 
         services
             .AddControllers()

@@ -7,6 +7,7 @@ namespace JoyModels.Services.Services.Orders;
 public interface IOrderService
 {
     Task<OrderCheckoutResponse> Checkout();
+    Task<OrderConfirmResponse> Confirm(string paymentIntentId);
     Task HandleWebhook(string json, string stripeSignature);
     Task<OrderResponse> GetByUuid(Guid orderUuid);
     Task<PaginationResponse<OrderResponse>> Search(OrderSearchRequest request);

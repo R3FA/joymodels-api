@@ -1,12 +1,15 @@
 using AutoMapper;
 using JoyModels.Models.Database;
 using JoyModels.Models.DataTransferObjects.ImageSettings;
+using JoyModels.Models.DataTransferObjects.RequestTypes.Notification;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Users;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Core;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Users;
+using JoyModels.Models.Enums;
 using JoyModels.Services.Services.Users.HelperMethods;
 using JoyModels.Services.Validation;
+using JoyModels.Utilities.RabbitMQ.MessageProducer;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,7 +19,8 @@ public class UsersService(
     JoyModelsDbContext context,
     IMapper mapper,
     UserAuthValidation userAuthValidation,
-    UserImageSettingsDetails userImageSettingsDetails)
+    UserImageSettingsDetails userImageSettingsDetails,
+    IMessageProducer messageProducer)
     : IUsersService
 {
     public async Task<UsersResponse> GetByUuid(Guid userUuid)
@@ -112,6 +116,21 @@ public class UsersService(
 
         var userFollowerEntity = UsersHelperMethods.CreateUserFollowerObject(targetUserUuid, userAuthValidation);
         await userFollowerEntity.CreateUserFollowerEntity(context);
+
+        var followerUuid = userAuthValidation.GetUserClaimUuid();
+        var follower = await context.Users.FirstAsync(x => x.Uuid == followerUuid);
+
+        var notification = new CreateNotificationRequest
+        {
+            ActorUuid = followerUuid,
+            TargetUserUuid = targetUserUuid,
+            NotificationType = nameof(NotificationType.NewFollower),
+            Title = "New Follower",
+            Message = $"{follower.NickName} started following you.",
+            RelatedEntityUuid = followerUuid,
+            RelatedEntityType = "User"
+        };
+        await messageProducer.SendMessage("create_notification", notification);
     }
 
     public async Task<UsersResponse> Patch(UsersPatchRequest request)

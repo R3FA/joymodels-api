@@ -53,4 +53,6 @@ public partial class User
     public virtual ICollection<ShoppingCart> ShoppingCartItems { get; set; } = new List<ShoppingCart>();
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
     public virtual ICollection<Library> Libraries { get; set; } = new List<Library>();
+    public virtual ICollection<Notification> NotificationsAsActor { get; set; } = new List<Notification>();
+    public virtual ICollection<Notification> NotificationsAsTarget { get; set; } = new List<Notification>();
 }

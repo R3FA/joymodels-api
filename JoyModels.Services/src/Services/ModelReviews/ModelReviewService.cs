@@ -3,11 +3,14 @@ using JoyModels.Models.Database;
 using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.RequestTypes.ModelReviews;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Models;
+using JoyModels.Models.DataTransferObjects.RequestTypes.Notification;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.ModelReviews;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
+using JoyModels.Models.Enums;
 using JoyModels.Services.Services.ModelReviews.HelperMethods;
 using JoyModels.Services.Services.Models;
 using JoyModels.Services.Validation;
+using JoyModels.Utilities.RabbitMQ.MessageProducer;
 using Microsoft.EntityFrameworkCore;
 
 namespace JoyModels.Services.Services.ModelReviews;
@@ -16,7 +19,8 @@ public class ModelReviewService(
     JoyModelsDbContext context,
     IMapper mapper,
     UserAuthValidation userAuthValidation,
-    IModelService modelService)
+    IModelService modelService,
+    IMessageProducer messageProducer)
     : IModelReviewService
 {
     public async Task<ModelReviewResponse> GetByUuid(Guid modelReviewUuid)
@@ -57,6 +61,24 @@ public class ModelReviewService(
         modelReviewEntity.UserUuid = userAuthValidation.GetUserClaimUuid();
 
         await modelReviewEntity.CreateModelReviewEntity(context);
+
+        var reviewerUuid = userAuthValidation.GetUserClaimUuid();
+        if (modelResponse.UserUuid != reviewerUuid)
+        {
+            var reviewer = await context.Users.FirstAsync(x => x.Uuid == reviewerUuid);
+
+            var notification = new CreateNotificationRequest
+            {
+                ActorUuid = reviewerUuid,
+                TargetUserUuid = modelResponse.UserUuid,
+                NotificationType = nameof(NotificationType.NewModelReview),
+                Title = "New Review",
+                Message = $"{reviewer.NickName} reviewed your model '{modelResponse.Name}'.",
+                RelatedEntityUuid = modelReviewEntity.Uuid,
+                RelatedEntityType = "ModelReview"
+            };
+            await messageProducer.SendMessage("create_notification", notification);
+        }
 
         return await GetByUuid(modelReviewEntity.Uuid);
     }

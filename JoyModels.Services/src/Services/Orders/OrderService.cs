@@ -2,12 +2,14 @@ using AutoMapper;
 using JoyModels.Models.Database;
 using JoyModels.Models.Enums;
 using JoyModels.Models.Database.Entities;
+using JoyModels.Models.DataTransferObjects.RequestTypes.Notification;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Order;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Order;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Models.DataTransferObjects.Settings;
 using JoyModels.Services.Services.Orders.HelperMethods;
 using JoyModels.Services.Validation;
+using JoyModels.Utilities.RabbitMQ.MessageProducer;
 using Microsoft.EntityFrameworkCore;
 using Stripe;
 using LibraryEntity = JoyModels.Models.Database.Entities.Library;
@@ -18,7 +20,8 @@ public class OrderService(
     JoyModelsDbContext context,
     IMapper mapper,
     UserAuthValidation userAuthValidation,
-    StripeSettingsDetails stripeSettings)
+    StripeSettingsDetails stripeSettings,
+    IMessageProducer messageProducer)
     : IOrderService
 {
     private readonly CustomerService _customerService = new();
@@ -29,21 +32,17 @@ public class OrderService(
     {
         var userUuid = userAuthValidation.GetUserClaimUuid();
 
-        // 1. Get all cart items for user
         var cartItems = await OrderHelperMethods.GetUserCartItemsWithModels(context, userUuid);
 
         if (cartItems.Count == 0)
             throw new ArgumentException("Shopping cart is empty.");
 
-        // 2. Validate all models have a price > 0
         var invalidModels = cartItems.Where(x => x.ModelUu.Price <= 0).Select(x => x.ModelUu.Name).ToList();
         if (invalidModels.Count > 0)
             throw new ArgumentException($"These models cannot be purchased: {string.Join(", ", invalidModels)}");
 
-        // 3. Check if user already owns any of these models
         await OrderHelperMethods.ValidateModelsNotAlreadyOwned(context, userUuid, cartItems);
 
-        // 4. Cancel any existing pending orders for these models (cleanup from abandoned checkouts)
         var modelUuids = cartItems.Select(x => x.ModelUuid).ToList();
         await context.Orders
             .Where(x => x.UserUuid == userUuid
@@ -51,22 +50,18 @@ public class OrderService(
                         && x.Status == nameof(OrderStatus.Pending))
             .ExecuteDeleteAsync();
 
-        // 5. Calculate total amount
         var totalAmount = cartItems.Sum(x => x.ModelUu.Price);
         var amountInCents = (long)(totalAmount * 100);
 
-        // 6. Get or create Stripe Customer
         var user = await context.Users.FirstAsync(x => x.Uuid == userUuid);
         var customerId = await GetOrCreateStripeCustomer(user);
 
-        // 7. Create Ephemeral Key for Payment Sheet
         var ephemeralKey = await _ephemeralKeyService.CreateAsync(new EphemeralKeyCreateOptions
         {
             Customer = customerId,
             StripeVersion = "2024-06-20"
         });
 
-        // 8. Create PaymentIntent
         var paymentIntent = await _paymentIntentService.CreateAsync(new PaymentIntentCreateOptions
         {
             Amount = amountInCents,
@@ -79,7 +74,6 @@ public class OrderService(
             }
         });
 
-        // 9. Create Order for each model (status: pending)
         await using var transaction = await context.Database.BeginTransactionAsync();
         try
         {
@@ -108,13 +102,59 @@ public class OrderService(
             throw;
         }
 
-        // 10. Return response for Flutter
         return new OrderCheckoutResponse
         {
             ClientSecret = paymentIntent.ClientSecret,
             EphemeralKey = ephemeralKey.Secret,
             CustomerId = customerId,
             PaymentIntentId = paymentIntent.Id
+        };
+    }
+
+    public async Task<OrderConfirmResponse> Confirm(string paymentIntentId)
+    {
+        var paymentIntent = await _paymentIntentService.GetAsync(paymentIntentId);
+
+        if (paymentIntent.Status != "succeeded")
+        {
+            return new OrderConfirmResponse
+            {
+                Success = false,
+                Message = $"Payment not successful. Status: {paymentIntent.Status}"
+            };
+        }
+
+        var orders = await context.Orders
+            .Include(x => x.Model)
+            .Where(x => x.StripePaymentIntentId == paymentIntentId)
+            .ToListAsync();
+
+        if (orders.Count == 0)
+        {
+            return new OrderConfirmResponse
+            {
+                Success = false,
+                Message = "No orders found for this payment."
+            };
+        }
+
+        var processed = await ProcessSuccessfulPayment(orders);
+
+        if (!processed)
+        {
+            return new OrderConfirmResponse
+            {
+                Success = true,
+                Message = "Orders already completed.",
+                OrderUuid = orders.First().Uuid
+            };
+        }
+
+        return new OrderConfirmResponse
+        {
+            Success = true,
+            Message = "Payment confirmed and orders completed.",
+            OrderUuid = orders.First().Uuid
         };
     }
 
@@ -180,32 +220,42 @@ public class OrderService(
         var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
         if (paymentIntent == null) return;
 
-        // 1. Find all Orders with this PaymentIntentId
         var orders = await context.Orders
+            .Include(x => x.Model)
             .Where(x => x.StripePaymentIntentId == paymentIntent.Id)
             .ToListAsync();
 
         if (orders.Count == 0) return;
 
-        // Check if already processed (idempotency)
-        if (orders.All(o => o.Status == nameof(OrderStatus.Completed)))
-            return;
+        await ProcessSuccessfulPayment(orders);
+    }
 
+    private async Task<bool> ProcessSuccessfulPayment(List<Order> orders)
+    {
         var userUuid = orders.First().UserUuid;
+        var paymentIntentId = orders.First().StripePaymentIntentId;
 
         await using var transaction = await context.Database.BeginTransactionAsync();
 
-        // 2. Update status to completed
-        foreach (var order in orders)
+        var freshOrders = await context.Orders
+            .Include(x => x.Model)
+            .Where(x => x.StripePaymentIntentId == paymentIntentId)
+            .ToListAsync();
+
+        if (freshOrders.All(o => o.Status == nameof(OrderStatus.Completed)))
+        {
+            await transaction.RollbackAsync();
+            return false;
+        }
+
+        foreach (var order in freshOrders)
         {
             order.Status = nameof(OrderStatus.Completed);
             order.UpdatedAt = DateTime.UtcNow;
         }
 
-        // 3. Create Library entries
-        foreach (var order in orders)
+        foreach (var order in freshOrders)
         {
-            // Check if library entry already exists (idempotency)
             var existingLibrary = await context.Libraries
                 .FirstOrDefaultAsync(x => x.UserUuid == order.UserUuid && x.ModelUuid == order.ModelUuid);
 
@@ -222,14 +272,45 @@ public class OrderService(
             await context.Libraries.AddAsync(libraryEntry);
         }
 
-        // 4. Delete ShoppingCart items
-        var modelUuids = orders.Select(o => o.ModelUuid).ToList();
+        var modelUuids = freshOrders.Select(o => o.ModelUuid).ToList();
         await context.ShoppingCartItems
             .Where(x => x.UserUuid == userUuid && modelUuids.Contains(x.ModelUuid))
             .ExecuteDeleteAsync();
 
         await context.SaveChangesAsync();
         await transaction.CommitAsync();
+
+        foreach (var order in freshOrders)
+        {
+            var buyerNotification = new CreateNotificationRequest
+            {
+                ActorUuid = order.Model.UserUuid,
+                TargetUserUuid = order.UserUuid,
+                NotificationType = nameof(NotificationType.OrderCompleted),
+                Title = "Purchase Complete",
+                Message = $"You have successfully purchased '{order.Model.Name}'.",
+                RelatedEntityUuid = order.Uuid,
+                RelatedEntityType = "Order"
+            };
+            await messageProducer.SendMessage("create_notification", buyerNotification);
+
+            if (order.Model.UserUuid != order.UserUuid)
+            {
+                var sellerNotification = new CreateNotificationRequest
+                {
+                    ActorUuid = order.UserUuid,
+                    TargetUserUuid = order.Model.UserUuid,
+                    NotificationType = nameof(NotificationType.ModelSold),
+                    Title = "Model Sold",
+                    Message = $"Your model '{order.Model.Name}' has been purchased.",
+                    RelatedEntityUuid = order.ModelUuid,
+                    RelatedEntityType = "Model"
+                };
+                await messageProducer.SendMessage("create_notification", sellerNotification);
+            }
+        }
+
+        return true;
     }
 
     private async Task HandlePaymentFailed(Event stripeEvent)
@@ -238,8 +319,11 @@ public class OrderService(
         if (paymentIntent == null) return;
 
         var orders = await context.Orders
+            .Include(x => x.Model)
             .Where(x => x.StripePaymentIntentId == paymentIntent.Id)
             .ToListAsync();
+
+        if (orders.Count == 0) return;
 
         foreach (var order in orders)
         {
@@ -248,5 +332,20 @@ public class OrderService(
         }
 
         await context.SaveChangesAsync();
+
+        var userUuid = orders.First().UserUuid;
+        var modelNames = string.Join(", ", orders.Select(o => $"'{o.Model.Name}'"));
+
+        var notification = new CreateNotificationRequest
+        {
+            ActorUuid = userUuid,
+            TargetUserUuid = userUuid,
+            NotificationType = nameof(NotificationType.OrderFailed),
+            Title = "Payment Failed",
+            Message = $"Your payment for {modelNames} has failed. Please try again.",
+            RelatedEntityUuid = orders.First().Uuid,
+            RelatedEntityType = "Order"
+        };
+        await messageProducer.SendMessage("create_notification", notification);
     }
 }
