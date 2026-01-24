@@ -1,3 +1,7 @@
+using JoyModels.Models.DataTransferObjects.ResponseTypes.CommunityPost;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.CommunityPostQuestionSection;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.ModelFaqSection;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.ModelReviews;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Users;
 
 namespace JoyModels.Models.DataTransferObjects.ResponseTypes.Report;
@@ -14,4 +18,10 @@ public class ReportResponse
     public UsersResponse? ReviewedBy { get; set; }
     public DateTime? ReviewedAt { get; set; }
     public DateTime CreatedAt { get; set; }
+
+    public UsersResponse? ReportedUser { get; set; }
+    public CommunityPostResponse? ReportedCommunityPost { get; set; }
+    public CommunityPostQuestionSectionResponse? ReportedCommunityPostComment { get; set; }
+    public ModelReviewResponse? ReportedModelReview { get; set; }
+    public ModelFaqSectionResponse? ReportedModelFaqQuestion { get; set; }
 }

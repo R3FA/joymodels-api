@@ -95,7 +95,7 @@ public static class ReportHelperMethods
 
         return await PaginationBase<ReportEntity>.CreateAsync(
             orderedQuery,
-            request.Page,
+            request.PageNumber,
             request.PageSize,
             "CreatedAt:desc");
     }
@@ -119,7 +119,7 @@ public static class ReportHelperMethods
 
         return await PaginationBase<ReportEntity>.CreateAsync(
             orderedQuery,
-            request.Page,
+            request.PageNumber,
             request.PageSize,
             "CreatedAt:desc");
     }

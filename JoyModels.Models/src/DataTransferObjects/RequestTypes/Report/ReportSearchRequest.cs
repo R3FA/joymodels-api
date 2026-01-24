@@ -1,9 +1,9 @@
+using JoyModels.Models.DataTransferObjects.RequestTypes.Pagination;
+
 namespace JoyModels.Models.DataTransferObjects.RequestTypes.Report;
 
-public class ReportSearchRequest
+public class ReportSearchRequest : PaginationRequest
 {
-    public int Page { get; set; } = 1;
-    public int PageSize { get; set; } = 10;
     public string? Status { get; set; }
     public string? ReportedEntityType { get; set; }
     public string? Reason { get; set; }
