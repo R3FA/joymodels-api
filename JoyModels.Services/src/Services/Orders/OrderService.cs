@@ -111,6 +111,53 @@ public class OrderService(
         };
     }
 
+    public async Task<OrderConfirmResponse> Confirm(string paymentIntentId)
+    {
+        var paymentIntent = await _paymentIntentService.GetAsync(paymentIntentId);
+
+        if (paymentIntent.Status != "succeeded")
+        {
+            return new OrderConfirmResponse
+            {
+                Success = false,
+                Message = $"Payment not successful. Status: {paymentIntent.Status}"
+            };
+        }
+
+        var orders = await context.Orders
+            .Include(x => x.Model)
+            .Where(x => x.StripePaymentIntentId == paymentIntentId)
+            .ToListAsync();
+
+        if (orders.Count == 0)
+        {
+            return new OrderConfirmResponse
+            {
+                Success = false,
+                Message = "No orders found for this payment."
+            };
+        }
+
+        var processed = await ProcessSuccessfulPayment(orders);
+
+        if (!processed)
+        {
+            return new OrderConfirmResponse
+            {
+                Success = true,
+                Message = "Orders already completed.",
+                OrderUuid = orders.First().Uuid
+            };
+        }
+
+        return new OrderConfirmResponse
+        {
+            Success = true,
+            Message = "Payment confirmed and orders completed.",
+            OrderUuid = orders.First().Uuid
+        };
+    }
+
     public async Task HandleWebhook(string json, string stripeSignature)
     {
         var stripeEvent = EventUtility.ConstructEvent(
@@ -180,20 +227,34 @@ public class OrderService(
 
         if (orders.Count == 0) return;
 
-        if (orders.All(o => o.Status == nameof(OrderStatus.Completed)))
-            return;
+        await ProcessSuccessfulPayment(orders);
+    }
 
+    private async Task<bool> ProcessSuccessfulPayment(List<Order> orders)
+    {
         var userUuid = orders.First().UserUuid;
+        var paymentIntentId = orders.First().StripePaymentIntentId;
 
         await using var transaction = await context.Database.BeginTransactionAsync();
 
-        foreach (var order in orders)
+        var freshOrders = await context.Orders
+            .Include(x => x.Model)
+            .Where(x => x.StripePaymentIntentId == paymentIntentId)
+            .ToListAsync();
+
+        if (freshOrders.All(o => o.Status == nameof(OrderStatus.Completed)))
+        {
+            await transaction.RollbackAsync();
+            return false;
+        }
+
+        foreach (var order in freshOrders)
         {
             order.Status = nameof(OrderStatus.Completed);
             order.UpdatedAt = DateTime.UtcNow;
         }
 
-        foreach (var order in orders)
+        foreach (var order in freshOrders)
         {
             var existingLibrary = await context.Libraries
                 .FirstOrDefaultAsync(x => x.UserUuid == order.UserUuid && x.ModelUuid == order.ModelUuid);
@@ -211,7 +272,7 @@ public class OrderService(
             await context.Libraries.AddAsync(libraryEntry);
         }
 
-        var modelUuids = orders.Select(o => o.ModelUuid).ToList();
+        var modelUuids = freshOrders.Select(o => o.ModelUuid).ToList();
         await context.ShoppingCartItems
             .Where(x => x.UserUuid == userUuid && modelUuids.Contains(x.ModelUuid))
             .ExecuteDeleteAsync();
@@ -219,7 +280,7 @@ public class OrderService(
         await context.SaveChangesAsync();
         await transaction.CommitAsync();
 
-        foreach (var order in orders)
+        foreach (var order in freshOrders)
         {
             var buyerNotification = new CreateNotificationRequest
             {
@@ -248,6 +309,8 @@ public class OrderService(
                 await messageProducer.SendMessage("create_notification", sellerNotification);
             }
         }
+
+        return true;
     }
 
     private async Task HandlePaymentFailed(Event stripeEvent)

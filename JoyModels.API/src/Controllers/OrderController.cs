@@ -18,6 +18,18 @@ public class OrderController(IOrderService service) : ControllerBase
         return await service.Checkout();
     }
 
+    [Authorize(Policy = "VerifiedUsers")]
+    [HttpPost("confirm/{paymentIntentId}")]
+    public async Task<ActionResult<OrderConfirmResponse>> Confirm([FromRoute] string paymentIntentId)
+    {
+        var result = await service.Confirm(paymentIntentId);
+
+        if (!result.Success)
+            return BadRequest(result);
+
+        return Ok(result);
+    }
+
     [HttpPost("webhook")]
     public async Task<IActionResult> Webhook()
     {
