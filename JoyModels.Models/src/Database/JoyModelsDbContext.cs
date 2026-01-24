@@ -62,6 +62,8 @@ public partial class JoyModelsDbContext : DbContext
 
     public virtual DbSet<Notification> Notifications { get; set; }
 
+    public virtual DbSet<Report> Reports { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder
@@ -980,6 +982,52 @@ public partial class JoyModelsDbContext : DbContext
                 .WithMany(p => p.NotificationsAsTarget)
                 .HasForeignKey(d => d.TargetUserUuid)
                 .HasConstraintName("notifications_ibfk_2");
+        });
+
+        modelBuilder.Entity<Report>(entity =>
+        {
+            entity.HasKey(e => e.Uuid).HasName("PRIMARY");
+
+            entity.ToTable("reports");
+
+            entity.HasIndex(e => e.ReporterUuid, "reporter_uuid");
+            entity.HasIndex(e => e.ReviewedByUuid, "reviewed_by_uuid");
+            entity.HasIndex(e => e.ReportedEntityUuid, "reported_entity_uuid");
+            entity.HasIndex(e => e.Status, "status");
+            entity.HasIndex(e => new { e.ReporterUuid, e.ReportedEntityUuid }, "uq_reporter_entity").IsUnique();
+
+            entity.Property(e => e.Uuid).HasColumnName("uuid");
+            entity.Property(e => e.ReporterUuid).HasColumnName("reporter_uuid");
+            entity.Property(e => e.ReportedEntityType)
+                .HasMaxLength(50)
+                .HasColumnName("reported_entity_type");
+            entity.Property(e => e.ReportedEntityUuid).HasColumnName("reported_entity_uuid");
+            entity.Property(e => e.Reason)
+                .HasMaxLength(50)
+                .HasColumnName("reason");
+            entity.Property(e => e.Description)
+                .HasColumnType("text")
+                .HasColumnName("description");
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .HasColumnName("status");
+            entity.Property(e => e.ReviewedByUuid).HasColumnName("reviewed_by_uuid");
+            entity.Property(e => e.ReviewedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("reviewed_at");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+
+            entity.HasOne(d => d.Reporter)
+                .WithMany(p => p.ReportsAsReporter)
+                .HasForeignKey(d => d.ReporterUuid)
+                .HasConstraintName("reports_ibfk_1");
+
+            entity.HasOne(d => d.ReviewedBy)
+                .WithMany(p => p.ReportsAsReviewer)
+                .HasForeignKey(d => d.ReviewedByUuid)
+                .HasConstraintName("reports_ibfk_2");
         });
 
         OnModelCreatingPartial(modelBuilder);

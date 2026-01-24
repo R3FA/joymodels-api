@@ -55,4 +55,6 @@ public partial class User
     public virtual ICollection<Library> Libraries { get; set; } = new List<Library>();
     public virtual ICollection<Notification> NotificationsAsActor { get; set; } = new List<Notification>();
     public virtual ICollection<Notification> NotificationsAsTarget { get; set; } = new List<Notification>();
+    public virtual ICollection<Report> ReportsAsReporter { get; set; } = new List<Report>();
+    public virtual ICollection<Report> ReportsAsReviewer { get; set; } = new List<Report>();
 }
