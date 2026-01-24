@@ -11,46 +11,6 @@ namespace JoyModels.Models.src.Database.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.RenameIndex(
-                name: "model_uuid5",
-                table: "user_model_likes",
-                newName: "model_uuid3");
-
-            migrationBuilder.RenameIndex(
-                name: "user_uuid6",
-                table: "shopping_cart",
-                newName: "user_uuid4");
-
-            migrationBuilder.RenameIndex(
-                name: "model_uuid4",
-                table: "shopping_cart",
-                newName: "model_uuid2");
-
-            migrationBuilder.RenameIndex(
-                name: "user_uuid5",
-                table: "pending_users",
-                newName: "user_uuid3");
-
-            migrationBuilder.RenameIndex(
-                name: "user_uuid2",
-                table: "models",
-                newName: "user_uuid1");
-
-            migrationBuilder.RenameIndex(
-                name: "model_uuid2",
-                table: "model_reviews",
-                newName: "model_uuid1");
-
-            migrationBuilder.RenameIndex(
-                name: "user_uuid3",
-                table: "model_faq_section",
-                newName: "user_uuid2");
-
-            migrationBuilder.RenameIndex(
-                name: "model_uuid1",
-                table: "model_faq_section",
-                newName: "model_uuid");
-
             migrationBuilder.CreateTable(
                 name: "orders",
                 columns: table => new
@@ -171,46 +131,6 @@ namespace JoyModels.Models.src.Database.Migrations
 
             migrationBuilder.DropTable(
                 name: "orders");
-
-            migrationBuilder.RenameIndex(
-                name: "model_uuid3",
-                table: "user_model_likes",
-                newName: "model_uuid5");
-
-            migrationBuilder.RenameIndex(
-                name: "user_uuid4",
-                table: "shopping_cart",
-                newName: "user_uuid6");
-
-            migrationBuilder.RenameIndex(
-                name: "model_uuid2",
-                table: "shopping_cart",
-                newName: "model_uuid4");
-
-            migrationBuilder.RenameIndex(
-                name: "user_uuid3",
-                table: "pending_users",
-                newName: "user_uuid5");
-
-            migrationBuilder.RenameIndex(
-                name: "user_uuid1",
-                table: "models",
-                newName: "user_uuid2");
-
-            migrationBuilder.RenameIndex(
-                name: "model_uuid1",
-                table: "model_reviews",
-                newName: "model_uuid2");
-
-            migrationBuilder.RenameIndex(
-                name: "user_uuid2",
-                table: "model_faq_section",
-                newName: "user_uuid3");
-
-            migrationBuilder.RenameIndex(
-                name: "model_uuid",
-                table: "model_faq_section",
-                newName: "model_uuid1");
         }
     }
 }
