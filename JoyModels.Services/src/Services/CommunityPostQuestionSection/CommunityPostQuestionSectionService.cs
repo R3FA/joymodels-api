@@ -1,17 +1,23 @@
+using System.Text.Json;
 using AutoMapper;
 using JoyModels.Models.Database;
 using JoyModels.Models.DataTransferObjects.RequestTypes.CommunityPostQuestionSection;
+using JoyModels.Models.DataTransferObjects.RequestTypes.Notification;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.CommunityPostQuestionSection;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
+using JoyModels.Models.Enums;
 using JoyModels.Services.Services.CommunityPostQuestionSection.HelperMethods;
 using JoyModels.Services.Validation;
+using JoyModels.Utilities.RabbitMQ.MessageProducer;
+using Microsoft.EntityFrameworkCore;
 
 namespace JoyModels.Services.Services.CommunityPostQuestionSection;
 
 public class CommunityPostQuestionSectionService(
     JoyModelsDbContext context,
     IMapper mapper,
-    UserAuthValidation userAuthValidation)
+    UserAuthValidation userAuthValidation,
+    IMessageProducer messageProducer)
     : ICommunityPostQuestionSectionService
 {
     public async Task<CommunityPostQuestionSectionResponse> GetByUuid(Guid communityPostQuestionSectionUuid)
@@ -43,6 +49,26 @@ public class CommunityPostQuestionSectionService(
 
         await communityPostQuestionSectionEntity.CreateCommunityPostQuestionSectionEntity(context);
 
+        var commenterUuid = userAuthValidation.GetUserClaimUuid();
+        var post = await context.CommunityPosts.FirstAsync(x => x.Uuid == request.CommunityPostUuid);
+
+        if (post.UserUuid != commenterUuid)
+        {
+            var commenter = await context.Users.FirstAsync(x => x.Uuid == commenterUuid);
+
+            var notification = new CreateNotificationRequest
+            {
+                ActorUuid = commenterUuid,
+                TargetUserUuid = post.UserUuid,
+                NotificationType = nameof(NotificationType.NewComment),
+                Title = "New Comment",
+                Message = $"{commenter.NickName} commented on your post '{post.Title}'.",
+                RelatedEntityUuid = communityPostQuestionSectionEntity.Uuid,
+                RelatedEntityType = "CommunityPostQuestionSection"
+            };
+            await messageProducer.SendMessage("create_notification", JsonSerializer.Serialize(notification));
+        }
+
         return await GetByUuid(communityPostQuestionSectionEntity.Uuid);
     }
 
@@ -56,6 +82,28 @@ public class CommunityPostQuestionSectionService(
         communityPostQuestionSectionEntity.UserUuid = userAuthValidation.GetUserClaimUuid();
 
         await communityPostQuestionSectionEntity.CreateCommunityPostQuestionSectionEntity(context);
+
+        var replierUuid = userAuthValidation.GetUserClaimUuid();
+        var parentMessage = await context.CommunityPostQuestionSections
+            .Include(x => x.CommunityPostUu)
+            .FirstAsync(x => x.Uuid == request.ParentMessageUuid);
+
+        if (parentMessage.UserUuid != replierUuid)
+        {
+            var replier = await context.Users.FirstAsync(x => x.Uuid == replierUuid);
+
+            var notification = new CreateNotificationRequest
+            {
+                ActorUuid = replierUuid,
+                TargetUserUuid = parentMessage.UserUuid,
+                NotificationType = nameof(NotificationType.NewComment),
+                Title = "New Reply",
+                Message = $"{replier.NickName} replied to your comment on '{parentMessage.CommunityPostUu.Title}'.",
+                RelatedEntityUuid = communityPostQuestionSectionEntity.Uuid,
+                RelatedEntityType = "CommunityPostQuestionSection"
+            };
+            await messageProducer.SendMessage("create_notification", JsonSerializer.Serialize(notification));
+        }
 
         return await GetByUuid(communityPostQuestionSectionEntity.Uuid);
     }

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Transactions;
 using AutoMapper;
 using JoyModels.Models.Database;
@@ -5,11 +6,14 @@ using JoyModels.Models.Database.Entities;
 using JoyModels.Models.DataTransferObjects.ImageSettings;
 using JoyModels.Models.DataTransferObjects.ModelSettings;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Models;
+using JoyModels.Models.DataTransferObjects.RequestTypes.Notification;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Core;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Models;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
+using JoyModels.Models.Enums;
 using JoyModels.Services.Services.Models.HelperMethods;
 using JoyModels.Services.Validation;
+using JoyModels.Utilities.RabbitMQ.MessageProducer;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,7 +24,8 @@ public class ModelService(
     IMapper mapper,
     UserAuthValidation userAuthValidation,
     ModelImageSettingsDetails modelImageSettingsDetails,
-    ModelSettingsDetails modelSettingsDetails)
+    ModelSettingsDetails modelSettingsDetails,
+    IMessageProducer messageProducer)
     : IModelService
 {
     private async Task<ModelResponse> GetByUuidWithAllAvailabilities(Guid modelUuid)
@@ -119,6 +124,26 @@ public class ModelService(
 
         var userModelLikeEntity = ModelHelperMethods.CreateUserModelLikeObject(modelUuid, userAuthValidation);
         await userModelLikeEntity.CreateUserModelLikeEntity(context);
+
+        var likerUuid = userAuthValidation.GetUserClaimUuid();
+        var model = await context.Models.FirstAsync(x => x.Uuid == modelUuid);
+
+        if (model.UserUuid != likerUuid)
+        {
+            var liker = await context.Users.FirstAsync(x => x.Uuid == likerUuid);
+
+            var notification = new CreateNotificationRequest
+            {
+                ActorUuid = likerUuid,
+                TargetUserUuid = model.UserUuid,
+                NotificationType = nameof(NotificationType.ModelLiked),
+                Title = "Model Liked",
+                Message = $"{liker.NickName} liked your model '{model.Name}'.",
+                RelatedEntityUuid = modelUuid,
+                RelatedEntityType = "Model"
+            };
+            await messageProducer.SendMessage("create_notification", JsonSerializer.Serialize(notification));
+        }
     }
 
     public async Task<ModelResponse> Patch(ModelPatchRequest request)

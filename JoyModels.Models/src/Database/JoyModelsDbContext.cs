@@ -60,6 +60,8 @@ public partial class JoyModelsDbContext : DbContext
 
     public virtual DbSet<Library> Libraries { get; set; }
 
+    public virtual DbSet<Notification> Notifications { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder
@@ -928,6 +930,56 @@ public partial class JoyModelsDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(d => d.OrderUuid)
                 .HasConstraintName("libraries_ibfk_3");
+        });
+
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.HasKey(e => e.Uuid).HasName("PRIMARY");
+
+            entity.ToTable("notifications");
+
+            entity.HasIndex(e => e.ActorUuid, "actor_uuid");
+            entity.HasIndex(e => e.TargetUserUuid, "target_user_uuid");
+            entity.HasIndex(e => e.IsRead, "is_read");
+            entity.HasIndex(e => e.CreatedAt, "created_at");
+
+            entity.Property(e => e.Uuid).HasColumnName("uuid");
+            entity.Property(e => e.ActorUuid).HasColumnName("actor_uuid");
+            entity.Property(e => e.TargetUserUuid).HasColumnName("target_user_uuid");
+            entity.Property(e => e.NotificationType)
+                .HasMaxLength(50)
+                .HasColumnName("notification_type");
+            entity.Property(e => e.Title)
+                .HasMaxLength(255)
+                .HasColumnName("title");
+            entity.Property(e => e.Message)
+                .HasColumnType("text")
+                .HasColumnName("message");
+            entity.Property(e => e.IsRead)
+                .HasColumnName("is_read")
+                .HasDefaultValue(false);
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.ReadAt)
+                .HasColumnType("datetime")
+                .HasColumnName("read_at");
+            entity.Property(e => e.RelatedEntityUuid)
+                .HasColumnType("char(36)")
+                .HasColumnName("related_entity_uuid");
+            entity.Property(e => e.RelatedEntityType)
+                .HasMaxLength(50)
+                .HasColumnName("related_entity_type");
+
+            entity.HasOne(d => d.Actor)
+                .WithMany(p => p.NotificationsAsActor)
+                .HasForeignKey(d => d.ActorUuid)
+                .HasConstraintName("notifications_ibfk_1");
+
+            entity.HasOne(d => d.TargetUser)
+                .WithMany(p => p.NotificationsAsTarget)
+                .HasForeignKey(d => d.TargetUserUuid)
+                .HasConstraintName("notifications_ibfk_2");
         });
 
         OnModelCreatingPartial(modelBuilder);

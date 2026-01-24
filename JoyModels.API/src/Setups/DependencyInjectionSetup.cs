@@ -18,6 +18,7 @@ using JoyModels.Services.Services.Orders;
 using JoyModels.Services.Services.ShoppingCart;
 using JoyModels.Services.Services.Sso;
 using JoyModels.Services.Services.UserRole;
+using JoyModels.Services.Services.Notification;
 using JoyModels.Services.Services.Users;
 using JoyModels.Services.Validation;
 using JoyModels.Utilities.RabbitMQ.MessageConsumer;
@@ -104,6 +105,7 @@ public static class DependencyInjectionSetup
         services.AddTransient<IShoppingCartService, ShoppingCartService>();
         services.AddTransient<IOrderService, OrderService>();
         services.AddTransient<ILibraryService, LibraryService>();
+        services.AddTransient<INotificationService, NotificationService>();
 
         services
             .AddControllers()
