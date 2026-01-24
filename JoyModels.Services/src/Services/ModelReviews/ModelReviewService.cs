@@ -1,4 +1,3 @@
-using System.Text.Json;
 using AutoMapper;
 using JoyModels.Models.Database;
 using JoyModels.Models.Database.Entities;
@@ -78,7 +77,7 @@ public class ModelReviewService(
                 RelatedEntityUuid = modelReviewEntity.Uuid,
                 RelatedEntityType = "ModelReview"
             };
-            await messageProducer.SendMessage("create_notification", JsonSerializer.Serialize(notification));
+            await messageProducer.SendMessage("create_notification", notification);
         }
 
         return await GetByUuid(modelReviewEntity.Uuid);

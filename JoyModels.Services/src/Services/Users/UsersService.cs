@@ -1,4 +1,3 @@
-using System.Text.Json;
 using AutoMapper;
 using JoyModels.Models.Database;
 using JoyModels.Models.DataTransferObjects.ImageSettings;
@@ -131,7 +130,7 @@ public class UsersService(
             RelatedEntityUuid = followerUuid,
             RelatedEntityType = "User"
         };
-        await messageProducer.SendMessage("create_notification", JsonSerializer.Serialize(notification));
+        await messageProducer.SendMessage("create_notification", notification);
     }
 
     public async Task<UsersResponse> Patch(UsersPatchRequest request)

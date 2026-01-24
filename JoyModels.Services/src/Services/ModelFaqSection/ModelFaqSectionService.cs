@@ -1,4 +1,3 @@
-using System.Text.Json;
 using AutoMapper;
 using JoyModels.Models.Database;
 using JoyModels.Models.DataTransferObjects.RequestTypes.ModelFaqSection;
@@ -60,7 +59,7 @@ public class ModelFaqSectionService(
                 RelatedEntityUuid = modelFaqSectionEntity.Uuid,
                 RelatedEntityType = "ModelFaqSection"
             };
-            await messageProducer.SendMessage("create_notification", JsonSerializer.Serialize(notification));
+            await messageProducer.SendMessage("create_notification", notification);
         }
 
         return await GetByUuid(modelFaqSectionEntity.Uuid);
@@ -94,7 +93,7 @@ public class ModelFaqSectionService(
                 RelatedEntityUuid = modelFaqSectionEntity.Uuid,
                 RelatedEntityType = "ModelFaqSection"
             };
-            await messageProducer.SendMessage("create_notification", JsonSerializer.Serialize(notification));
+            await messageProducer.SendMessage("create_notification", notification);
         }
 
         return await GetByUuid(modelFaqSectionEntity.Uuid);

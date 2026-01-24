@@ -1,4 +1,3 @@
-using System.Text.Json;
 using AutoMapper;
 using JoyModels.Models.Database;
 using JoyModels.Models.Enums;
@@ -232,7 +231,7 @@ public class OrderService(
                 RelatedEntityUuid = order.Uuid,
                 RelatedEntityType = "Order"
             };
-            await messageProducer.SendMessage("create_notification", JsonSerializer.Serialize(buyerNotification));
+            await messageProducer.SendMessage("create_notification", buyerNotification);
 
             if (order.Model.UserUuid != order.UserUuid)
             {
@@ -246,7 +245,7 @@ public class OrderService(
                     RelatedEntityUuid = order.ModelUuid,
                     RelatedEntityType = "Model"
                 };
-                await messageProducer.SendMessage("create_notification", JsonSerializer.Serialize(sellerNotification));
+                await messageProducer.SendMessage("create_notification", sellerNotification);
             }
         }
     }
@@ -284,6 +283,6 @@ public class OrderService(
             RelatedEntityUuid = orders.First().Uuid,
             RelatedEntityType = "Order"
         };
-        await messageProducer.SendMessage("create_notification", JsonSerializer.Serialize(notification));
+        await messageProducer.SendMessage("create_notification", notification);
     }
 }

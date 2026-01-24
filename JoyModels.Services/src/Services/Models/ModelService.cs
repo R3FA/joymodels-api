@@ -1,4 +1,3 @@
-using System.Text.Json;
 using System.Transactions;
 using AutoMapper;
 using JoyModels.Models.Database;
@@ -142,7 +141,7 @@ public class ModelService(
                 RelatedEntityUuid = modelUuid,
                 RelatedEntityType = "Model"
             };
-            await messageProducer.SendMessage("create_notification", JsonSerializer.Serialize(notification));
+            await messageProducer.SendMessage("create_notification", notification);
         }
     }
 

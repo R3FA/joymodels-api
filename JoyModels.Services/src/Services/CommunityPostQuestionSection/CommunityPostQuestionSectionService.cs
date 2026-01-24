@@ -1,4 +1,3 @@
-using System.Text.Json;
 using AutoMapper;
 using JoyModels.Models.Database;
 using JoyModels.Models.DataTransferObjects.RequestTypes.CommunityPostQuestionSection;
@@ -66,7 +65,7 @@ public class CommunityPostQuestionSectionService(
                 RelatedEntityUuid = communityPostQuestionSectionEntity.Uuid,
                 RelatedEntityType = "CommunityPostQuestionSection"
             };
-            await messageProducer.SendMessage("create_notification", JsonSerializer.Serialize(notification));
+            await messageProducer.SendMessage("create_notification", notification);
         }
 
         return await GetByUuid(communityPostQuestionSectionEntity.Uuid);
@@ -102,7 +101,7 @@ public class CommunityPostQuestionSectionService(
                 RelatedEntityUuid = communityPostQuestionSectionEntity.Uuid,
                 RelatedEntityType = "CommunityPostQuestionSection"
             };
-            await messageProducer.SendMessage("create_notification", JsonSerializer.Serialize(notification));
+            await messageProducer.SendMessage("create_notification", notification);
         }
 
         return await GetByUuid(communityPostQuestionSectionEntity.Uuid);
