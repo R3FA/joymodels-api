@@ -129,6 +129,31 @@ public static class ModelHelperMethods
         return modelEntities;
     }
 
+    public static async Task<PaginationBase<Model>> SearchBestSellingModelEntities(JoyModelsDbContext context,
+        ModelBestSellingRequest request)
+    {
+        var baseQuery = context.Models
+            .AsNoTracking()
+            .Include(x => x.UserUu)
+            .Include(x => x.UserUu.UserRoleUu)
+            .Include(x => x.UserUu.UserModelLikes)
+            .Include(x => x.ModelAvailabilityUu)
+            .Include(x => x.ModelCategories)
+            .ThenInclude(x => x.CategoryUu)
+            .Include(x => x.ModelPictures)
+            .Where(m => m.ModelAvailabilityUu.AvailabilityName == nameof(ModelAvailabilityEnum.Public))
+            .OrderByDescending(m =>
+                context.Orders.Count(o => o.ModelUuid == m.Uuid && o.Status == nameof(OrderStatus.Completed)));
+
+        var modelEntities = await PaginationBase<Model>.CreateAsync(
+            baseQuery,
+            request.PageNumber,
+            request.PageSize,
+            null);
+
+        return modelEntities;
+    }
+
     public static async Task CreateModelEntity(this Model modelEntity, JoyModelsDbContext context)
     {
         await context.Models.AddAsync(modelEntity);
