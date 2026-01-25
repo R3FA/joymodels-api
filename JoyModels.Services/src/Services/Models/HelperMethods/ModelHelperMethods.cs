@@ -154,6 +154,43 @@ public static class ModelHelperMethods
         return modelEntities;
     }
 
+    public static async Task<PaginationBase<Model>> GetRecommendedModelEntities(
+        JoyModelsDbContext context,
+        List<Guid> orderedModelUuids,
+        ModelRecommendedRequest request)
+    {
+        var totalRecords = orderedModelUuids.Count;
+
+        var paginatedUuids = orderedModelUuids
+            .Skip((request.PageNumber - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToList();
+
+        var models = await context.Models
+            .AsNoTracking()
+            .Include(x => x.UserUu)
+            .Include(x => x.UserUu.UserRoleUu)
+            .Include(x => x.UserUu.UserModelLikes)
+            .Include(x => x.ModelAvailabilityUu)
+            .Include(x => x.ModelCategories)
+            .ThenInclude(x => x.CategoryUu)
+            .Include(x => x.ModelPictures)
+            .Where(m => paginatedUuids.Contains(m.Uuid))
+            .ToListAsync();
+
+        var orderedModels = paginatedUuids
+            .Select(uuid => models.FirstOrDefault(m => m.Uuid == uuid))
+            .Where(m => m != null)
+            .ToList();
+
+        return new PaginationBase<Model>(
+            orderedModels!,
+            totalRecords,
+            request.PageNumber,
+            request.PageSize,
+            null);
+    }
+
     public static async Task CreateModelEntity(this Model modelEntity, JoyModelsDbContext context)
     {
         await context.Models.AddAsync(modelEntity);

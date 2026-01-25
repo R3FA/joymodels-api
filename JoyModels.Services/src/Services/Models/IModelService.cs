@@ -12,6 +12,7 @@ public interface IModelService
     Task<PaginationResponse<ModelResponse>> Search(ModelSearchRequest request);
     Task<PaginationResponse<ModelResponse>> AdminSearch(ModelAdminSearchRequest request);
     Task<PaginationResponse<ModelResponse>> BestSelling(ModelBestSellingRequest request);
+    Task<PaginationResponse<ModelResponse>> Recommended(ModelRecommendedRequest request);
     Task<bool> IsModelLiked(Guid modelUuid);
     Task<ModelResponse> Create(ModelCreateRequest request);
     Task ModelLike(Guid modelUuid);

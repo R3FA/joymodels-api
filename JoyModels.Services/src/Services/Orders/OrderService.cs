@@ -158,23 +158,6 @@ public class OrderService(
         };
     }
 
-    public async Task HandleWebhook(string json, string stripeSignature)
-    {
-        var stripeEvent = EventUtility.ConstructEvent(
-            json, stripeSignature, stripeSettings.WebhookSecret);
-
-        switch (stripeEvent.Type)
-        {
-            case EventTypes.PaymentIntentSucceeded:
-                await HandlePaymentSucceeded(stripeEvent);
-                break;
-
-            case EventTypes.PaymentIntentPaymentFailed:
-                await HandlePaymentFailed(stripeEvent);
-                break;
-        }
-    }
-
     public async Task<OrderResponse> GetByUuid(Guid orderUuid)
     {
         var userUuid = userAuthValidation.GetUserClaimUuid();
@@ -213,21 +196,6 @@ public class OrderService(
         await context.SaveChangesAsync();
 
         return customer.Id;
-    }
-
-    private async Task HandlePaymentSucceeded(Event stripeEvent)
-    {
-        var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
-        if (paymentIntent == null) return;
-
-        var orders = await context.Orders
-            .Include(x => x.Model)
-            .Where(x => x.StripePaymentIntentId == paymentIntent.Id)
-            .ToListAsync();
-
-        if (orders.Count == 0) return;
-
-        await ProcessSuccessfulPayment(orders);
     }
 
     private async Task<bool> ProcessSuccessfulPayment(List<Order> orders)
@@ -311,41 +279,5 @@ public class OrderService(
         }
 
         return true;
-    }
-
-    private async Task HandlePaymentFailed(Event stripeEvent)
-    {
-        var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
-        if (paymentIntent == null) return;
-
-        var orders = await context.Orders
-            .Include(x => x.Model)
-            .Where(x => x.StripePaymentIntentId == paymentIntent.Id)
-            .ToListAsync();
-
-        if (orders.Count == 0) return;
-
-        foreach (var order in orders)
-        {
-            order.Status = nameof(OrderStatus.Failed);
-            order.UpdatedAt = DateTime.UtcNow;
-        }
-
-        await context.SaveChangesAsync();
-
-        var userUuid = orders.First().UserUuid;
-        var modelNames = string.Join(", ", orders.Select(o => $"'{o.Model.Name}'"));
-
-        var notification = new CreateNotificationRequest
-        {
-            ActorUuid = userUuid,
-            TargetUserUuid = userUuid,
-            NotificationType = nameof(NotificationType.OrderFailed),
-            Title = "Payment Failed",
-            Message = $"Your payment for {modelNames} has failed. Please try again.",
-            RelatedEntityUuid = orders.First().Uuid,
-            RelatedEntityType = "Order"
-        };
-        await messageProducer.SendMessage("create_notification", notification);
     }
 }

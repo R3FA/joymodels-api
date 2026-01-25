@@ -17,7 +17,9 @@ public static class DatabaseSetup
                                       $"Password={mariaDbDetails["Password"]};";
         var mariaDbVersion = ServerVersion.AutoDetect(mariaDbConnectionString);
 
-        services.AddDbContext<JoyModelsDbContext>(options => options.UseMySql(mariaDbConnectionString, mariaDbVersion));
+        services.AddPooledDbContextFactory<JoyModelsDbContext>(options =>
+            options.UseMySql(mariaDbConnectionString, mariaDbVersion));
+        services.AddScoped(sp => sp.GetRequiredService<IDbContextFactory<JoyModelsDbContext>>().CreateDbContext());
 
         return services;
     }
