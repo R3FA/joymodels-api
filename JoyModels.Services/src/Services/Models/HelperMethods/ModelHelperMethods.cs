@@ -159,14 +159,7 @@ public static class ModelHelperMethods
         List<Guid> orderedModelUuids,
         ModelRecommendedRequest request)
     {
-        var totalRecords = orderedModelUuids.Count;
-
-        var paginatedUuids = orderedModelUuids
-            .Skip((request.PageNumber - 1) * request.PageSize)
-            .Take(request.PageSize)
-            .ToList();
-
-        var models = await context.Models
+        var baseQuery = context.Models
             .AsNoTracking()
             .Include(x => x.UserUu)
             .Include(x => x.UserUu.UserRoleUu)
@@ -175,16 +168,27 @@ public static class ModelHelperMethods
             .Include(x => x.ModelCategories)
             .ThenInclude(x => x.CategoryUu)
             .Include(x => x.ModelPictures)
-            .Where(m => paginatedUuids.Contains(m.Uuid))
-            .ToListAsync();
+            .Where(m => orderedModelUuids.Contains(m.Uuid));
 
-        var orderedModels = paginatedUuids
+        if (!string.IsNullOrWhiteSpace(request.ModelName))
+            baseQuery = baseQuery.Where(x => x.Name.Contains(request.ModelName));
+
+        var models = await baseQuery.ToListAsync();
+
+        var orderedModels = orderedModelUuids
             .Select(uuid => models.FirstOrDefault(m => m.Uuid == uuid))
             .Where(m => m != null)
             .ToList();
 
+        var totalRecords = orderedModels.Count;
+
+        var paginatedModels = orderedModels
+            .Skip((request.PageNumber - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToList();
+
         return new PaginationBase<Model>(
-            orderedModels!,
+            paginatedModels!,
             totalRecords,
             request.PageNumber,
             request.PageSize,
