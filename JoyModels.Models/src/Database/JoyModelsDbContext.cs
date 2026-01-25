@@ -1027,6 +1027,7 @@ public partial class JoyModelsDbContext : DbContext
             entity.HasOne(d => d.ReviewedBy)
                 .WithMany(p => p.ReportsAsReviewer)
                 .HasForeignKey(d => d.ReviewedByUuid)
+                .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("reports_ibfk_2");
         });
 
