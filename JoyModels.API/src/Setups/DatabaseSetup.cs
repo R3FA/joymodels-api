@@ -18,6 +18,8 @@ public static class DatabaseSetup
         var mariaDbVersion = ServerVersion.AutoDetect(mariaDbConnectionString);
 
         services.AddDbContext<JoyModelsDbContext>(options => options.UseMySql(mariaDbConnectionString, mariaDbVersion));
+        services.AddDbContextFactory<JoyModelsDbContext>(options =>
+            options.UseMySql(mariaDbConnectionString, mariaDbVersion));
 
         return services;
     }

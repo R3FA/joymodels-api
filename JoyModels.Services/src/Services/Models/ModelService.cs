@@ -11,6 +11,7 @@ using JoyModels.Models.DataTransferObjects.ResponseTypes.Models;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Models.Enums;
 using JoyModels.Services.Services.Models.HelperMethods;
+using JoyModels.Services.Services.Recommender;
 using JoyModels.Services.Validation;
 using JoyModels.Utilities.RabbitMQ.MessageProducer;
 using Microsoft.AspNetCore.StaticFiles;
@@ -24,7 +25,8 @@ public class ModelService(
     UserAuthValidation userAuthValidation,
     ModelImageSettingsDetails modelImageSettingsDetails,
     ModelSettingsDetails modelSettingsDetails,
-    IMessageProducer messageProducer)
+    IMessageProducer messageProducer,
+    IRecommenderService recommenderService)
     : IModelService
 {
     private async Task<ModelResponse> GetByUuidWithAllAvailabilities(Guid modelUuid)
@@ -81,6 +83,19 @@ public class ModelService(
     public async Task<PaginationResponse<ModelResponse>> BestSelling(ModelBestSellingRequest request)
     {
         var modelEntities = await ModelHelperMethods.SearchBestSellingModelEntities(context, request);
+
+        return mapper.Map<PaginationResponse<ModelResponse>>(modelEntities);
+    }
+
+    public async Task<PaginationResponse<ModelResponse>> Recommended(ModelRecommendedRequest request)
+    {
+        var userUuid = userAuthValidation.GetUserClaimUuid();
+        var fetchCount = request.PageNumber * request.PageSize;
+
+        var recommendedModelUuids = await recommenderService.GetRecommendations(userUuid, fetchCount);
+
+        var modelEntities =
+            await ModelHelperMethods.GetRecommendedModelEntities(context, recommendedModelUuids, request);
 
         return mapper.Map<PaginationResponse<ModelResponse>>(modelEntities);
     }

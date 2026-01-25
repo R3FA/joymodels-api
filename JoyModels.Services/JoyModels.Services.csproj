@@ -18,6 +18,8 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="Microsoft.ML" Version="5.0.0"/>
+        <PackageReference Include="Microsoft.ML.Recommender" Version="0.23.0"/>
         <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12"/>
         <PackageReference Include="Stripe.net" Version="50.2.0"/>
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0"/>

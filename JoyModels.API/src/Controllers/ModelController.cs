@@ -51,6 +51,14 @@ public class ModelController(IModelService service) : ControllerBase
     }
 
     [Authorize(Policy = "VerifiedUsers")]
+    [HttpGet("recommended")]
+    public async Task<ActionResult<PaginationResponse<ModelResponse>>> Recommended(
+        [FromQuery] ModelRecommendedRequest request)
+    {
+        return await service.Recommended(request);
+    }
+
+    [Authorize(Policy = "VerifiedUsers")]
     [HttpGet("is-model-liked/{modelUuid:guid}")]
     public async Task<ActionResult<bool>> IsModelLiked([FromRoute] Guid modelUuid)
     {

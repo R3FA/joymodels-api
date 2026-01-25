@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Text.Json.Serialization;
 using JoyModels.API.Handlers;
+using JoyModels.API.Services;
 using JoyModels.Communications.Setups;
 using JoyModels.Models.Database;
 using JoyModels.Services.Services.Categories;
@@ -19,6 +20,7 @@ using JoyModels.Services.Services.ShoppingCart;
 using JoyModels.Services.Services.Sso;
 using JoyModels.Services.Services.UserRole;
 using JoyModels.Services.Services.Notification;
+using JoyModels.Services.Services.Recommender;
 using JoyModels.Services.Services.Report;
 using JoyModels.Services.Services.Users;
 using JoyModels.Services.Validation;
@@ -98,6 +100,9 @@ public static class DependencyInjectionSetup
         services.AddTransient<ILibraryService, LibraryService>();
         services.AddTransient<INotificationService, NotificationService>();
         services.AddTransient<IReportService, ReportService>();
+        services.AddSingleton<IRecommenderService, RecommenderService>();
+
+        services.AddHostedService<RecommenderTrainingService>();
 
         services
             .AddControllers()
