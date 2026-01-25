@@ -74,7 +74,7 @@ public class SsoService(
         }
         catch (Exception ex)
         {
-            SsoHelperMethods.DeleteUserPictureFolderOnException(userEntity.UserPictureLocation);
+            SsoHelperMethods.DeleteUserPictureFolderOnException(userEntity.Uuid, userImageSettingsDetails);
             throw new TransactionException(ex.InnerException!.Message);
         }
 
@@ -203,16 +203,8 @@ public class SsoService(
 
     public async Task Delete(Guid userUuid)
     {
-        var pendingUser = await GetByUuid(userUuid);
+        await SsoHelperMethods.DeleteAllUnverifiedUserData(context, userUuid);
 
-        try
-        {
-            SsoHelperMethods.DeleteUserPictureFolderOnException(pendingUser.UserPictureLocation);
-            await SsoHelperMethods.DeleteAllUnverifiedUserData(context, userUuid);
-        }
-        catch (Exception e)
-        {
-            throw new Exception(e.Message);
-        }
+        SsoHelperMethods.DeleteUserPictureFolderOnException(userUuid, userImageSettingsDetails);
     }
 }

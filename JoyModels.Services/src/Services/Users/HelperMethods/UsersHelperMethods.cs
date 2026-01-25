@@ -181,17 +181,20 @@ public static class UsersHelperMethods
         if (request.UserPicture != null)
         {
             var userPicturePath = string.Empty;
+            var oldPicturePath = userResponse.UserPictureLocation;
+
             try
             {
                 userPicturePath =
                     await SsoHelperMethods.SaveUserPicture(request.UserPicture, userImageSettingsDetails,
                         request.UserUuid);
 
-                SsoHelperMethods.DeleteUserPictureOnException(userResponse.UserPictureLocation, userResponse.Uuid,
-                    userImageSettingsDetails);
-
                 await context.Users.Where(x => x.Uuid == request.UserUuid)
                     .ExecuteUpdateAsync(x => x.SetProperty(z => z.UserPictureLocation, userPicturePath));
+
+                if (!string.IsNullOrWhiteSpace(oldPicturePath))
+                    SsoHelperMethods.DeleteUserPictureOnException(oldPicturePath, userResponse.Uuid,
+                        userImageSettingsDetails);
             }
             catch (Exception e)
             {
