@@ -108,9 +108,8 @@ public class CommunityPostService(
         }
         catch (Exception ex)
         {
-            if (communityPostPictureEntities != null)
-                ModelHelperMethods.DeleteModelPictureUuidFolderOnException(communityPostPictureEntities[0]
-                    .PictureLocation[0].ToString());
+            CommunityPostHelperMethods.DeleteCommunityPostPicturesFolderOnException(modelImageSettingsDetails,
+                communityPostEntity.Uuid);
 
             throw new TransactionException(ex.InnerException!.Message);
         }
@@ -126,14 +125,31 @@ public class CommunityPostService(
         await request.ValidateCommunityPostPatchArguments(context, communityPostResponse, modelImageSettingsDetails);
 
         var transaction = await context.Database.BeginTransactionAsync();
+        (List<string> newlyAddedFiles, List<string> filesToDeleteAfterCommit) patchResult = ([], []);
+
         try
         {
-            await request.PatchCommunityPostEntity(modelImageSettingsDetails, context);
+            patchResult = await request.PatchCommunityPostEntity(modelImageSettingsDetails, context);
 
             await transaction.CommitAsync();
+
+            foreach (var filePath in patchResult.filesToDeleteAfterCommit)
+            {
+                if (File.Exists(filePath))
+                    File.Delete(filePath);
+            }
         }
         catch (Exception ex)
         {
+            foreach (var fileName in patchResult.newlyAddedFiles)
+            {
+                var fullPath = Path.Combine(modelImageSettingsDetails.SavePath, "community-posts",
+                    request.CommunityPostUuid.ToString(), fileName);
+
+                if (File.Exists(fullPath))
+                    File.Delete(fullPath);
+            }
+
             throw new TransactionException(ex.Message);
         }
 
@@ -174,12 +190,9 @@ public class CommunityPostService(
 
     public async Task Delete(Guid communityPostUuid)
     {
-        var communityPostEntity = await GetByUuid(communityPostUuid);
-
         await CommunityPostHelperMethods.DeleteCommunityPostEntity(context, communityPostUuid, userAuthValidation);
 
-        if (communityPostEntity.PictureLocations.Count > 0)
-            ModelHelperMethods.DeleteModelUuidFolderOnException(communityPostEntity.PictureLocations[0]
-                .PictureLocation);
+        CommunityPostHelperMethods.DeleteCommunityPostPicturesFolderOnException(modelImageSettingsDetails,
+            communityPostUuid);
     }
 }

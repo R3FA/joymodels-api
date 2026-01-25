@@ -182,6 +182,7 @@ public static class CommunityPostHelperMethods
         }
         catch (Exception e)
         {
+            DeleteCommunityPostPicturesFolderOnException(modelImageSettingsDetails, communityPostUuid);
             throw new ApplicationException($"Failed to save community post picture: {e.Message}");
         }
 
@@ -247,11 +248,15 @@ public static class CommunityPostHelperMethods
         }
     }
 
-    public static async Task PatchCommunityPostEntity(
-        this CommunityPostPatchRequest request,
-        ModelImageSettingsDetails modelImageSettingsDetails,
-        JoyModelsDbContext context)
+    public static async Task<(List<string> NewlyAddedFiles, List<string> FilesToDeleteAfterCommit)>
+        PatchCommunityPostEntity(
+            this CommunityPostPatchRequest request,
+            ModelImageSettingsDetails modelImageSettingsDetails,
+            JoyModelsDbContext context)
     {
+        List<string> newlyAddedFiles = [];
+        List<string> filesToDeleteAfterCommit = [];
+
         if (!string.IsNullOrWhiteSpace(request.Title))
             await context.CommunityPosts
                 .Where(x => x.Uuid == request.CommunityPostUuid)
@@ -278,6 +283,8 @@ public static class CommunityPostHelperMethods
                 await request.PicturesToAdd.SaveCommunityPostPictures(modelImageSettingsDetails,
                     request.CommunityPostUuid);
 
+            newlyAddedFiles.AddRange(communityPostPicturePaths);
+
             var communityPostPictureEntities =
                 CreateCommunityPostPictureEntityInstances(request.CommunityPostUuid, communityPostPicturePaths);
 
@@ -286,24 +293,23 @@ public static class CommunityPostHelperMethods
 
         if (request.PicturesToRemove is not null && request.PicturesToRemove.Count != 0)
         {
-            for (var i = 0; i < request.PicturesToRemove.Distinct().Count(); i++)
+            foreach (var fileName in request.PicturesToRemove.Distinct())
             {
-                var fileName = request.PicturesToRemove.ElementAt(i);
-
                 await context.CommunityPostPictures
                     .Where(x => x.CommunityPostUuid == request.CommunityPostUuid
-                                && string.Equals(x.PictureLocation, fileName))
+                                && x.PictureLocation == fileName)
                     .ExecuteDeleteAsync();
 
                 var fullPath = Path.Combine(modelImageSettingsDetails.SavePath, "community-posts",
                     request.CommunityPostUuid.ToString(), fileName);
 
-                if (File.Exists(fullPath))
-                    File.Delete(fullPath);
+                filesToDeleteAfterCommit.Add(fullPath);
             }
         }
 
         await context.SaveChangesAsync();
+
+        return (newlyAddedFiles, filesToDeleteAfterCommit);
     }
 
     public static async Task DeleteCommunityPostUserReview(this CommunityPostUserReviewDeleteRequest request,
@@ -340,5 +346,12 @@ public static class CommunityPostHelperMethods
             throw new KeyNotFoundException("Community post either doesn't exist or isn't under your ownership.");
 
         await context.SaveChangesAsync();
+    }
+
+    public static void DeleteCommunityPostPicturesFolderOnException(ModelImageSettingsDetails modelImageSettingsDetails,
+        Guid communityPostUuid)
+    {
+        var folder = Path.Combine(modelImageSettingsDetails.SavePath, "community-posts", communityPostUuid.ToString());
+        if (Directory.Exists(folder)) Directory.Delete(folder, true);
     }
 }

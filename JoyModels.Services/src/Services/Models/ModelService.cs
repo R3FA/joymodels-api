@@ -117,7 +117,7 @@ public class ModelService(
 
         var modelPicturePaths = await request.Pictures.SaveModelPictures(modelImageSettingsDetails, modelEntity.Uuid);
         modelEntity.LocationPath =
-            await request.Model.SaveModel(modelSettingsDetails, modelEntity.Uuid, modelPicturePaths);
+            await request.Model.SaveModel(modelSettingsDetails, modelImageSettingsDetails, modelEntity.Uuid);
 
         var transaction = await context.Database.BeginTransactionAsync();
         try
@@ -130,8 +130,8 @@ public class ModelService(
         }
         catch (Exception ex)
         {
-            ModelHelperMethods.DeleteModelPictureUuidFolderOnException(modelPicturePaths[0]);
-            ModelHelperMethods.DeleteModelUuidFolderOnException(modelEntity.LocationPath);
+            ModelHelperMethods.DeleteModelFolderOnException(modelSettingsDetails, modelEntity.Uuid);
+            ModelHelperMethods.DeleteModelPicturesFolderOnException(modelImageSettingsDetails, modelEntity.Uuid);
 
             throw new TransactionException(ex.InnerException!.Message);
         }
@@ -174,14 +174,31 @@ public class ModelService(
         await request.ValidateModelPatchArgumentsDuplicatedFields(context);
 
         var transaction = await context.Database.BeginTransactionAsync();
+        (List<string> newlyAddedFiles, List<string> filesToDeleteAfterCommit) patchResult = ([], []);
+
         try
         {
-            await request.PatchModelEntity(modelResponse, modelImageSettingsDetails, context);
+            patchResult = await request.PatchModelEntity(modelResponse, modelImageSettingsDetails, context);
 
             await transaction.CommitAsync();
+
+            foreach (var filePath in patchResult.filesToDeleteAfterCommit)
+            {
+                if (File.Exists(filePath))
+                    File.Delete(filePath);
+            }
         }
         catch (Exception ex)
         {
+            foreach (var fileName in patchResult.newlyAddedFiles)
+            {
+                var fullPath = Path.Combine(modelImageSettingsDetails.SavePath, "models",
+                    request.Uuid.ToString(), fileName);
+
+                if (File.Exists(fullPath))
+                    File.Delete(fullPath);
+            }
+
             throw new TransactionException(ex.Message);
         }
 
@@ -197,11 +214,9 @@ public class ModelService(
 
     public async Task Delete(Guid modelUuid)
     {
-        var modelEntity = await GetByUuidWithAllAvailabilities(modelUuid);
-
         await ModelHelperMethods.DeleteModel(context, modelUuid, userAuthValidation);
 
-        ModelHelperMethods.DeleteModelPictureUuidFolderOnException(modelEntity.ModelPictures[0].PictureLocation);
-        ModelHelperMethods.DeleteModelUuidFolderOnException(modelEntity.LocationPath);
+        ModelHelperMethods.DeleteModelFolderOnException(modelSettingsDetails, modelUuid);
+        ModelHelperMethods.DeleteModelPicturesFolderOnException(modelImageSettingsDetails, modelUuid);
     }
 }
