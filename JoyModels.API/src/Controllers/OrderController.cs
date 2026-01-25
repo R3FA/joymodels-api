@@ -30,19 +30,6 @@ public class OrderController(IOrderService service) : ControllerBase
         return Ok(result);
     }
 
-    [HttpPost("webhook")]
-    public async Task<IActionResult> Webhook()
-    {
-        var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
-        var signature = Request.Headers["Stripe-Signature"];
-
-        if (string.IsNullOrEmpty(signature))
-            return BadRequest("Missing Stripe-Signature header");
-
-        await service.HandleWebhook(json, signature!);
-        return Ok();
-    }
-
     [Authorize(Policy = "VerifiedUsers")]
     [HttpGet("get/{orderUuid:guid}")]
     public async Task<ActionResult<OrderResponse>> GetByUuid([FromRoute] Guid orderUuid)
