@@ -9,16 +9,15 @@ namespace JoyModels.API.Controllers;
 
 [Route("api/models/")]
 [ApiController]
+[Authorize(Policy = "VerifiedUsers")]
 public class ModelController(IModelService service) : ControllerBase
 {
-    [Authorize(Policy = "VerifiedUsers")]
     [HttpGet("get")]
     public async Task<ActionResult<ModelResponse>> GetByUuid([FromQuery] ModelGetByUuidRequest request)
     {
         return await service.GetByUuid(request);
     }
 
-    [Authorize(Policy = "VerifiedUsers")]
     [HttpGet("get/{modelUuid:guid}/images/{modelPictureLocationPath}")]
     public async Task<ActionResult> GetModelPictures([FromRoute] Guid modelUuid,
         [FromRoute] string modelPictureLocationPath)
@@ -27,7 +26,6 @@ public class ModelController(IModelService service) : ControllerBase
         return File(files.FileBytes, files.ContentType);
     }
 
-    [Authorize(Policy = "VerifiedUsers")]
     [HttpGet("search")]
     public async Task<ActionResult<PaginationResponse<ModelResponse>>> Search([FromQuery] ModelSearchRequest request)
     {
@@ -42,7 +40,6 @@ public class ModelController(IModelService service) : ControllerBase
         return await service.AdminSearch(request);
     }
 
-    [Authorize(Policy = "VerifiedUsers")]
     [HttpGet("best-selling")]
     public async Task<ActionResult<PaginationResponse<ModelResponse>>> BestSelling(
         [FromQuery] ModelBestSellingRequest request)
@@ -50,7 +47,6 @@ public class ModelController(IModelService service) : ControllerBase
         return await service.BestSelling(request);
     }
 
-    [Authorize(Policy = "VerifiedUsers")]
     [HttpGet("recommended")]
     public async Task<ActionResult<PaginationResponse<ModelResponse>>> Recommended(
         [FromQuery] ModelRecommendedRequest request)
@@ -58,21 +54,19 @@ public class ModelController(IModelService service) : ControllerBase
         return await service.Recommended(request);
     }
 
-    [Authorize(Policy = "VerifiedUsers")]
     [HttpGet("is-model-liked/{modelUuid:guid}")]
     public async Task<ActionResult<bool>> IsModelLiked([FromRoute] Guid modelUuid)
     {
         return await service.IsModelLiked(modelUuid);
     }
 
-    [Authorize(Policy = "VerifiedUsers")]
+    [Authorize(Policy = "HeadStaff")]
     [HttpPost("create")]
     public async Task<ActionResult<ModelResponse>> Create([FromForm] ModelCreateRequest request)
     {
         return await service.Create(request);
     }
 
-    [Authorize(Policy = "VerifiedUsers")]
     [HttpPost("model-like/{modelUuid:guid}")]
     public async Task<ActionResult> ModelLike([FromRoute] Guid modelUuid)
     {
@@ -80,14 +74,13 @@ public class ModelController(IModelService service) : ControllerBase
         return NoContent();
     }
 
-    [Authorize(Policy = "VerifiedUsers")]
+    [Authorize(Policy = "HeadStaff")]
     [HttpPatch("edit-model")]
     public async Task<ActionResult<ModelResponse>> Patch([FromForm] ModelPatchRequest request)
     {
         return await service.Patch(request);
     }
 
-    [Authorize(Policy = "VerifiedUsers")]
     [HttpDelete("model-unlike/{modelUuid:guid}")]
     public async Task<ActionResult> ModelUnlike([FromRoute] Guid modelUuid)
     {
@@ -95,7 +88,7 @@ public class ModelController(IModelService service) : ControllerBase
         return NoContent();
     }
 
-    [Authorize(Policy = "VerifiedUsers")]
+    [Authorize(Policy = "HeadStaff")]
     [HttpDelete("delete/{modelUuid:guid}")]
     public async Task<ActionResult> Delete([FromRoute] Guid modelUuid)
     {

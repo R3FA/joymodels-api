@@ -170,7 +170,6 @@ public class ModelService(
     public async Task<ModelResponse> Patch(ModelPatchRequest request)
     {
         var modelResponse = await GetByUuidWithAllAvailabilities(request.Uuid);
-        userAuthValidation.ValidateUserAuthRequest(modelResponse.UserUuid);
         request.ValidateModelPatchArguments();
         await request.ValidateModelPatchArgumentsDuplicatedFields(context);
 
