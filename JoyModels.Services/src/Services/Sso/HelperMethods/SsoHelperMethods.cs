@@ -311,9 +311,10 @@ public static class SsoHelperMethods
         await context.SaveChangesAsync();
     }
 
-    public static void DeleteUserPictureFolderOnException(string userPicturePath)
+    public static void DeleteUserPictureFolderOnException(Guid userUuid,
+        UserImageSettingsDetails userImageSettingsDetails)
     {
-        var userPictureFolder = Path.GetFullPath(Path.Combine(userPicturePath, ".."));
+        var userPictureFolder = Path.Combine(userImageSettingsDetails.SavePath, "users", userUuid.ToString());
         if (Directory.Exists(userPictureFolder)) Directory.Delete(userPictureFolder, true);
     }
 

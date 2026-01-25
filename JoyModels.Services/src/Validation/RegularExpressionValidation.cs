@@ -68,11 +68,11 @@ public static class RegularExpressionValidation
         if (string.IsNullOrWhiteSpace(text))
             throw new ArgumentException("Text cannot be empty string.");
 
-        const string pattern = @"^[\p{L}\p{Nd}:.,\-\'\& ]{1,}$";
+        const string pattern = @"^[\p{L}\p{Nd}:.,\-'&?()*%$! ]{1,}$";
 
         if (!Regex.IsMatch(text, pattern))
             throw new ArgumentException(
-                "Invalid value: Must contain only letters (any language), digits, and the following characters: (:.,-').");
+                "Invalid value: Must contain only letters (any language), digits, and the following characters: (:.,-'&?()*%$!).");
     }
 
     public static void ValidateYoutubeVideoLink(string url)

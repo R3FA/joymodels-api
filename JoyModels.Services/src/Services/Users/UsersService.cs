@@ -156,5 +156,7 @@ public class UsersService(
     public async Task Delete(Guid userUuid)
     {
         await UsersHelperMethods.DeleteUserEntity(context, userUuid, userAuthValidation);
+
+        Sso.HelperMethods.SsoHelperMethods.DeleteUserPictureFolderOnException(userUuid, userImageSettingsDetails);
     }
 }

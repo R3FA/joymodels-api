@@ -71,9 +71,10 @@ public class RecommenderService(IDbContextFactory<JoyModelsDbContext> contextFac
         {
             if (_trainedModel == null || _predictionEngine == null)
             {
-                useFallback = true;
+                return [];
             }
-            else if (!_userIdMap.TryGetValue(userUuid, out userId))
+
+            if (!_userIdMap.TryGetValue(userUuid, out userId))
             {
                 useFallback = true;
             }

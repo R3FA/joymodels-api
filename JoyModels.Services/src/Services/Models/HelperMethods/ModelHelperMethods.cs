@@ -159,14 +159,7 @@ public static class ModelHelperMethods
         List<Guid> orderedModelUuids,
         ModelRecommendedRequest request)
     {
-        var totalRecords = orderedModelUuids.Count;
-
-        var paginatedUuids = orderedModelUuids
-            .Skip((request.PageNumber - 1) * request.PageSize)
-            .Take(request.PageSize)
-            .ToList();
-
-        var models = await context.Models
+        var baseQuery = context.Models
             .AsNoTracking()
             .Include(x => x.UserUu)
             .Include(x => x.UserUu.UserRoleUu)
@@ -175,16 +168,27 @@ public static class ModelHelperMethods
             .Include(x => x.ModelCategories)
             .ThenInclude(x => x.CategoryUu)
             .Include(x => x.ModelPictures)
-            .Where(m => paginatedUuids.Contains(m.Uuid))
-            .ToListAsync();
+            .Where(m => orderedModelUuids.Contains(m.Uuid));
 
-        var orderedModels = paginatedUuids
+        if (!string.IsNullOrWhiteSpace(request.ModelName))
+            baseQuery = baseQuery.Where(x => x.Name.Contains(request.ModelName));
+
+        var models = await baseQuery.ToListAsync();
+
+        var orderedModels = orderedModelUuids
             .Select(uuid => models.FirstOrDefault(m => m.Uuid == uuid))
             .Where(m => m != null)
             .ToList();
 
+        var totalRecords = orderedModels.Count;
+
+        var paginatedModels = orderedModels
+            .Skip((request.PageNumber - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToList();
+
         return new PaginationBase<Model>(
-            orderedModels!,
+            paginatedModels!,
             totalRecords,
             request.PageNumber,
             request.PageSize,
@@ -260,6 +264,7 @@ public static class ModelHelperMethods
         }
         catch (Exception e)
         {
+            DeleteModelPicturesFolderOnException(modelImageSettingsDetails, modelUuid);
             throw new ApplicationException($"Failed to save model picture: {e.Message}");
         }
 
@@ -267,7 +272,9 @@ public static class ModelHelperMethods
     }
 
     public static async Task<string> SaveModel(this IFormFile model,
-        ModelSettingsDetails modelSettingsDetails, Guid modelUuid, List<string> modelPicturePaths)
+        ModelSettingsDetails modelSettingsDetails,
+        ModelImageSettingsDetails modelImageSettingsDetails,
+        Guid modelUuid)
     {
         string modelPath;
 
@@ -287,7 +294,8 @@ public static class ModelHelperMethods
         }
         catch (Exception e)
         {
-            DeleteModelPictureUuidFolderOnException(modelPicturePaths[0]);
+            DeleteModelFolderOnException(modelSettingsDetails, modelUuid);
+            DeleteModelPicturesFolderOnException(modelImageSettingsDetails, modelUuid);
 
             throw new ApplicationException($"Failed to save model: {e.Message}");
         }
@@ -302,12 +310,15 @@ public static class ModelHelperMethods
         await context.SaveChangesAsync();
     }
 
-    public static async Task PatchModelEntity(
+    public static async Task<(List<string> NewlyAddedFiles, List<string> FilesToDeleteAfterCommit)> PatchModelEntity(
         this ModelPatchRequest request,
         ModelResponse modelResponse,
         ModelImageSettingsDetails modelImageSettingsDetails,
         JoyModelsDbContext context)
     {
+        List<string> newlyAddedFiles = [];
+        List<string> filesToDeleteAfterCommit = [];
+
         if (!string.IsNullOrWhiteSpace(request.Name))
             await context.Models
                 .Where(x => x.Uuid == modelResponse.Uuid)
@@ -369,28 +380,30 @@ public static class ModelHelperMethods
             var modelPicturePaths =
                 await request.ModelPictureToInsert.SaveModelPictures(modelImageSettingsDetails, modelResponse.Uuid);
 
+            newlyAddedFiles.AddRange(modelPicturePaths);
+
             await CreateModelPictures(new Model { Uuid = modelResponse.Uuid }, context, modelPicturePaths);
         }
 
         if (request.ModelPictureLocationsToDelete is not null && request.ModelPictureLocationsToDelete.Count != 0)
         {
-            for (var i = 0; i < request.ModelPictureLocationsToDelete.Distinct().Count(); i++)
+            foreach (var pictureLocationToDelete in request.ModelPictureLocationsToDelete.Distinct())
             {
                 await context.ModelPictures
                     .Where(x => x.ModelUuid == modelResponse.Uuid
-                                && string.Equals(x.PictureLocation,
-                                    modelResponse.ModelPictures.ElementAt(i).PictureLocation))
+                                && x.PictureLocation == pictureLocationToDelete)
                     .ExecuteDeleteAsync();
 
-                var fullPath = Path.Combine(modelImageSettingsDetails.SavePath, "models", request.Uuid.ToString(),
-                    request.ModelPictureLocationsToDelete[i]);
+                var fullPath = Path.Combine(modelImageSettingsDetails.SavePath, "models",
+                    modelResponse.Uuid.ToString(), pictureLocationToDelete);
 
-                if (File.Exists(fullPath))
-                    File.Delete(fullPath);
+                filesToDeleteAfterCommit.Add(fullPath);
             }
         }
 
         await context.SaveChangesAsync();
+
+        return (newlyAddedFiles, filesToDeleteAfterCommit);
     }
 
     public static async Task DeleteUserModelLikeEntity(JoyModelsDbContext context, Guid modelUuid,
@@ -422,15 +435,16 @@ public static class ModelHelperMethods
         await context.SaveChangesAsync();
     }
 
-    public static void DeleteModelPictureUuidFolderOnException(string modelPicturePath)
+    public static void DeleteModelFolderOnException(ModelSettingsDetails modelSettingsDetails, Guid modelUuid)
     {
-        var modelPictureFolder = Path.GetFullPath(Path.Combine(modelPicturePath, ".."));
-        if (Directory.Exists(modelPictureFolder)) Directory.Delete(modelPictureFolder, true);
+        var modelFolder = Path.Combine(modelSettingsDetails.SavePath, "models", modelUuid.ToString());
+        if (Directory.Exists(modelFolder)) Directory.Delete(modelFolder, true);
     }
 
-    public static void DeleteModelUuidFolderOnException(string modelPath)
+    public static void DeleteModelPicturesFolderOnException(ModelImageSettingsDetails modelImageSettingsDetails,
+        Guid modelUuid)
     {
-        var modelFolder = Path.GetFullPath(Path.Combine(modelPath, ".."));
+        var modelFolder = Path.Combine(modelImageSettingsDetails.SavePath, "models", modelUuid.ToString());
         if (Directory.Exists(modelFolder)) Directory.Delete(modelFolder, true);
     }
 
