@@ -30,8 +30,6 @@ public static class ModelFaqSectionHelperMethods
             .Include(x => x.Replies)
             .ThenInclude(y => y.UserUu)
             .ThenInclude(u => u.UserRoleUu)
-            .Where(x => string.Equals(x.ModelUu.ModelAvailabilityUu.AvailabilityName,
-                nameof(ModelAvailabilityEnum.Public)))
             .FirstOrDefaultAsync(x => x.Uuid == modelFaqSectionUuid);
 
         return modelFaqSectionEntity ??
@@ -59,8 +57,7 @@ public static class ModelFaqSectionHelperMethods
             .Include(x => x.Replies)
             .ThenInclude(y => y.UserUu)
             .ThenInclude(u => u.UserRoleUu)
-            .Where(x => string.Equals(x.ModelUu.ModelAvailabilityUu.AvailabilityName,
-                            nameof(ModelAvailabilityEnum.Public)) && x.ModelUuid == request.ModelUuid &&
+            .Where(x => x.ModelUuid == request.ModelUuid &&
                         x.ParentMessageUuid == null)
             .AsQueryable();
 
