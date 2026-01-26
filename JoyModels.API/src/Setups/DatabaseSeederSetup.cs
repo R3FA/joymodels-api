@@ -1070,7 +1070,11 @@ public static class DatabaseSeederSetup
 
         logger.LogInformation("Starting ShoppingCart seeding...");
 
-        var allUsers = await context.Users.OrderBy(u => u.CreatedAt).ToListAsync();
+        var regularUsers = await context.Users
+            .Include(u => u.UserRoleUu)
+            .Where(u => u.UserRoleUu.RoleName == nameof(UserRoleEnum.User))
+            .OrderBy(u => u.CreatedAt)
+            .ToListAsync();
         var models = await context.Models.OrderBy(m => m.CreatedAt).ToListAsync();
 
         var ownedModels = await context.Libraries
@@ -1083,11 +1087,11 @@ public static class DatabaseSeederSetup
 
         const int groupCount = 5;
         var modelsPerGroup = models.Count / groupCount;
-        var usersPerGroup = allUsers.Count / groupCount;
+        var usersPerGroup = regularUsers.Count / groupCount;
 
-        for (var userIndex = 0; userIndex < allUsers.Count; userIndex++)
+        for (var userIndex = 0; userIndex < regularUsers.Count; userIndex++)
         {
-            var user = allUsers[userIndex];
+            var user = regularUsers[userIndex];
             var userGroup = userIndex / usersPerGroup;
             if (userGroup >= groupCount) userGroup = groupCount - 1;
 
@@ -1161,7 +1165,11 @@ public static class DatabaseSeederSetup
 
         logger.LogInformation("Starting Orders and Library seeding...");
 
-        var allUsers = await context.Users.OrderBy(u => u.CreatedAt).ToListAsync();
+        var regularUsers = await context.Users
+            .Include(u => u.UserRoleUu)
+            .Where(u => u.UserRoleUu.RoleName == nameof(UserRoleEnum.User))
+            .OrderBy(u => u.CreatedAt)
+            .ToListAsync();
         var models = await context.Models.OrderBy(m => m.CreatedAt).ToListAsync();
 
         var orders = new List<Order>();
@@ -1170,11 +1178,11 @@ public static class DatabaseSeederSetup
 
         const int groupCount = 5;
         var modelsPerGroup = models.Count / groupCount;
-        var usersPerGroup = allUsers.Count / groupCount;
+        var usersPerGroup = regularUsers.Count / groupCount;
 
-        for (var userIndex = 0; userIndex < allUsers.Count; userIndex++)
+        for (var userIndex = 0; userIndex < regularUsers.Count; userIndex++)
         {
-            var user = allUsers[userIndex];
+            var user = regularUsers[userIndex];
             var userGroup = userIndex / usersPerGroup;
             if (userGroup >= groupCount) userGroup = groupCount - 1;
 
