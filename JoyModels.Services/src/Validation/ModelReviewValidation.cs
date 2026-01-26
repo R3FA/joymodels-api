@@ -31,4 +31,13 @@ public static class ModelReviewValidation
         if (isDuplicated)
             throw new ApplicationException("You have already reviewed this model!");
     }
+
+    public static async Task ValidateModelOwnership(JoyModelsDbContext context, Guid modelUuid, Guid userClaimUuid)
+    {
+        var hasInLibrary = await context.Libraries
+            .AnyAsync(x => x.UserUuid == userClaimUuid && x.ModelUuid == modelUuid);
+
+        if (!hasInLibrary)
+            throw new ApplicationException("You can only review models you have purchased!");
+    }
 }

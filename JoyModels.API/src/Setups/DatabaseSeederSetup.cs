@@ -33,20 +33,30 @@ public static class DatabaseSeederSetup
 
     private static readonly string[] FirstNames =
     [
-        "Alex", "Jordan", "Taylor", "Morgan", "Casey",
-        "Riley", "Quinn", "Avery", "Peyton", "Cameron",
-        "Skyler", "Dakota", "Reese", "Finley", "Sage",
-        "Rowan", "Emery", "Phoenix", "Harley", "Blake",
-        "Drew", "Hayden", "Jamie", "Logan", "Parker"
+        "Alex", "Jordan", "Taylor", "Morgan", "Casey", "Riley", "Quinn", "Avery", "Peyton", "Cameron",
+        "Skyler", "Dakota", "Reese", "Finley", "Sage", "Rowan", "Emery", "Phoenix", "Harley", "Blake",
+        "Drew", "Hayden", "Jamie", "Logan", "Parker", "Emma", "Liam", "Olivia", "Noah", "Ava",
+        "Ethan", "Sophia", "Mason", "Isabella", "Lucas", "Mia", "Oliver", "Charlotte", "Elijah", "Amelia",
+        "James", "Harper", "Benjamin", "Evelyn", "Henry", "Abigail", "Sebastian", "Emily", "Jack", "Elizabeth",
+        "Aiden", "Sofia", "Owen", "Ella", "Samuel", "Scarlett", "Ryan", "Grace", "Nathan", "Chloe",
+        "Caleb", "Victoria", "Christian", "Aria", "Dylan", "Lily", "Isaac", "Zoey", "Joshua", "Penelope",
+        "Andrew", "Layla", "Daniel", "Nora", "Matthew", "Riley", "Joseph", "Zoe", "David", "Hannah",
+        "Carter", "Hazel", "Luke", "Luna", "Gabriel", "Savannah", "Anthony", "Audrey", "Lincoln", "Brooklyn",
+        "Jaxon", "Bella", "Asher", "Claire", "Christopher", "Skylar", "Ezra", "Lucy", "Theodore", "Paisley"
     ];
 
     private static readonly string[] LastNames =
     [
-        "Smith", "Johnson", "Williams", "Brown", "Jones",
-        "Garcia", "Miller", "Davis", "Rodriguez", "Martinez",
-        "Wilson", "Anderson", "Taylor", "Thomas", "Moore",
-        "Jackson", "Martin", "Lee", "Thompson", "White",
-        "Harris", "Clark", "Lewis", "Robinson", "Walker"
+        "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez",
+        "Wilson", "Anderson", "Taylor", "Thomas", "Moore", "Jackson", "Martin", "Lee", "Thompson", "White",
+        "Harris", "Clark", "Lewis", "Robinson", "Walker", "Hall", "Allen", "Young", "King", "Wright",
+        "Scott", "Green", "Baker", "Adams", "Nelson", "Carter", "Mitchell", "Perez", "Roberts", "Turner",
+        "Phillips", "Campbell", "Parker", "Evans", "Edwards", "Collins", "Stewart", "Sanchez", "Morris", "Rogers",
+        "Reed", "Cook", "Morgan", "Bell", "Murphy", "Bailey", "Rivera", "Cooper", "Richardson", "Cox",
+        "Howard", "Ward", "Torres", "Peterson", "Gray", "Ramirez", "James", "Watson", "Brooks", "Kelly",
+        "Sanders", "Price", "Bennett", "Wood", "Barnes", "Ross", "Henderson", "Coleman", "Jenkins", "Perry",
+        "Powell", "Long", "Patterson", "Hughes", "Flores", "Washington", "Butler", "Simmons", "Foster", "Gonzales",
+        "Bryant", "Alexander", "Russell", "Griffin", "Diaz", "Hayes", "Myers", "Ford", "Hamilton", "Graham"
     ];
 
     private static readonly string[] ModelNamePrefixes =
@@ -117,6 +127,34 @@ public static class DatabaseSeederSetup
         "I'm happy to help! Let me know if you need anything else."
     ];
 
+    private static readonly string[] PositiveReviewTexts =
+    [
+        "Excellent quality model! The details are amazing and it works perfectly in my project.",
+        "Very impressed with this model. Clean topology and great textures included.",
+        "Best purchase I've made. The model is exactly as described and easy to use.",
+        "Fantastic work! The artist clearly put a lot of effort into this piece.",
+        "Highly recommend this model. Perfect for game development projects.",
+        "Outstanding quality for the price. Will definitely buy from this creator again.",
+        "The model exceeded my expectations. Great attention to detail throughout.",
+        "Perfect for my needs. The file formats provided made integration seamless.",
+        "Amazing model with professional quality. The creator was also very helpful.",
+        "Five stars! This model saved me hours of work on my project."
+    ];
+
+    private static readonly string[] NegativeReviewTexts =
+    [
+        "The model quality doesn't match the preview images. Disappointed with this purchase.",
+        "Had some issues with the topology. Not ideal for animation purposes.",
+        "The textures were lower resolution than expected. Needs improvement.",
+        "Model required significant cleanup before I could use it in my project.",
+        "Not worth the price. I've seen better models for less money.",
+        "The file formats provided were outdated. Had compatibility issues.",
+        "Description was misleading. The model lacks many advertised features.",
+        "Polygon count was much higher than stated, causing performance issues.",
+        "UV mapping needs work. Had to redo most of it myself.",
+        "Customer support was slow to respond when I had questions."
+    ];
+
     public static IApplicationBuilder RegisterDatabaseSeeder(this IApplicationBuilder app)
     {
         using var scope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope();
@@ -129,6 +167,8 @@ public static class DatabaseSeederSetup
         SeedUsers(context, userImageSettings, logger).GetAwaiter().GetResult();
         SeedModels(context, modelImageSettings, modelSettings, logger).GetAwaiter().GetResult();
         SeedModelFaqSections(context, logger).GetAwaiter().GetResult();
+        SeedOrdersAndLibrary(context, logger).GetAwaiter().GetResult();
+        SeedModelReviews(context, logger).GetAwaiter().GetResult();
 
         return app;
     }
@@ -157,7 +197,7 @@ public static class DatabaseSeederSetup
         const string defaultPassword = "strinG1!";
         var users = new List<User>();
 
-        for (var i = 0; i < 25; i++)
+        for (var i = 0; i < 100; i++)
         {
             var userUuid = Guid.NewGuid();
             var colorIndex = i % AvatarColors.Length;
@@ -165,18 +205,22 @@ public static class DatabaseSeederSetup
 
             var role = i switch
             {
-                0 or 1 => rootRole,
-                2 or 3 or 4 => adminRole,
+                < 5 => rootRole,
+                < 10 => adminRole,
                 _ => userRole
             };
+
+            var firstName = FirstNames[i % FirstNames.Length];
+            var lastName = LastNames[i % LastNames.Length];
+            var nickname = $"{firstName.ToLower()}{lastName.ToLower()[0]}{i + 1}";
 
             var user = new User
             {
                 Uuid = userUuid,
-                Email = $"user{i + 1}@joymodels.com",
-                NickName = $"user{i + 1}",
-                FirstName = FirstNames[i],
-                LastName = LastNames[i],
+                Email = $"{nickname}@joymodels.com",
+                NickName = nickname,
+                FirstName = firstName,
+                LastName = lastName,
                 PasswordHash = string.Empty,
                 UserRoleUuid = role.Uuid,
                 UserRoleUu = role,
@@ -285,8 +329,8 @@ public static class DatabaseSeederSetup
                 a.AvailabilityName == nameof(ModelAvailabilityEnum.Public));
         var categories = await context.Categories.ToListAsync();
 
-        logger.LogInformation("Generating 60 shared model preview images...");
-        var sharedImageFileNames = GenerateSharedModelImages(modelImageSettings, 60);
+        logger.LogInformation("Generating 100 shared model preview images...");
+        var sharedImageFileNames = GenerateSharedModelImages(modelImageSettings, 100);
 
         var minimalObjContent = GenerateMinimalObjFile();
 
@@ -295,70 +339,81 @@ public static class DatabaseSeederSetup
         var modelPictures = new List<ModelPicture>();
         var usedNames = new HashSet<string>();
 
-        for (var i = 0; i < 60; i++)
+        var modelAssignments = DistributeModelsAmongCreators(adminUsers.Count, 100, 5, 20);
+        var modelIndex = 0;
+
+        for (var creatorIndex = 0; creatorIndex < adminUsers.Count; creatorIndex++)
         {
-            var modelUuid = Guid.NewGuid();
-            var creator = adminUsers[i % adminUsers.Count];
+            var creator = adminUsers[creatorIndex];
+            var modelsForThisCreator = modelAssignments[creatorIndex];
 
-            var modelName = GenerateUniqueModelName(usedNames, i);
-            usedNames.Add(modelName);
+            logger.LogInformation("Creator {Nickname} will create {Count} models.", creator.NickName, modelsForThisCreator);
 
-            var modelFileName = $"model-{Guid.NewGuid()}.obj";
-            var modelFolderPath = Path.Combine(modelSettings.SavePath, "models", modelUuid.ToString());
-            Directory.CreateDirectory(modelFolderPath);
-            var modelFilePath = Path.Combine(modelFolderPath, modelFileName);
-            await File.WriteAllTextAsync(modelFilePath, minimalObjContent);
-
-            var pictureFolderPath = Path.Combine(modelImageSettings.SavePath, "models", modelUuid.ToString());
-            Directory.CreateDirectory(pictureFolderPath);
-
-            var pictureCount = Random.Next(3, 6);
-            var selectedImages = sharedImageFileNames.OrderBy(_ => Random.Next()).Take(pictureCount).ToList();
-
-            foreach (var sourceImageName in selectedImages)
+            for (var j = 0; j < modelsForThisCreator; j++)
             {
-                var sourcePath = Path.Combine(modelImageSettings.SavePath, "seed-images", sourceImageName);
-                var destFileName = $"model-picture-{Guid.NewGuid()}.jpg";
-                var destPath = Path.Combine(pictureFolderPath, destFileName);
-                File.Copy(sourcePath, destPath);
+                var modelUuid = Guid.NewGuid();
 
-                modelPictures.Add(new ModelPicture
+                var modelName = GenerateUniqueModelName(usedNames, modelIndex);
+                usedNames.Add(modelName);
+
+                var modelFileName = $"model-{Guid.NewGuid()}.obj";
+                var modelFolderPath = Path.Combine(modelSettings.SavePath, "models", modelUuid.ToString());
+                Directory.CreateDirectory(modelFolderPath);
+                var modelFilePath = Path.Combine(modelFolderPath, modelFileName);
+                await File.WriteAllTextAsync(modelFilePath, minimalObjContent);
+
+                var pictureFolderPath = Path.Combine(modelImageSettings.SavePath, "models", modelUuid.ToString());
+                Directory.CreateDirectory(pictureFolderPath);
+
+                var pictureCount = Random.Next(3, 6);
+                var selectedImages = sharedImageFileNames.OrderBy(_ => Random.Next()).Take(pictureCount).ToList();
+
+                foreach (var sourceImageName in selectedImages)
                 {
-                    Uuid = Guid.NewGuid(),
-                    ModelUuid = modelUuid,
-                    PictureLocation = destFileName,
-                    CreatedAt = DateTime.UtcNow
-                });
-            }
+                    var sourcePath = Path.Combine(modelImageSettings.SavePath, "seed-images", sourceImageName);
+                    var destFileName = $"model-picture-{Guid.NewGuid()}.jpg";
+                    var destPath = Path.Combine(pictureFolderPath, destFileName);
+                    File.Copy(sourcePath, destPath);
 
-            var model = new Model
-            {
-                Uuid = modelUuid,
-                Name = modelName,
-                UserUuid = creator.Uuid,
-                Description = ModelDescriptions[i % ModelDescriptions.Length],
-                Price = Math.Round((decimal)(Random.NextDouble() * 99 + 1), 2),
-                LocationPath = modelFilePath,
-                ModelAvailabilityUuid = publicAvailability.Uuid,
-                CreatedAt = DateTime.UtcNow.AddDays(-Random.Next(1, 365))
-            };
-            models.Add(model);
+                    modelPictures.Add(new ModelPicture
+                    {
+                        Uuid = Guid.NewGuid(),
+                        ModelUuid = modelUuid,
+                        PictureLocation = destFileName,
+                        CreatedAt = DateTime.UtcNow
+                    });
+                }
 
-            var categoryCount = Random.Next(1, 4);
-            var selectedCategories = categories.OrderBy(_ => Random.Next()).Take(categoryCount).ToList();
-            foreach (var category in selectedCategories)
-            {
-                modelCategories.Add(new ModelCategory
+                var model = new Model
                 {
-                    Uuid = Guid.NewGuid(),
-                    ModelUuid = modelUuid,
-                    CategoryUuid = category.Uuid
-                });
+                    Uuid = modelUuid,
+                    Name = modelName,
+                    UserUuid = creator.Uuid,
+                    Description = ModelDescriptions[modelIndex % ModelDescriptions.Length],
+                    Price = Math.Round((decimal)(Random.NextDouble() * 99 + 1), 2),
+                    LocationPath = modelFilePath,
+                    ModelAvailabilityUuid = publicAvailability.Uuid,
+                    CreatedAt = DateTime.UtcNow.AddDays(-Random.Next(1, 365))
+                };
+                models.Add(model);
+
+                var categoryCount = Random.Next(1, 4);
+                var selectedCategories = categories.OrderBy(_ => Random.Next()).Take(categoryCount).ToList();
+                foreach (var category in selectedCategories)
+                {
+                    modelCategories.Add(new ModelCategory
+                    {
+                        Uuid = Guid.NewGuid(),
+                        ModelUuid = modelUuid,
+                        CategoryUuid = category.Uuid
+                    });
+                }
+
+                creator.UserModelsCount++;
+                modelIndex++;
+
+                logger.LogInformation("Created model: {ModelName} by {Creator}", modelName, creator.NickName);
             }
-
-            creator.UserModelsCount++;
-
-            logger.LogInformation("Created model: {ModelName} by {Creator}", modelName, creator.NickName);
         }
 
         var transaction = await context.Database.BeginTransactionAsync();
@@ -379,6 +434,13 @@ public static class DatabaseSeederSetup
             await transaction.CommitAsync();
 
             logger.LogInformation("Model seeding completed. Created {Count} models.", models.Count);
+
+            var seedImagesFolder = Path.Combine(modelImageSettings.SavePath, "seed-images");
+            if (Directory.Exists(seedImagesFolder))
+            {
+                Directory.Delete(seedImagesFolder, true);
+                logger.LogInformation("Cleaned up seed-images folder.");
+            }
         }
         catch (Exception ex)
         {
@@ -701,6 +763,200 @@ public static class DatabaseSeederSetup
             logger.LogError(ex, "ModelFaqSection seeding failed. Rolling back transaction.");
             throw;
         }
+    }
+
+    #endregion
+
+    #region Orders and Library Seeding
+
+    private static async Task SeedOrdersAndLibrary(JoyModelsDbContext context, ILogger logger)
+    {
+        var existingOrdersCount = await context.Orders.CountAsync();
+        if (existingOrdersCount > 0)
+        {
+            logger.LogInformation("Database already contains {Count} orders. Skipping orders seeding.",
+                existingOrdersCount);
+            return;
+        }
+
+        logger.LogInformation("Starting Orders and Library seeding...");
+
+        var regularUsers = await context.Users
+            .Include(u => u.UserRoleUu)
+            .Where(u => u.UserRoleUu.RoleName == nameof(UserRoleEnum.User))
+            .ToListAsync();
+
+        var models = await context.Models.ToListAsync();
+
+        var orders = new List<Order>();
+        var libraryEntries = new List<Library>();
+
+        foreach (var user in regularUsers)
+        {
+            var purchaseCount = Random.Next(3, 8);
+            var availableModels = models.Where(m => m.UserUuid != user.Uuid).ToList();
+            var selectedModels = availableModels.OrderBy(_ => Random.Next()).Take(purchaseCount).ToList();
+
+            foreach (var model in selectedModels)
+            {
+                var orderUuid = Guid.NewGuid();
+                var purchaseDate = DateTime.UtcNow.AddDays(-Random.Next(1, 180));
+
+                var order = new Order
+                {
+                    Uuid = orderUuid,
+                    UserUuid = user.Uuid,
+                    ModelUuid = model.Uuid,
+                    Amount = model.Price,
+                    Status = nameof(OrderStatus.Completed),
+                    StripePaymentIntentId = $"seed_pi_{Guid.NewGuid()}",
+                    CreatedAt = purchaseDate,
+                    UpdatedAt = purchaseDate
+                };
+                orders.Add(order);
+
+                var library = new Library
+                {
+                    Uuid = Guid.NewGuid(),
+                    UserUuid = user.Uuid,
+                    ModelUuid = model.Uuid,
+                    OrderUuid = orderUuid,
+                    AcquiredAt = purchaseDate
+                };
+                libraryEntries.Add(library);
+            }
+
+            logger.LogInformation("User {Nickname} purchased {Count} models.", user.NickName, purchaseCount);
+        }
+
+        var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            await context.Orders.AddRangeAsync(orders);
+            await context.SaveChangesAsync();
+
+            await context.Libraries.AddRangeAsync(libraryEntries);
+            await context.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+
+            logger.LogInformation(
+                "Orders and Library seeding completed. Created {Orders} orders and {Libraries} library entries.",
+                orders.Count, libraryEntries.Count);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            logger.LogError(ex, "Orders and Library seeding failed. Rolling back transaction.");
+            throw;
+        }
+    }
+
+    #endregion
+
+    #region ModelReviews Seeding
+
+    private static async Task SeedModelReviews(JoyModelsDbContext context, ILogger logger)
+    {
+        var existingReviewsCount = await context.ModelReviews.CountAsync();
+        if (existingReviewsCount > 0)
+        {
+            logger.LogInformation("Database already contains {Count} reviews. Skipping reviews seeding.",
+                existingReviewsCount);
+            return;
+        }
+
+        logger.LogInformation("Starting ModelReviews seeding...");
+
+        var libraryEntries = await context.Libraries
+            .Include(l => l.User)
+            .Include(l => l.Model)
+            .ToListAsync();
+
+        var positiveReviewType = await context.ModelReviewTypes
+            .FirstAsync(r => r.ReviewName == nameof(ModelReviewEnum.Positive));
+        var negativeReviewType = await context.ModelReviewTypes
+            .FirstAsync(r => r.ReviewName == nameof(ModelReviewEnum.Negative));
+
+        var reviews = new List<ModelReview>();
+        var reviewedPairs = new HashSet<(Guid UserUuid, Guid ModelUuid)>();
+
+        foreach (var library in libraryEntries)
+        {
+            if (library.Model.UserUuid == library.UserUuid)
+                continue;
+
+            if (reviewedPairs.Contains((library.UserUuid, library.ModelUuid)))
+                continue;
+
+            if (Random.NextDouble() > 0.75)
+                continue;
+
+            var isPositive = Random.NextDouble() > 0.2;
+            var reviewType = isPositive ? positiveReviewType : negativeReviewType;
+            var reviewTexts = isPositive ? PositiveReviewTexts : NegativeReviewTexts;
+
+            var review = new ModelReview
+            {
+                Uuid = Guid.NewGuid(),
+                ModelUuid = library.ModelUuid,
+                UserUuid = library.UserUuid,
+                ReviewTypeUuid = reviewType.Uuid,
+                ReviewText = reviewTexts[Random.Next(reviewTexts.Length)],
+                CreatedAt = library.AcquiredAt.AddDays(Random.Next(1, 30))
+            };
+            reviews.Add(review);
+            reviewedPairs.Add((library.UserUuid, library.ModelUuid));
+        }
+
+        var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            await context.ModelReviews.AddRangeAsync(reviews);
+            await context.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+
+            var positiveCount = reviews.Count(r => r.ReviewTypeUuid == positiveReviewType.Uuid);
+            var negativeCount = reviews.Count(r => r.ReviewTypeUuid == negativeReviewType.Uuid);
+            logger.LogInformation(
+                "ModelReviews seeding completed. Created {Total} reviews ({Positive} positive, {Negative} negative).",
+                reviews.Count, positiveCount, negativeCount);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            logger.LogError(ex, "ModelReviews seeding failed. Rolling back transaction.");
+            throw;
+        }
+    }
+
+    #endregion
+
+    #region Distribution Utilities
+
+    private static List<int> DistributeModelsAmongCreators(int creatorCount, int totalModels, int minPerCreator,
+        int maxPerCreator)
+    {
+        var assignments = new List<int>();
+
+        for (var i = 0; i < creatorCount; i++)
+            assignments.Add(minPerCreator);
+
+        var remaining = totalModels - (creatorCount * minPerCreator);
+
+        while (remaining > 0)
+        {
+            var creatorIndex = Random.Next(creatorCount);
+
+            if (assignments[creatorIndex] < maxPerCreator)
+            {
+                assignments[creatorIndex]++;
+                remaining--;
+            }
+        }
+
+        return assignments;
     }
 
     #endregion
