@@ -74,6 +74,49 @@ public static class DatabaseSeederSetup
         "Perfect for architectural visualization and product rendering."
     ];
 
+    private static readonly string[] FaqQuestions =
+    [
+        "What software was used to create this model?",
+        "Is this model rigged for animation?",
+        "What file formats are included in the download?",
+        "Can I use this model for commercial projects?",
+        "What is the polygon count of this model?",
+        "Are textures included with this model?",
+        "Is this model suitable for 3D printing?",
+        "Can you provide a lower poly version?",
+        "What rendering engine was used for the preview images?",
+        "Does this model include UV mapping?",
+        "Are there any known issues with the model?",
+        "Can I request modifications to this model?",
+        "What scale is this model created in?",
+        "Is the model optimized for game engines?",
+        "Do you offer support after purchase?"
+    ];
+
+    private static readonly string[] FaqAnswers =
+    [
+        "This model was created using Blender and ZBrush for high-detail sculpting.",
+        "Yes, the model is fully rigged and ready for animation in most 3D software.",
+        "The download includes OBJ, FBX, and GLTF formats for maximum compatibility.",
+        "Yes, this model comes with a commercial license for use in any project.",
+        "The model has approximately 50,000 polygons in the high-poly version.",
+        "Yes, all textures are included in 4K resolution (diffuse, normal, roughness).",
+        "The model can be 3D printed but may require some cleanup for best results.",
+        "I can provide a lower poly version upon request, just send me a message.",
+        "The preview images were rendered in Cycles with HDRI lighting.",
+        "Yes, the model includes properly unwrapped UV maps for easy texturing.",
+        "No known issues. If you find any problems, please let me know!",
+        "Yes, I offer custom modifications for an additional fee. Contact me for details.",
+        "The model is created at real-world scale (1 unit = 1 meter).",
+        "Yes, it's optimized for Unity and Unreal Engine with LOD support.",
+        "Absolutely! I provide support for any issues you might encounter.",
+        "Thank you for your interest! Feel free to reach out with any questions.",
+        "Great question! The answer depends on your specific use case.",
+        "I appreciate your feedback and will consider this for future updates.",
+        "Please check the product description for more detailed specifications.",
+        "I'm happy to help! Let me know if you need anything else."
+    ];
+
     public static IApplicationBuilder RegisterDatabaseSeeder(this IApplicationBuilder app)
     {
         using var scope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope();
@@ -85,6 +128,7 @@ public static class DatabaseSeederSetup
 
         SeedUsers(context, userImageSettings, logger).GetAwaiter().GetResult();
         SeedModels(context, modelImageSettings, modelSettings, logger).GetAwaiter().GetResult();
+        SeedModelFaqSections(context, logger).GetAwaiter().GetResult();
 
         return app;
     }
@@ -561,6 +605,102 @@ public static class DatabaseSeederSetup
                f 2/1/5 6/2/5 7/3/5 3/4/5
                f 1/1/6 4/2/6 8/3/6 5/4/6
                """;
+    }
+
+    #endregion
+
+    #region ModelFaqSection Seeding
+
+    private static async Task SeedModelFaqSections(JoyModelsDbContext context, ILogger logger)
+    {
+        var existingFaqCount = await context.ModelFaqSections.CountAsync();
+        if (existingFaqCount > 0)
+        {
+            logger.LogInformation("Database already contains {Count} FAQ entries. Skipping FAQ seeding.",
+                existingFaqCount);
+            return;
+        }
+
+        logger.LogInformation("Starting ModelFaqSection seeding...");
+
+        var models = await context.Models.ToListAsync();
+        var allUsers = await context.Users.ToListAsync();
+
+        var faqSections = new List<ModelFaqSection>();
+
+        foreach (var model in models)
+        {
+            var modelOwner = allUsers.First(u => u.Uuid == model.UserUuid);
+            var otherUsers = allUsers.Where(u => u.Uuid != model.UserUuid).ToList();
+
+            var questionCount = Random.Next(5, 9);
+            var selectedQuestions = FaqQuestions.OrderBy(_ => Random.Next()).Take(questionCount).ToList();
+
+            foreach (var questionText in selectedQuestions)
+            {
+                var asker = otherUsers[Random.Next(otherUsers.Count)];
+                var questionUuid = Guid.NewGuid();
+                var questionDate = model.CreatedAt.AddDays(Random.Next(1, 30));
+
+                var question = new ModelFaqSection
+                {
+                    Uuid = questionUuid,
+                    ParentMessageUuid = null,
+                    ModelUuid = model.Uuid,
+                    UserUuid = asker.Uuid,
+                    MessageText = questionText,
+                    CreatedAt = questionDate
+                };
+                faqSections.Add(question);
+
+                var answerCount = Random.Next(2, 4);
+                var lastAnswerDate = questionDate;
+
+                for (var i = 0; i < answerCount; i++)
+                {
+                    var isOwnerAnswer = i == 0 || Random.NextDouble() > 0.5;
+                    var answerer = isOwnerAnswer ? modelOwner : otherUsers[Random.Next(otherUsers.Count)];
+
+                    lastAnswerDate = lastAnswerDate.AddHours(Random.Next(1, 48));
+
+                    var answer = new ModelFaqSection
+                    {
+                        Uuid = Guid.NewGuid(),
+                        ParentMessageUuid = questionUuid,
+                        ModelUuid = model.Uuid,
+                        UserUuid = answerer.Uuid,
+                        MessageText = FaqAnswers[Random.Next(FaqAnswers.Length)],
+                        CreatedAt = lastAnswerDate
+                    };
+                    faqSections.Add(answer);
+                }
+            }
+
+            logger.LogInformation("Created {Count} FAQ entries for model: {ModelName}",
+                questionCount + faqSections.Count(f => f.ParentMessageUuid != null && f.ModelUuid == model.Uuid),
+                model.Name);
+        }
+
+        var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            await context.ModelFaqSections.AddRangeAsync(faqSections);
+            await context.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+
+            var totalQuestions = faqSections.Count(f => f.ParentMessageUuid == null);
+            var totalAnswers = faqSections.Count(f => f.ParentMessageUuid != null);
+            logger.LogInformation(
+                "ModelFaqSection seeding completed. Created {Questions} questions and {Answers} answers.",
+                totalQuestions, totalAnswers);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            logger.LogError(ex, "ModelFaqSection seeding failed. Rolling back transaction.");
+            throw;
+        }
     }
 
     #endregion
