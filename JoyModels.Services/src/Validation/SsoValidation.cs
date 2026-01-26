@@ -83,10 +83,10 @@ public static class SsoValidation
     public static void ValidateUserSearchArguments(this SsoSearchRequest request)
     {
         if (!string.IsNullOrWhiteSpace(request.Nickname))
-            RegularExpressionValidation.ValidateNickname(request.Nickname);
+            RegularExpressionValidation.ValidateText(request.Nickname);
 
         if (!string.IsNullOrWhiteSpace(request.Email))
-            RegularExpressionValidation.ValidateEmail(request.Email);
+            RegularExpressionValidation.ValidateText(request.Email);
     }
 
     public static void ValidateUserPasswordChangeRequestArguments(

@@ -11,7 +11,10 @@ public static class CommunityPostReviewTypeValidation
     }
 
     public static void ValidateCommunityPostReviewTypeSearchArguments(this CommunityPostReviewTypeSearchRequest request)
-        => ValidatePostTypeName(request.CommunityPostReviewTypeName!);
+    {
+        if (!string.IsNullOrWhiteSpace(request.CommunityPostReviewTypeName))
+            RegularExpressionValidation.ValidateText(request.CommunityPostReviewTypeName);
+    }
 
     public static void ValidateCommunityPostReviewTypeCreateArguments(this CommunityPostReviewTypeCreateRequest request)
         => ValidatePostTypeName(request.CommunityPostReviewTypeName);
