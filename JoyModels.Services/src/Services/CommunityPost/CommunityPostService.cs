@@ -57,7 +57,7 @@ public class CommunityPostService(
 
     public async Task<PaginationResponse<CommunityPostResponse>> Search(CommunityPostSearchRequest request)
     {
-        request.ValidateCommunityPostSearchArguments();
+        request.ValidateCommunityPostSearchArguments(userAuthValidation);
 
         var communityPostEntities = await request.SearchCommunityPostEntities(context);
 
