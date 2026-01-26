@@ -44,7 +44,7 @@ public class ModelService(
 
     public async Task<PictureResponse> GetModelPictures(Guid modelUuid, string modelPictureFileName)
     {
-        await GetByUuid(new ModelGetByUuidRequest { ModelUuid = modelUuid });
+        await GetByUuidWithAllAvailabilities(modelUuid);
 
         var fileName = Uri.UnescapeDataString(modelPictureFileName);
 
