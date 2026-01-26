@@ -23,6 +23,27 @@ public static class DatabaseSeederSetup
         "#3498db", "#e74c3c", "#2ecc71", "#9b59b6", "#f39c12", "#1abc9c"
     ];
 
+    private static readonly
+        List<(Guid Uuid, string Email, string Nickname, string FirstName, string LastName, string Role)> FixedUsers =
+        [
+            (Guid.Parse("a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d"), "root1@joymodels.com", "root1", "Root", "One",
+                nameof(UserRoleEnum.Root)),
+            (Guid.Parse("b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e"), "root2@joymodels.com", "root2", "Root", "Two",
+                nameof(UserRoleEnum.Root)),
+            (Guid.Parse("c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f"), "admin1@joymodels.com", "admin1", "Admin", "One",
+                nameof(UserRoleEnum.Admin)),
+            (Guid.Parse("d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a"), "admin2@joymodels.com", "admin2", "Admin", "Two",
+                nameof(UserRoleEnum.Admin)),
+            (Guid.Parse("e5f6a7b8-c9d0-4e1f-2a3b-4c5d6e7f8a9b"), "user1@joymodels.com", "user1", "User", "One",
+                nameof(UserRoleEnum.User)),
+            (Guid.Parse("f6a7b8c9-d0e1-4f2a-3b4c-5d6e7f8a9b0c"), "user2@joymodels.com", "user2", "User", "Two",
+                nameof(UserRoleEnum.User)),
+            (Guid.Parse("a7b8c9d0-e1f2-4a3b-4c5d-6e7f8a9b0c1d"), "user3@joymodels.com", "user3", "User", "Three",
+                nameof(UserRoleEnum.User)),
+            (Guid.Parse("b8c9d0e1-f2a3-4b4c-5d6e-7f8a9b0c1d2e"), "user4@joymodels.com", "user4", "User", "Four",
+                nameof(UserRoleEnum.User))
+        ];
+
     private static readonly string[] ModelColors =
     [
         "#1a1a2e", "#16213e", "#0f3460", "#1b262c", "#2d4059", "#222831",
@@ -306,16 +327,57 @@ public static class DatabaseSeederSetup
         var users = new List<User>();
         var createdFolders = new List<string>();
 
-        for (var i = 0; i < 100; i++)
+        foreach (var (uuid, email, nickname, firstName, lastName, roleName) in FixedUsers)
+        {
+            var role = roleName switch
+            {
+                nameof(UserRoleEnum.Root) => rootRole,
+                nameof(UserRoleEnum.Admin) => adminRole,
+                _ => userRole
+            };
+
+            var colorIndex = users.Count % AvatarColors.Length;
+            var pictureFileName = $"avatar-{uuid}.jpg";
+
+            var user = new User
+            {
+                Uuid = uuid,
+                Email = email,
+                NickName = nickname,
+                FirstName = firstName,
+                LastName = lastName,
+                PasswordHash = string.Empty,
+                UserRoleUuid = role.Uuid,
+                UserRoleUu = role,
+                CreatedAt = DateTime.UtcNow,
+                UserPictureLocation = pictureFileName,
+                UserFollowerCount = 0,
+                UserFollowingCount = 0,
+                UserLikedModelsCount = 0,
+                UserModelsCount = 0
+            };
+
+            user.PasswordHash = SsoPasswordHasher.Hash(user, defaultPassword);
+
+            var userFolder = Path.Combine(userImageSettings.SavePath, "users", uuid.ToString());
+            createdFolders.Add(userFolder);
+            GenerateAndSaveAvatar(uuid, pictureFileName, AvatarColors[colorIndex], userImageSettings);
+
+            users.Add(user);
+
+            logger.LogInformation("Created fixed user: {Nickname} ({Role})", user.NickName, role.RoleName);
+        }
+
+        for (var i = 0; i < 92; i++)
         {
             var userUuid = Guid.NewGuid();
-            var colorIndex = i % AvatarColors.Length;
+            var colorIndex = (i + FixedUsers.Count) % AvatarColors.Length;
             var pictureFileName = $"avatar-{userUuid}.jpg";
 
             var role = i switch
             {
-                < 5 => rootRole,
-                < 10 => adminRole,
+                < 3 => rootRole,
+                < 6 => adminRole,
                 _ => userRole
             };
 
