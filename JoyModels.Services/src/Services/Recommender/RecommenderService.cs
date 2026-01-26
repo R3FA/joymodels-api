@@ -149,9 +149,20 @@ public class RecommenderService(IDbContextFactory<JoyModelsDbContext> contextFac
         Dictionary<Guid, uint> modelIdMap)
     {
         var interactions = new List<ModelInteractionRequest>();
+        var interactionSet = new HashSet<(uint UserId, uint ModelId)>();
 
-        uint userCounter = 1;
-        uint modelCounter = 1;
+        uint userCounter = 0;
+        uint modelCounter = 0;
+
+        var allModelUuids = await context.Models
+            .Where(m => m.ModelAvailabilityUu.AvailabilityName == nameof(ModelAvailabilityEnum.Public))
+            .Select(m => m.Uuid)
+            .ToListAsync();
+
+        foreach (var modelUuid in allModelUuids)
+        {
+            GetOrCreateId(modelIdMap, modelUuid, ref modelCounter);
+        }
 
         var purchases = await context.Orders
             .Where(o => o.Status == nameof(OrderStatus.Completed))
@@ -163,12 +174,15 @@ public class RecommenderService(IDbContextFactory<JoyModelsDbContext> contextFac
             var userId = GetOrCreateId(userIdMap, purchase.UserUuid, ref userCounter);
             var modelId = GetOrCreateId(modelIdMap, purchase.ModelUuid, ref modelCounter);
 
-            interactions.Add(new ModelInteractionRequest
+            if (interactionSet.Add((userId, modelId)))
             {
-                UserId = userId,
-                ModelId = modelId,
-                Score = 1.0f
-            });
+                interactions.Add(new ModelInteractionRequest
+                {
+                    UserId = userId,
+                    ModelId = modelId,
+                    Score = 1.0f
+                });
+            }
         }
 
         var likes = await context.UserModelLikes
@@ -180,14 +194,13 @@ public class RecommenderService(IDbContextFactory<JoyModelsDbContext> contextFac
             var userId = GetOrCreateId(userIdMap, like.UserUuid, ref userCounter);
             var modelId = GetOrCreateId(modelIdMap, like.ModelUuid, ref modelCounter);
 
-            var exists = interactions.Any(i => i.UserId == userId && i.ModelId == modelId);
-            if (!exists)
+            if (interactionSet.Add((userId, modelId)))
             {
                 interactions.Add(new ModelInteractionRequest
                 {
                     UserId = userId,
                     ModelId = modelId,
-                    Score = 0.6f
+                    Score = 0.7f
                 });
             }
         }
@@ -201,15 +214,46 @@ public class RecommenderService(IDbContextFactory<JoyModelsDbContext> contextFac
             var userId = GetOrCreateId(userIdMap, cartItem.UserUuid, ref userCounter);
             var modelId = GetOrCreateId(modelIdMap, cartItem.ModelUuid, ref modelCounter);
 
-            var exists = interactions.Any(i => i.UserId == userId && i.ModelId == modelId);
-            if (!exists)
+            if (interactionSet.Add((userId, modelId)))
             {
                 interactions.Add(new ModelInteractionRequest
                 {
                     UserId = userId,
                     ModelId = modelId,
-                    Score = 0.3f
+                    Score = 0.4f
                 });
+            }
+        }
+
+        var random = new Random(42);
+        var userUuids = userIdMap.Keys.ToList();
+        var modelUuids = modelIdMap.Keys.ToList();
+
+        foreach (var userUuid in userUuids)
+        {
+            var userId = userIdMap[userUuid];
+            var negativeCount = 0;
+            var maxNegatives = Math.Min(10, modelUuids.Count / 4);
+
+            var shuffledModels = modelUuids.OrderBy(_ => random.Next()).ToList();
+
+            foreach (var modelUuid in shuffledModels)
+            {
+                if (negativeCount >= maxNegatives)
+                    break;
+
+                var modelId = modelIdMap[modelUuid];
+
+                if (interactionSet.Add((userId, modelId)))
+                {
+                    interactions.Add(new ModelInteractionRequest
+                    {
+                        UserId = userId,
+                        ModelId = modelId,
+                        Score = 0.1f
+                    });
+                    negativeCount++;
+                }
             }
         }
 

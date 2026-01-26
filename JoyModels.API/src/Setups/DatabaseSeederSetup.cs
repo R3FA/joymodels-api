@@ -167,7 +167,9 @@ public static class DatabaseSeederSetup
         SeedUsers(context, userImageSettings, logger).GetAwaiter().GetResult();
         SeedModels(context, modelImageSettings, modelSettings, logger).GetAwaiter().GetResult();
         SeedModelFaqSections(context, logger).GetAwaiter().GetResult();
+        SeedUserModelLikes(context, logger).GetAwaiter().GetResult();
         SeedOrdersAndLibrary(context, logger).GetAwaiter().GetResult();
+        SeedShoppingCart(context, logger).GetAwaiter().GetResult();
         SeedModelReviews(context, logger).GetAwaiter().GetResult();
 
         return app;
@@ -347,7 +349,8 @@ public static class DatabaseSeederSetup
             var creator = adminUsers[creatorIndex];
             var modelsForThisCreator = modelAssignments[creatorIndex];
 
-            logger.LogInformation("Creator {Nickname} will create {Count} models.", creator.NickName, modelsForThisCreator);
+            logger.LogInformation("Creator {Nickname} will create {Count} models.", creator.NickName,
+                modelsForThisCreator);
 
             for (var j = 0; j < modelsForThisCreator; j++)
             {
@@ -393,7 +396,7 @@ public static class DatabaseSeederSetup
                     Price = Math.Round((decimal)(Random.NextDouble() * 99 + 1), 2),
                     LocationPath = modelFilePath,
                     ModelAvailabilityUuid = publicAvailability.Uuid,
-                    CreatedAt = DateTime.UtcNow.AddDays(-Random.Next(1, 365))
+                    CreatedAt = DateTime.UtcNow.AddDays(-365 + modelIndex)
                 };
                 models.Add(model);
 
@@ -767,6 +770,191 @@ public static class DatabaseSeederSetup
 
     #endregion
 
+    #region UserModelLikes Seeding
+
+    private static async Task SeedUserModelLikes(JoyModelsDbContext context, ILogger logger)
+    {
+        var existingLikesCount = await context.UserModelLikes.CountAsync();
+        if (existingLikesCount > 0)
+        {
+            logger.LogInformation("Database already contains {Count} likes. Skipping likes seeding.",
+                existingLikesCount);
+            return;
+        }
+
+        logger.LogInformation("Starting UserModelLikes seeding...");
+
+        var allUsers = await context.Users.OrderBy(u => u.CreatedAt).ToListAsync();
+        var models = await context.Models.OrderBy(m => m.CreatedAt).ToListAsync();
+
+        var likes = new List<UserModelLike>();
+        var likedPairs = new HashSet<(Guid UserUuid, Guid ModelUuid)>();
+
+        const int groupCount = 5;
+        var modelsPerGroup = models.Count / groupCount;
+        var usersPerGroup = allUsers.Count / groupCount;
+
+        for (var userIndex = 0; userIndex < allUsers.Count; userIndex++)
+        {
+            var user = allUsers[userIndex];
+            var userGroup = userIndex / usersPerGroup;
+            if (userGroup >= groupCount) userGroup = groupCount - 1;
+
+            for (var modelIndex = 0; modelIndex < models.Count; modelIndex++)
+            {
+                var model = models[modelIndex];
+                if (model.UserUuid == user.Uuid)
+                    continue;
+
+                var modelGroup = modelIndex / modelsPerGroup;
+                if (modelGroup >= groupCount) modelGroup = groupCount - 1;
+
+                double likeChance;
+                var groupDistance = Math.Abs(userGroup - modelGroup);
+
+                likeChance = groupDistance switch
+                {
+                    0 => 0.8,
+                    1 => 0.4,
+                    2 => 0.15,
+                    _ => 0.05
+                };
+
+                if (Random.NextDouble() < likeChance)
+                {
+                    if (likedPairs.Add((user.Uuid, model.Uuid)))
+                    {
+                        likes.Add(new UserModelLike
+                        {
+                            Uuid = Guid.NewGuid(),
+                            UserUuid = user.Uuid,
+                            ModelUuid = model.Uuid
+                        });
+                    }
+                }
+            }
+        }
+
+        var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            await context.UserModelLikes.AddRangeAsync(likes);
+            await context.SaveChangesAsync();
+
+            foreach (var userGroup in likes.GroupBy(l => l.UserUuid))
+            {
+                var user = allUsers.First(u => u.Uuid == userGroup.Key);
+                user.UserLikedModelsCount += userGroup.Count();
+            }
+
+            context.Users.UpdateRange(allUsers);
+            await context.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+
+            logger.LogInformation("UserModelLikes seeding completed. Created {Count} likes.", likes.Count);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            logger.LogError(ex, "UserModelLikes seeding failed. Rolling back transaction.");
+            throw;
+        }
+    }
+
+    #endregion
+
+    #region ShoppingCart Seeding
+
+    private static async Task SeedShoppingCart(JoyModelsDbContext context, ILogger logger)
+    {
+        var existingCartCount = await context.ShoppingCartItems.CountAsync();
+        if (existingCartCount > 0)
+        {
+            logger.LogInformation("Database already contains {Count} cart items. Skipping cart seeding.",
+                existingCartCount);
+            return;
+        }
+
+        logger.LogInformation("Starting ShoppingCart seeding...");
+
+        var allUsers = await context.Users.OrderBy(u => u.CreatedAt).ToListAsync();
+        var models = await context.Models.OrderBy(m => m.CreatedAt).ToListAsync();
+
+        var ownedModels = await context.Libraries
+            .Select(l => new { l.UserUuid, l.ModelUuid })
+            .ToListAsync();
+        var ownedSet = ownedModels.ToHashSet();
+
+        var cartItems = new List<ShoppingCart>();
+        var cartPairs = new HashSet<(Guid UserUuid, Guid ModelUuid)>();
+
+        const int groupCount = 5;
+        var modelsPerGroup = models.Count / groupCount;
+        var usersPerGroup = allUsers.Count / groupCount;
+
+        for (var userIndex = 0; userIndex < allUsers.Count; userIndex++)
+        {
+            var user = allUsers[userIndex];
+            var userGroup = userIndex / usersPerGroup;
+            if (userGroup >= groupCount) userGroup = groupCount - 1;
+
+            for (var modelIndex = 0; modelIndex < models.Count; modelIndex++)
+            {
+                var model = models[modelIndex];
+                if (model.UserUuid == user.Uuid)
+                    continue;
+
+                if (ownedSet.Contains(new { UserUuid = user.Uuid, ModelUuid = model.Uuid }))
+                    continue;
+
+                var modelGroup = modelIndex / modelsPerGroup;
+                if (modelGroup >= groupCount) modelGroup = groupCount - 1;
+
+                var groupDistance = Math.Abs(userGroup - modelGroup);
+
+                double cartChance = groupDistance switch
+                {
+                    0 => 0.08,
+                    1 => 0.03,
+                    _ => 0.005
+                };
+
+                if (Random.NextDouble() < cartChance)
+                {
+                    if (cartPairs.Add((user.Uuid, model.Uuid)))
+                    {
+                        cartItems.Add(new ShoppingCart
+                        {
+                            Uuid = Guid.NewGuid(),
+                            UserUuid = user.Uuid,
+                            ModelUuid = model.Uuid,
+                            CreatedAt = DateTime.UtcNow.AddDays(-Random.Next(1, 30))
+                        });
+                    }
+                }
+            }
+        }
+
+        var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            await context.ShoppingCartItems.AddRangeAsync(cartItems);
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            logger.LogInformation("ShoppingCart seeding completed. Created {Count} cart items.", cartItems.Count);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            logger.LogError(ex, "ShoppingCart seeding failed. Rolling back transaction.");
+            throw;
+        }
+    }
+
+    #endregion
+
     #region Orders and Library Seeding
 
     private static async Task SeedOrdersAndLibrary(JoyModelsDbContext context, ILogger logger)
@@ -781,52 +969,71 @@ public static class DatabaseSeederSetup
 
         logger.LogInformation("Starting Orders and Library seeding...");
 
-        var regularUsers = await context.Users
-            .Include(u => u.UserRoleUu)
-            .Where(u => u.UserRoleUu.RoleName == nameof(UserRoleEnum.User))
-            .ToListAsync();
-
-        var models = await context.Models.ToListAsync();
+        var allUsers = await context.Users.OrderBy(u => u.CreatedAt).ToListAsync();
+        var models = await context.Models.OrderBy(m => m.CreatedAt).ToListAsync();
 
         var orders = new List<Order>();
         var libraryEntries = new List<Library>();
+        var purchasedPairs = new HashSet<(Guid UserUuid, Guid ModelUuid)>();
 
-        foreach (var user in regularUsers)
+        const int groupCount = 5;
+        var modelsPerGroup = models.Count / groupCount;
+        var usersPerGroup = allUsers.Count / groupCount;
+
+        for (var userIndex = 0; userIndex < allUsers.Count; userIndex++)
         {
-            var purchaseCount = Random.Next(3, 8);
-            var availableModels = models.Where(m => m.UserUuid != user.Uuid).ToList();
-            var selectedModels = availableModels.OrderBy(_ => Random.Next()).Take(purchaseCount).ToList();
+            var user = allUsers[userIndex];
+            var userGroup = userIndex / usersPerGroup;
+            if (userGroup >= groupCount) userGroup = groupCount - 1;
 
-            foreach (var model in selectedModels)
+            for (var modelIndex = 0; modelIndex < models.Count; modelIndex++)
             {
-                var orderUuid = Guid.NewGuid();
-                var purchaseDate = DateTime.UtcNow.AddDays(-Random.Next(1, 180));
+                var model = models[modelIndex];
+                if (model.UserUuid == user.Uuid)
+                    continue;
 
-                var order = new Order
-                {
-                    Uuid = orderUuid,
-                    UserUuid = user.Uuid,
-                    ModelUuid = model.Uuid,
-                    Amount = model.Price,
-                    Status = nameof(OrderStatus.Completed),
-                    StripePaymentIntentId = $"seed_pi_{Guid.NewGuid()}",
-                    CreatedAt = purchaseDate,
-                    UpdatedAt = purchaseDate
-                };
-                orders.Add(order);
+                var modelGroup = modelIndex / modelsPerGroup;
+                if (modelGroup >= groupCount) modelGroup = groupCount - 1;
 
-                var library = new Library
+                var groupDistance = Math.Abs(userGroup - modelGroup);
+
+                double purchaseChance = groupDistance switch
                 {
-                    Uuid = Guid.NewGuid(),
-                    UserUuid = user.Uuid,
-                    ModelUuid = model.Uuid,
-                    OrderUuid = orderUuid,
-                    AcquiredAt = purchaseDate
+                    0 => 0.25,
+                    1 => 0.10,
+                    _ => 0.02
                 };
-                libraryEntries.Add(library);
+
+                if (Random.NextDouble() < purchaseChance)
+                {
+                    if (purchasedPairs.Add((user.Uuid, model.Uuid)))
+                    {
+                        var orderUuid = Guid.NewGuid();
+                        var purchaseDate = DateTime.UtcNow.AddDays(-Random.Next(1, 180));
+
+                        orders.Add(new Order
+                        {
+                            Uuid = orderUuid,
+                            UserUuid = user.Uuid,
+                            ModelUuid = model.Uuid,
+                            Amount = model.Price,
+                            Status = nameof(OrderStatus.Completed),
+                            StripePaymentIntentId = $"seed_pi_{Guid.NewGuid()}",
+                            CreatedAt = purchaseDate,
+                            UpdatedAt = purchaseDate
+                        });
+
+                        libraryEntries.Add(new Library
+                        {
+                            Uuid = Guid.NewGuid(),
+                            UserUuid = user.Uuid,
+                            ModelUuid = model.Uuid,
+                            OrderUuid = orderUuid,
+                            AcquiredAt = purchaseDate
+                        });
+                    }
+                }
             }
-
-            logger.LogInformation("User {Nickname} purchased {Count} models.", user.NickName, purchaseCount);
         }
 
         var transaction = await context.Database.BeginTransactionAsync();
