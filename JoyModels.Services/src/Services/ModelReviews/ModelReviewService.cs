@@ -32,7 +32,8 @@ public class ModelReviewService(
 
     public async Task<PaginationResponse<ModelReviewResponse>> Search(ModelReviewSearchRequest request)
     {
-        var modelReviewEntities = await ModelReviewHelperMethods.SearchModelReviewEntities(context, request);
+        var modelReviewEntities =
+            await ModelReviewHelperMethods.SearchModelReviewEntities(context, request, userAuthValidation);
 
         return mapper.Map<PaginationResponse<ModelReviewResponse>>(modelReviewEntities);
     }

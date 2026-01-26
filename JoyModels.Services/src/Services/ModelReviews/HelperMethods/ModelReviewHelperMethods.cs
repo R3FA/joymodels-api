@@ -33,7 +33,7 @@ public static class ModelReviewHelperMethods
     }
 
     public static async Task<PaginationBase<ModelReview>> SearchModelReviewEntities(JoyModelsDbContext context,
-        ModelReviewSearchRequest request)
+        ModelReviewSearchRequest request, UserAuthValidation userAuthValidation)
     {
         var baseQuery = context.ModelReviews
             .AsNoTracking()
@@ -49,6 +49,13 @@ public static class ModelReviewHelperMethods
             .Include(x => x.ReviewTypeUu)
             .Where(x => x.ModelUuid == request.ModelUuid)
             .AsQueryable();
+
+        baseQuery = request.IsMyReviewFiltered switch
+        {
+            true => baseQuery
+                .Where(x => x.UserUuid == userAuthValidation.GetUserClaimUuid()),
+            _ => baseQuery
+        };
 
         baseQuery = request.ModelReviewType.ToString() switch
         {
