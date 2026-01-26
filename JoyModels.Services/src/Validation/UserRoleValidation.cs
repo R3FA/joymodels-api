@@ -11,7 +11,10 @@ public static class UserRoleValidation
     }
 
     public static void ValidateUserRoleSearchArguments(this UserRoleSearchRequest request)
-        => ValidateRoleName(request.RoleName!);
+    {
+        if (!string.IsNullOrWhiteSpace(request.RoleName))
+            RegularExpressionValidation.ValidateText(request.RoleName);
+    }
 
     public static void ValidateUserRoleCreateArguments(this UserRoleCreateRequest request)
         => ValidateRoleName(request.RoleName);

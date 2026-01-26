@@ -56,6 +56,8 @@ public class ModelReviewService(
         request.ValidateModelReviewCreateArguments(modelResponse, userAuthValidation.GetUserClaimUuid());
         await ModelReviewValidation.ValidateDuplicatedModelReviews(context, modelResponse.Uuid,
             userAuthValidation.GetUserClaimUuid());
+        await ModelReviewValidation.ValidateModelOwnership(context, modelResponse.Uuid,
+            userAuthValidation.GetUserClaimUuid());
 
         var modelReviewEntity = mapper.Map<ModelReview>(request);
         modelReviewEntity.UserUuid = userAuthValidation.GetUserClaimUuid();

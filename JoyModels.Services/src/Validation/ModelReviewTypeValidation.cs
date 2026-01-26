@@ -11,7 +11,10 @@ public static class ModelReviewTypeValidation
     }
 
     public static void ValidateModelReviewTypeSearchArguments(this ModelReviewTypeSearchRequest request)
-        => ValidateModelReviewTypeName(request.ModelReviewTypeName!);
+    {
+        if (!string.IsNullOrWhiteSpace(request.ModelReviewTypeName))
+            RegularExpressionValidation.ValidateText(request.ModelReviewTypeName);
+    }
 
     public static void ValidateModelReviewTypeCreateArguments(this ModelReviewTypeCreateRequest request)
         => ValidateModelReviewTypeName(request.ModelReviewTypeName);

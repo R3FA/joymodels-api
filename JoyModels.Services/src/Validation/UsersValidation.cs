@@ -10,13 +10,13 @@ public static class UsersValidation
     public static void ValidateUserSearchArguments(this UsersSearchRequest request)
     {
         if (!string.IsNullOrWhiteSpace(request.Nickname))
-            RegularExpressionValidation.ValidateNickname(request.Nickname);
+            RegularExpressionValidation.ValidateText(request.Nickname);
     }
 
     public static void ValidateUserSearchFollowingUsersArguments(this UserFollowerSearchRequest request)
     {
         if (!string.IsNullOrWhiteSpace(request.Nickname))
-            RegularExpressionValidation.ValidateNickname(request.Nickname);
+            RegularExpressionValidation.ValidateText(request.Nickname);
     }
 
     public static void ValidateUserModelLikesSearchArguments(this UserModelLikesSearchRequest request)
