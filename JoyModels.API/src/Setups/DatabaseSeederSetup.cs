@@ -155,6 +155,108 @@ public static class DatabaseSeederSetup
         "Customer support was slow to respond when I had questions."
     ];
 
+    private static readonly string[] CommunityPostColors =
+    [
+        "#6B2D5C", "#4A1942", "#2D132C", "#801336", "#C72C41",
+        "#0B3D91", "#1E5128", "#4E3524", "#2C3E50", "#1A1A2E",
+        "#FF6B35", "#004E89", "#7B2D26", "#3D5A80", "#293241"
+    ];
+
+    private static readonly string[] CommunityPostTitles =
+    [
+        "My first game dev project - feedback welcome!",
+        "Tutorial: Creating realistic water shaders",
+        "Showcase: Low-poly character I made this week",
+        "Tips for optimizing Unity projects",
+        "How I improved my Blender workflow",
+        "Question about PBR texturing",
+        "My indie game progress update",
+        "Best practices for game UI design",
+        "Procedural generation techniques I learned",
+        "Retro pixel art style guide",
+        "Animation tips for beginners",
+        "Level design principles that work",
+        "My journey learning Unreal Engine",
+        "Shader Graph tutorial for beginners",
+        "Game jam experience and lessons learned",
+        "How to create stylized environments",
+        "VFX breakdown of my latest effect",
+        "Character rigging workflow tips",
+        "Sound design basics for games",
+        "Post-processing effects guide",
+        "Mobile game optimization tricks",
+        "Creating immersive game worlds",
+        "Substance Painter workflow tips",
+        "Making modular game assets",
+        "AI in games: My experiments"
+    ];
+
+    private static readonly string[] CommunityPostDescriptions =
+    [
+        "I've been working on this project for the past few months and would love to get some feedback from the community. Any suggestions for improvement are welcome!",
+        "In this guide, I'll walk you through the process step by step. I've learned a lot from this community and wanted to give back by sharing what I know.",
+        "Here's something I've been working on lately. It took me about a week to complete and I'm pretty happy with how it turned out. Let me know what you think!",
+        "After struggling with this for a while, I finally figured out a workflow that works for me. Sharing it here in case it helps someone else.",
+        "I've compiled some tips and tricks that have significantly improved my productivity. Hope this helps other developers in their journey!",
+        "Been experimenting with different techniques and wanted to share my results. The difference in quality is quite noticeable.",
+        "This is my progress so far on my indie game project. Still a lot of work to do but I'm excited about the direction it's going.",
+        "I've gathered some resources and techniques that have helped me improve significantly. Sharing them with the community!",
+        "After watching countless tutorials and practicing for months, here's what I've learned. These tips really made a difference for me.",
+        "Wanted to document my learning journey and share it with others who might be starting out. We all start somewhere!",
+        "Here's a breakdown of my creative process for this project. I hope it gives some insight into how I approach these challenges.",
+        "I've been following this community for a while and finally decided to share my own work. Feedback is greatly appreciated!",
+        "This tutorial covers everything from the basics to more advanced techniques. Perfect for those looking to level up their skills.",
+        "Sharing my latest creation with the community. It's been a challenging but rewarding experience putting this together.",
+        "I've put together a comprehensive guide based on my experience. Hope it helps others avoid the mistakes I made early on."
+    ];
+
+    private static readonly string[] CommunityPostComments =
+    [
+        "This is really impressive work! How long did it take you to learn these techniques?",
+        "Great tutorial! I've been looking for something like this for a while.",
+        "Love the art style! What software did you use for this?",
+        "Thanks for sharing! This will definitely help with my current project.",
+        "Awesome work! Any plans to create more tutorials like this?",
+        "This is exactly what I needed. Bookmarking for later!",
+        "Really well explained. Even a beginner like me could follow along.",
+        "The attention to detail here is incredible. Well done!",
+        "I tried this technique and it worked great. Thanks for the tip!",
+        "Would love to see more content like this from you.",
+        "How do you handle the performance impact of this approach?",
+        "This inspired me to try something similar. Great work!",
+        "Clean and professional looking. What's your workflow?",
+        "I've been struggling with this exact problem. Thanks for the solution!",
+        "Mind sharing the settings you used for this effect?"
+    ];
+
+    private static readonly string[] CommunityPostAnswers =
+    [
+        "Thanks for the kind words! It took me about 6 months of practice to get to this level.",
+        "Glad you found it helpful! I used Blender for the modeling and Substance Painter for textures.",
+        "I'm planning to create more tutorials in the future. Stay tuned!",
+        "The performance impact is minimal if you follow the optimization tips I mentioned.",
+        "My workflow involves planning everything out first, then executing in stages.",
+        "Feel free to reach out if you have any questions about the process!",
+        "I'll definitely share more settings and configurations in my next post.",
+        "Thanks! I spent a lot of time on the small details to make it look right.",
+        "Happy to help! Let me know if you need any clarification on the steps.",
+        "I appreciate the feedback! It motivates me to create more content."
+    ];
+
+    private static readonly string[] YoutubeVideoLinks =
+    [
+        "https://www.youtube.com/watch?v=i_UEP_Mkiqs",
+        "https://www.youtube.com/watch?v=TPrnSACiTJ4",
+        "https://www.youtube.com/watch?v=IKqJPuCfvmo",
+        "https://www.youtube.com/watch?v=gB1F9G0JXOo",
+        "https://www.youtube.com/watch?v=pwZpJzpE2lQ",
+        "https://www.youtube.com/watch?v=_nRzoTzeyxU",
+        "https://www.youtube.com/watch?v=QMU0qR_GGFw",
+        "https://www.youtube.com/watch?v=RqRoXLLwJ8g",
+        "https://www.youtube.com/watch?v=aircAruvnKk",
+        "https://www.youtube.com/watch?v=Z1qyvQsjK5Y"
+    ];
+
     public static IApplicationBuilder RegisterDatabaseSeeder(this IApplicationBuilder app)
     {
         using var scope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope();
@@ -171,6 +273,9 @@ public static class DatabaseSeederSetup
         SeedOrdersAndLibrary(context, logger).GetAwaiter().GetResult();
         SeedShoppingCart(context, logger).GetAwaiter().GetResult();
         SeedModelReviews(context, logger).GetAwaiter().GetResult();
+        SeedCommunityPosts(context, modelImageSettings, logger).GetAwaiter().GetResult();
+        SeedCommunityPostQuestionSections(context, logger).GetAwaiter().GetResult();
+        SeedCommunityPostUserReviews(context, logger).GetAwaiter().GetResult();
 
         return app;
     }
@@ -198,6 +303,7 @@ public static class DatabaseSeederSetup
 
         const string defaultPassword = "strinG1!";
         var users = new List<User>();
+        var createdFolders = new List<string>();
 
         for (var i = 0; i < 100; i++)
         {
@@ -236,6 +342,8 @@ public static class DatabaseSeederSetup
 
             user.PasswordHash = SsoPasswordHasher.Hash(user, defaultPassword);
 
+            var userFolder = Path.Combine(userImageSettings.SavePath, "users", userUuid.ToString());
+            createdFolders.Add(userFolder);
             GenerateAndSaveAvatar(userUuid, pictureFileName, AvatarColors[colorIndex], userImageSettings);
 
             users.Add(user);
@@ -256,7 +364,14 @@ public static class DatabaseSeederSetup
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            logger.LogError(ex, "User seeding failed. Rolling back transaction.");
+
+            foreach (var folder in createdFolders)
+            {
+                if (Directory.Exists(folder))
+                    Directory.Delete(folder, true);
+            }
+
+            logger.LogError(ex, "User seeding failed. Rolling back transaction and cleaning up folders.");
             throw;
         }
     }
@@ -340,6 +455,7 @@ public static class DatabaseSeederSetup
         var modelCategories = new List<ModelCategory>();
         var modelPictures = new List<ModelPicture>();
         var usedNames = new HashSet<string>();
+        var createdFolders = new List<string>();
 
         var modelAssignments = DistributeModelsAmongCreators(adminUsers.Count, 100, 5, 20);
         var modelIndex = 0;
@@ -362,11 +478,13 @@ public static class DatabaseSeederSetup
                 var modelFileName = $"model-{Guid.NewGuid()}.obj";
                 var modelFolderPath = Path.Combine(modelSettings.SavePath, "models", modelUuid.ToString());
                 Directory.CreateDirectory(modelFolderPath);
+                createdFolders.Add(modelFolderPath);
                 var modelFilePath = Path.Combine(modelFolderPath, modelFileName);
                 await File.WriteAllTextAsync(modelFilePath, minimalObjContent);
 
                 var pictureFolderPath = Path.Combine(modelImageSettings.SavePath, "models", modelUuid.ToString());
                 Directory.CreateDirectory(pictureFolderPath);
+                createdFolders.Add(pictureFolderPath);
 
                 var pictureCount = Random.Next(3, 6);
                 var selectedImages = sharedImageFileNames.OrderBy(_ => Random.Next()).Take(pictureCount).ToList();
@@ -448,7 +566,18 @@ public static class DatabaseSeederSetup
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            logger.LogError(ex, "Model seeding failed. Rolling back transaction.");
+
+            foreach (var folder in createdFolders)
+            {
+                if (Directory.Exists(folder))
+                    Directory.Delete(folder, true);
+            }
+
+            var seedImagesFolder = Path.Combine(modelImageSettings.SavePath, "seed-images");
+            if (Directory.Exists(seedImagesFolder))
+                Directory.Delete(seedImagesFolder, true);
+
+            logger.LogError(ex, "Model seeding failed. Rolling back transaction and cleaning up folders.");
             throw;
         }
     }
@@ -1099,7 +1228,7 @@ public static class DatabaseSeederSetup
             if (Random.NextDouble() > 0.75)
                 continue;
 
-            var isPositive = Random.NextDouble() > 0.2;
+            var isPositive = Random.NextDouble() < 0.65;
             var reviewType = isPositive ? positiveReviewType : negativeReviewType;
             var reviewTexts = isPositive ? PositiveReviewTexts : NegativeReviewTexts;
 
@@ -1134,6 +1263,549 @@ public static class DatabaseSeederSetup
         {
             await transaction.RollbackAsync();
             logger.LogError(ex, "ModelReviews seeding failed. Rolling back transaction.");
+            throw;
+        }
+    }
+
+    #endregion
+
+    #region CommunityPost Seeding
+
+    private static async Task SeedCommunityPosts(
+        JoyModelsDbContext context,
+        ModelImageSettingsDetails modelImageSettings,
+        ILogger logger)
+    {
+        var existingPostsCount = await context.CommunityPosts.CountAsync();
+        if (existingPostsCount > 0)
+        {
+            logger.LogInformation("Database already contains {Count} community posts. Skipping community post seeding.",
+                existingPostsCount);
+            return;
+        }
+
+        logger.LogInformation("Starting CommunityPost seeding...");
+
+        var allUsers = await context.Users.ToListAsync();
+        var postTypes = await context.CommunityPostTypes.ToListAsync();
+
+        logger.LogInformation("Generating 50 shared community post images...");
+        var sharedImageFileNames = GenerateSharedCommunityPostImages(modelImageSettings, 50);
+
+        var posts = new List<CommunityPost>();
+        var postPictures = new List<CommunityPostPicture>();
+        var usedTitles = new HashSet<string>();
+        var createdFolders = new List<string>();
+
+        const int totalPosts = 80;
+        var youtubePostCount = (int)(totalPosts * 0.4);
+
+        for (var i = 0; i < totalPosts; i++)
+        {
+            var postUuid = Guid.NewGuid();
+            var creator = allUsers[Random.Next(allUsers.Count)];
+            var postType = postTypes[Random.Next(postTypes.Count)];
+
+            var title = GetUniqueCommunityPostTitle(usedTitles, i);
+            usedTitles.Add(title);
+
+            string? youtubeLink = null;
+            if (i < youtubePostCount)
+            {
+                youtubeLink = YoutubeVideoLinks[i % YoutubeVideoLinks.Length];
+            }
+
+            var post = new CommunityPost
+            {
+                Uuid = postUuid,
+                UserUuid = creator.Uuid,
+                Title = title,
+                Description = CommunityPostDescriptions[i % CommunityPostDescriptions.Length],
+                PostTypeUuid = postType.Uuid,
+                YoutubeVideoLink = youtubeLink,
+                CreatedAt = DateTime.UtcNow.AddDays(-Random.Next(1, 180)),
+                CommunityPostLikes = 0,
+                CommunityPostDislikes = 0,
+                CommunityPostCommentCount = 0
+            };
+            posts.Add(post);
+
+            var pictureFolderPath = Path.Combine(modelImageSettings.SavePath, "community-posts", postUuid.ToString());
+            Directory.CreateDirectory(pictureFolderPath);
+            createdFolders.Add(pictureFolderPath);
+
+            var pictureCount = Random.Next(0, 5);
+            var selectedImages = sharedImageFileNames.OrderBy(_ => Random.Next()).Take(pictureCount).ToList();
+
+            foreach (var sourceImageName in selectedImages)
+            {
+                var sourcePath = Path.Combine(modelImageSettings.SavePath, "community-post-seed-images",
+                    sourceImageName);
+                var destFileName = $"community-post-picture-{Guid.NewGuid()}.jpg";
+                var destPath = Path.Combine(pictureFolderPath, destFileName);
+                File.Copy(sourcePath, destPath);
+
+                postPictures.Add(new CommunityPostPicture
+                {
+                    Uuid = Guid.NewGuid(),
+                    CommunityPostUuid = postUuid,
+                    PictureLocation = destFileName,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
+
+            logger.LogInformation("Created community post: {Title} by {Creator}", title, creator.NickName);
+        }
+
+        var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            await context.CommunityPosts.AddRangeAsync(posts);
+            await context.SaveChangesAsync();
+
+            await context.CommunityPostPictures.AddRangeAsync(postPictures);
+            await context.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+
+            logger.LogInformation("CommunityPost seeding completed. Created {Posts} posts and {Pictures} pictures.",
+                posts.Count, postPictures.Count);
+
+            var seedImagesFolder = Path.Combine(modelImageSettings.SavePath, "community-post-seed-images");
+            if (Directory.Exists(seedImagesFolder))
+            {
+                Directory.Delete(seedImagesFolder, true);
+                logger.LogInformation("Cleaned up community-post-seed-images folder.");
+            }
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+
+            foreach (var folder in createdFolders)
+            {
+                if (Directory.Exists(folder))
+                    Directory.Delete(folder, true);
+            }
+
+            var seedImagesFolder = Path.Combine(modelImageSettings.SavePath, "community-post-seed-images");
+            if (Directory.Exists(seedImagesFolder))
+                Directory.Delete(seedImagesFolder, true);
+
+            logger.LogError(ex, "CommunityPost seeding failed. Rolling back transaction and cleaning up folders.");
+            throw;
+        }
+    }
+
+    private static string GetUniqueCommunityPostTitle(HashSet<string> usedTitles, int index)
+    {
+        var baseTitle = CommunityPostTitles[index % CommunityPostTitles.Length];
+        if (!usedTitles.Contains(baseTitle))
+            return baseTitle;
+
+        var suffix = 2;
+        while (usedTitles.Contains($"{baseTitle} #{suffix}"))
+            suffix++;
+
+        return $"{baseTitle} #{suffix}";
+    }
+
+    private static List<string> GenerateSharedCommunityPostImages(ModelImageSettingsDetails settings, int count)
+    {
+        var seedImagesFolder = Path.Combine(settings.SavePath, "community-post-seed-images");
+        Directory.CreateDirectory(seedImagesFolder);
+
+        var fileNames = new List<string>();
+
+        for (var i = 0; i < count; i++)
+        {
+            var fileName = $"seed-community-{i + 1}.jpg";
+            var filePath = Path.Combine(seedImagesFolder, fileName);
+
+            if (!File.Exists(filePath))
+            {
+                var colorIndex = i % CommunityPostColors.Length;
+                GenerateCommunityPostImage(filePath, CommunityPostColors[colorIndex], i);
+            }
+
+            fileNames.Add(fileName);
+        }
+
+        return fileNames;
+    }
+
+    private static void GenerateCommunityPostImage(string filePath, string bgColorHex, int seed)
+    {
+        const int size = 512;
+        const float center = size / 2f;
+
+        var bgColor = Color.ParseHex(bgColorHex);
+        var gridColor = LightenColor(bgColor, 0.1f);
+        var primaryColor = LightenColor(bgColor, 0.4f);
+        var accentColor = Color.ParseHex(AvatarColors[seed % AvatarColors.Length]);
+
+        using var image = new Image<Rgba32>(size, size);
+
+        image.Mutate(ctx =>
+        {
+            ctx.BackgroundColor(bgColor);
+
+            for (var j = 0; j < size; j += 40)
+            {
+                ctx.DrawLine(gridColor, 0.5f, new PointF(j, 0), new PointF(j, size));
+                ctx.DrawLine(gridColor, 0.5f, new PointF(0, j), new PointF(size, j));
+            }
+
+            var iconType = seed % 5;
+
+            switch (iconType)
+            {
+                case 0:
+                    DrawGameController(ctx, center, center, 100, primaryColor, accentColor);
+                    break;
+                case 1:
+                    DrawCodeBrackets(ctx, center, center, 120, primaryColor, accentColor);
+                    break;
+                case 2:
+                    DrawPixelHeart(ctx, center, center, 80, primaryColor, accentColor);
+                    break;
+                case 3:
+                    DrawLightbulb(ctx, center, center, 100, primaryColor, accentColor);
+                    break;
+                case 4:
+                    DrawPencil(ctx, center, center, 120, primaryColor, accentColor);
+                    break;
+            }
+
+            var highlightGradient = new RadialGradientBrush(
+                new PointF(size * 0.25f, size * 0.25f),
+                size * 0.6f,
+                GradientRepetitionMode.None,
+                new ColorStop(0, Color.FromRgba(255, 255, 255, 20)),
+                new ColorStop(1, Color.FromRgba(255, 255, 255, 0)));
+            ctx.Fill(highlightGradient, new EllipsePolygon(size * 0.25f, size * 0.25f, size * 0.4f));
+        });
+
+        image.SaveAsJpeg(filePath);
+    }
+
+    private static void DrawGameController(IImageProcessingContext ctx, float cx, float cy, float controllerSize,
+        Color primaryColor, Color accentColor)
+    {
+        var bodyWidth = controllerSize * 1.6f;
+        var bodyHeight = controllerSize * 0.8f;
+
+        ctx.Fill(primaryColor, new EllipsePolygon(cx - bodyWidth * 0.3f, cy, bodyHeight * 0.5f, bodyHeight * 0.5f));
+        ctx.Fill(primaryColor, new EllipsePolygon(cx + bodyWidth * 0.3f, cy, bodyHeight * 0.5f, bodyHeight * 0.5f));
+        ctx.Fill(primaryColor,
+            new RectangularPolygon(cx - bodyWidth * 0.3f, cy - bodyHeight * 0.25f, bodyWidth * 0.6f,
+                bodyHeight * 0.5f));
+
+        ctx.Fill(accentColor, new EllipsePolygon(cx - bodyWidth * 0.3f, cy - 5, 12, 12));
+        ctx.Fill(accentColor, new EllipsePolygon(cx - bodyWidth * 0.3f - 15, cy + 5, 8, 8));
+        ctx.Fill(accentColor, new EllipsePolygon(cx - bodyWidth * 0.3f + 15, cy + 5, 8, 8));
+        ctx.Fill(accentColor, new EllipsePolygon(cx - bodyWidth * 0.3f, cy + 15, 8, 8));
+
+        ctx.Fill(accentColor, new EllipsePolygon(cx + bodyWidth * 0.3f - 12, cy, 10, 10));
+        ctx.Fill(accentColor, new EllipsePolygon(cx + bodyWidth * 0.3f + 12, cy, 10, 10));
+        ctx.Fill(accentColor, new EllipsePolygon(cx + bodyWidth * 0.3f, cy - 12, 10, 10));
+        ctx.Fill(accentColor, new EllipsePolygon(cx + bodyWidth * 0.3f, cy + 12, 10, 10));
+    }
+
+    private static void DrawCodeBrackets(IImageProcessingContext ctx, float cx, float cy, float bracketSize,
+        Color primaryColor, Color accentColor)
+    {
+        var thickness = 8f;
+
+        ctx.DrawLine(primaryColor, thickness, new PointF(cx - bracketSize * 0.4f, cy - bracketSize * 0.5f),
+            new PointF(cx - bracketSize * 0.6f, cy - bracketSize * 0.5f));
+        ctx.DrawLine(primaryColor, thickness, new PointF(cx - bracketSize * 0.6f, cy - bracketSize * 0.5f),
+            new PointF(cx - bracketSize * 0.6f, cy + bracketSize * 0.5f));
+        ctx.DrawLine(primaryColor, thickness, new PointF(cx - bracketSize * 0.6f, cy + bracketSize * 0.5f),
+            new PointF(cx - bracketSize * 0.4f, cy + bracketSize * 0.5f));
+
+        ctx.DrawLine(primaryColor, thickness, new PointF(cx + bracketSize * 0.4f, cy - bracketSize * 0.5f),
+            new PointF(cx + bracketSize * 0.6f, cy - bracketSize * 0.5f));
+        ctx.DrawLine(primaryColor, thickness, new PointF(cx + bracketSize * 0.6f, cy - bracketSize * 0.5f),
+            new PointF(cx + bracketSize * 0.6f, cy + bracketSize * 0.5f));
+        ctx.DrawLine(primaryColor, thickness, new PointF(cx + bracketSize * 0.6f, cy + bracketSize * 0.5f),
+            new PointF(cx + bracketSize * 0.4f, cy + bracketSize * 0.5f));
+
+        ctx.DrawLine(accentColor, thickness * 0.8f, new PointF(cx - bracketSize * 0.15f, cy - bracketSize * 0.3f),
+            new PointF(cx + bracketSize * 0.15f, cy + bracketSize * 0.3f));
+    }
+
+    private static void DrawPixelHeart(IImageProcessingContext ctx, float cx, float cy, float heartSize,
+        Color primaryColor, Color accentColor)
+    {
+        var pixelSize = heartSize / 6f;
+
+        int[,] heartPattern =
+        {
+            { 0, 1, 1, 0, 0, 1, 1, 0 },
+            { 1, 2, 2, 1, 1, 2, 2, 1 },
+            { 1, 2, 2, 2, 2, 2, 2, 1 },
+            { 1, 2, 2, 2, 2, 2, 2, 1 },
+            { 0, 1, 2, 2, 2, 2, 1, 0 },
+            { 0, 0, 1, 2, 2, 1, 0, 0 },
+            { 0, 0, 0, 1, 1, 0, 0, 0 }
+        };
+
+        var startX = cx - (heartPattern.GetLength(1) * pixelSize) / 2;
+        var startY = cy - (heartPattern.GetLength(0) * pixelSize) / 2;
+
+        for (var row = 0; row < heartPattern.GetLength(0); row++)
+        {
+            for (var col = 0; col < heartPattern.GetLength(1); col++)
+            {
+                if (heartPattern[row, col] == 0) continue;
+
+                var color = heartPattern[row, col] == 1 ? primaryColor : accentColor;
+                var x = startX + col * pixelSize;
+                var y = startY + row * pixelSize;
+                ctx.Fill(color, new RectangularPolygon(x, y, pixelSize - 1, pixelSize - 1));
+            }
+        }
+    }
+
+    private static void DrawLightbulb(IImageProcessingContext ctx, float cx, float cy, float bulbSize,
+        Color primaryColor, Color accentColor)
+    {
+        ctx.Fill(accentColor, new EllipsePolygon(cx, cy - bulbSize * 0.15f, bulbSize * 0.4f, bulbSize * 0.45f));
+
+        ctx.Fill(primaryColor,
+            new RectangularPolygon(cx - bulbSize * 0.15f, cy + bulbSize * 0.25f, bulbSize * 0.3f, bulbSize * 0.25f));
+
+        for (var i = 0; i < 3; i++)
+        {
+            var y = cy + bulbSize * 0.3f + i * 8;
+            ctx.DrawLine(DarkenColor(primaryColor, 0.2f), 2f, new PointF(cx - bulbSize * 0.12f, y),
+                new PointF(cx + bulbSize * 0.12f, y));
+        }
+
+        ctx.DrawLine(accentColor, 3f, new PointF(cx - bulbSize * 0.6f, cy - bulbSize * 0.15f),
+            new PointF(cx - bulbSize * 0.45f, cy - bulbSize * 0.15f));
+        ctx.DrawLine(accentColor, 3f, new PointF(cx + bulbSize * 0.6f, cy - bulbSize * 0.15f),
+            new PointF(cx + bulbSize * 0.45f, cy - bulbSize * 0.15f));
+        ctx.DrawLine(accentColor, 3f, new PointF(cx, cy - bulbSize * 0.7f),
+            new PointF(cx, cy - bulbSize * 0.55f));
+    }
+
+    private static void DrawPencil(IImageProcessingContext ctx, float cx, float cy, float pencilSize,
+        Color primaryColor, Color accentColor)
+    {
+        var angle = -45f * MathF.PI / 180f;
+        var cos = MathF.Cos(angle);
+        var sin = MathF.Sin(angle);
+
+        var bodyLength = pencilSize * 0.8f;
+        var bodyWidth = pencilSize * 0.15f;
+
+        var bodyPoints = new PointF[]
+        {
+            new(cx - bodyLength * 0.5f * cos - bodyWidth * 0.5f * sin,
+                cy - bodyLength * 0.5f * sin + bodyWidth * 0.5f * cos),
+            new(cx - bodyLength * 0.5f * cos + bodyWidth * 0.5f * sin,
+                cy - bodyLength * 0.5f * sin - bodyWidth * 0.5f * cos),
+            new(cx + bodyLength * 0.3f * cos + bodyWidth * 0.5f * sin,
+                cy + bodyLength * 0.3f * sin - bodyWidth * 0.5f * cos),
+            new(cx + bodyLength * 0.3f * cos - bodyWidth * 0.5f * sin,
+                cy + bodyLength * 0.3f * sin + bodyWidth * 0.5f * cos)
+        };
+        ctx.FillPolygon(primaryColor, bodyPoints);
+
+        var tipPoints = new PointF[]
+        {
+            new(cx + bodyLength * 0.3f * cos - bodyWidth * 0.5f * sin,
+                cy + bodyLength * 0.3f * sin + bodyWidth * 0.5f * cos),
+            new(cx + bodyLength * 0.3f * cos + bodyWidth * 0.5f * sin,
+                cy + bodyLength * 0.3f * sin - bodyWidth * 0.5f * cos),
+            new(cx + bodyLength * 0.5f * cos, cy + bodyLength * 0.5f * sin)
+        };
+        ctx.FillPolygon(accentColor, tipPoints);
+
+        ctx.Fill(DarkenColor(primaryColor, 0.3f), new EllipsePolygon(
+            cx - bodyLength * 0.5f * cos,
+            cy - bodyLength * 0.5f * sin,
+            bodyWidth * 0.6f, bodyWidth * 0.4f));
+    }
+
+    #endregion
+
+    #region CommunityPostQuestionSection Seeding
+
+    private static async Task SeedCommunityPostQuestionSections(JoyModelsDbContext context, ILogger logger)
+    {
+        var existingCommentsCount = await context.CommunityPostQuestionSections.CountAsync();
+        if (existingCommentsCount > 0)
+        {
+            logger.LogInformation(
+                "Database already contains {Count} community post comments. Skipping comment seeding.",
+                existingCommentsCount);
+            return;
+        }
+
+        logger.LogInformation("Starting CommunityPostQuestionSection seeding...");
+
+        var posts = await context.CommunityPosts.ToListAsync();
+        var allUsers = await context.Users.ToListAsync();
+
+        var comments = new List<CommunityPostQuestionSection>();
+
+        foreach (var post in posts)
+        {
+            var postOwner = allUsers.First(u => u.Uuid == post.UserUuid);
+            var otherUsers = allUsers.Where(u => u.Uuid != post.UserUuid).ToList();
+
+            var questionCount = Random.Next(3, 8);
+
+            for (var i = 0; i < questionCount; i++)
+            {
+                var commenter = otherUsers[Random.Next(otherUsers.Count)];
+                var questionUuid = Guid.NewGuid();
+                var questionDate = post.CreatedAt.AddDays(Random.Next(1, 30));
+
+                var question = new CommunityPostQuestionSection
+                {
+                    Uuid = questionUuid,
+                    ParentMessageUuid = null,
+                    CommunityPostUuid = post.Uuid,
+                    UserUuid = commenter.Uuid,
+                    MessageText = CommunityPostComments[Random.Next(CommunityPostComments.Length)],
+                    CreatedAt = questionDate
+                };
+                comments.Add(question);
+                post.CommunityPostCommentCount++;
+
+                var answerCount = Random.Next(1, 4);
+                var lastAnswerDate = questionDate;
+
+                for (var j = 0; j < answerCount; j++)
+                {
+                    var isOwnerAnswer = j == 0 || Random.NextDouble() > 0.5;
+                    var answerer = isOwnerAnswer ? postOwner : otherUsers[Random.Next(otherUsers.Count)];
+
+                    lastAnswerDate = lastAnswerDate.AddHours(Random.Next(1, 48));
+
+                    var answer = new CommunityPostQuestionSection
+                    {
+                        Uuid = Guid.NewGuid(),
+                        ParentMessageUuid = questionUuid,
+                        CommunityPostUuid = post.Uuid,
+                        UserUuid = answerer.Uuid,
+                        MessageText = CommunityPostAnswers[Random.Next(CommunityPostAnswers.Length)],
+                        CreatedAt = lastAnswerDate
+                    };
+                    comments.Add(answer);
+                    post.CommunityPostCommentCount++;
+                }
+            }
+        }
+
+        var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            await context.CommunityPostQuestionSections.AddRangeAsync(comments);
+            await context.SaveChangesAsync();
+
+            context.CommunityPosts.UpdateRange(posts);
+            await context.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+
+            var totalQuestions = comments.Count(c => c.ParentMessageUuid == null);
+            var totalAnswers = comments.Count(c => c.ParentMessageUuid != null);
+            logger.LogInformation(
+                "CommunityPostQuestionSection seeding completed. Created {Questions} questions and {Answers} answers.",
+                totalQuestions, totalAnswers);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            logger.LogError(ex, "CommunityPostQuestionSection seeding failed. Rolling back transaction.");
+            throw;
+        }
+    }
+
+    #endregion
+
+    #region CommunityPostUserReview Seeding
+
+    private static async Task SeedCommunityPostUserReviews(JoyModelsDbContext context, ILogger logger)
+    {
+        var existingReviewsCount = await context.CommunityPostUserReviews.CountAsync();
+        if (existingReviewsCount > 0)
+        {
+            logger.LogInformation("Database already contains {Count} community post reviews. Skipping review seeding.",
+                existingReviewsCount);
+            return;
+        }
+
+        logger.LogInformation("Starting CommunityPostUserReview seeding...");
+
+        var posts = await context.CommunityPosts.ToListAsync();
+        var allUsers = await context.Users.ToListAsync();
+
+        var positiveReviewType = await context.CommunityPostReviewTypes
+            .FirstAsync(r => r.ReviewName == "Positive");
+        var negativeReviewType = await context.CommunityPostReviewTypes
+            .FirstAsync(r => r.ReviewName == "Negative");
+
+        var reviews = new List<CommunityPostUserReview>();
+        var reviewedPairs = new HashSet<(Guid UserUuid, Guid PostUuid)>();
+
+        foreach (var post in posts)
+        {
+            var otherUsers = allUsers.Where(u => u.Uuid != post.UserUuid).ToList();
+
+            var reviewerCount = Random.Next(10, 40);
+            var selectedReviewers = otherUsers.OrderBy(_ => Random.Next()).Take(reviewerCount).ToList();
+
+            foreach (var reviewer in selectedReviewers)
+            {
+                if (reviewedPairs.Contains((reviewer.Uuid, post.Uuid)))
+                    continue;
+
+                var isPositive = Random.NextDouble() < 0.65;
+                var reviewType = isPositive ? positiveReviewType : negativeReviewType;
+
+                reviews.Add(new CommunityPostUserReview
+                {
+                    Uuid = Guid.NewGuid(),
+                    UserUuid = reviewer.Uuid,
+                    CommunityPostUuid = post.Uuid,
+                    ReviewTypeUuid = reviewType.Uuid
+                });
+                reviewedPairs.Add((reviewer.Uuid, post.Uuid));
+
+                if (isPositive)
+                    post.CommunityPostLikes++;
+                else
+                    post.CommunityPostDislikes++;
+            }
+        }
+
+        var transaction = await context.Database.BeginTransactionAsync();
+        try
+        {
+            await context.CommunityPostUserReviews.AddRangeAsync(reviews);
+            await context.SaveChangesAsync();
+
+            context.CommunityPosts.UpdateRange(posts);
+            await context.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+
+            var positiveCount = reviews.Count(r => r.ReviewTypeUuid == positiveReviewType.Uuid);
+            var negativeCount = reviews.Count(r => r.ReviewTypeUuid == negativeReviewType.Uuid);
+            logger.LogInformation(
+                "CommunityPostUserReview seeding completed. Created {Total} reviews ({Positive} likes, {Negative} dislikes).",
+                reviews.Count, positiveCount, negativeCount);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            logger.LogError(ex, "CommunityPostUserReview seeding failed. Rolling back transaction.");
             throw;
         }
     }
