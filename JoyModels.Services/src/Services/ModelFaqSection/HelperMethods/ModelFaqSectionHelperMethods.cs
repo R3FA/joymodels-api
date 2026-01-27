@@ -38,7 +38,8 @@ public static class ModelFaqSectionHelperMethods
 
     public static async Task<PaginationBase<JoyModels.Models.Database.Entities.ModelFaqSection>> SearchModelFaqEntities(
         JoyModelsDbContext context,
-        ModelFaqSectionSearchRequest request)
+        ModelFaqSectionSearchRequest request,
+        UserAuthValidation userAuthValidation)
     {
         var baseQuery = context.ModelFaqSections
             .AsNoTracking()
@@ -63,6 +64,12 @@ public static class ModelFaqSectionHelperMethods
 
         if (!string.IsNullOrWhiteSpace(request.FaqMessage))
             baseQuery = baseQuery.Where(x => x.MessageText.Contains(request.FaqMessage));
+
+        baseQuery = request.IsMyFaqSectionFiltered switch
+        {
+            true => baseQuery.Where(x => x.UserUuid == userAuthValidation.GetUserClaimUuid()),
+            _ => baseQuery
+        };
 
         var resultQuery =
             GlobalHelperMethods<JoyModels.Models.Database.Entities.ModelFaqSection>.OrderBy(baseQuery, request.OrderBy);

@@ -28,7 +28,8 @@ public class ModelFaqSectionService(
 
     public async Task<PaginationResponse<ModelFaqSectionResponse>> Search(ModelFaqSectionSearchRequest request)
     {
-        var modelFaqEntities = await ModelFaqSectionHelperMethods.SearchModelFaqEntities(context, request);
+        var modelFaqEntities =
+            await ModelFaqSectionHelperMethods.SearchModelFaqEntities(context, request, userAuthValidation);
 
         return mapper.Map<PaginationResponse<ModelFaqSectionResponse>>(modelFaqEntities);
     }
