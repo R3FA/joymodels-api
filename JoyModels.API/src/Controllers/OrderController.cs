@@ -9,16 +9,15 @@ namespace JoyModels.API.Controllers;
 
 [Route("api/orders/")]
 [ApiController]
+[Authorize(Policy = "UserOnly")]
 public class OrderController(IOrderService service) : ControllerBase
 {
-    [Authorize(Policy = "VerifiedUsers")]
     [HttpPost("checkout")]
     public async Task<ActionResult<OrderCheckoutResponse>> Checkout()
     {
         return await service.Checkout();
     }
 
-    [Authorize(Policy = "VerifiedUsers")]
     [HttpPost("confirm/{paymentIntentId}")]
     public async Task<ActionResult<OrderConfirmResponse>> Confirm([FromRoute] string paymentIntentId)
     {
@@ -30,14 +29,12 @@ public class OrderController(IOrderService service) : ControllerBase
         return Ok(result);
     }
 
-    [Authorize(Policy = "VerifiedUsers")]
     [HttpGet("get/{orderUuid:guid}")]
     public async Task<ActionResult<OrderResponse>> GetByUuid([FromRoute] Guid orderUuid)
     {
         return await service.GetByUuid(orderUuid);
     }
 
-    [Authorize(Policy = "VerifiedUsers")]
     [HttpGet("search")]
     public async Task<ActionResult<PaginationResponse<OrderResponse>>> Search(
         [FromQuery] OrderSearchRequest request)
