@@ -37,7 +37,7 @@ public static class SsoHelperMethods
             issuer: jwtClaimDetails.JwtIssuer,
             audience: jwtClaimDetails.JwtAudience,
             claims: claims,
-            expires: DateTime.Now.AddMinutes(1),
+            expires: DateTime.Now.AddDays(1),
             signingCredentials: signingCredentials
         );
 
@@ -201,7 +201,7 @@ public static class SsoHelperMethods
             Uuid = Guid.NewGuid(),
             UserUuid = userEntity.Uuid,
             RefreshToken = ssoLoginResponse.RefreshToken,
-            TokenExpirationDate = DateTime.Now.AddDays(30)
+            TokenExpirationDate = DateTime.Now.AddDays(90)
         };
     }
 
