@@ -8,4 +8,5 @@ public class ModelReviewSearchRequest : PaginationRequest
 {
     public Guid ModelUuid { get; set; }
     [DefaultValue(ModelReviewEnum.All)] public ModelReviewEnum ModelReviewType { get; set; }
+    [DefaultValue(false)] public bool IsMyReviewFiltered { get; set; }
 }

@@ -8,10 +8,14 @@ namespace JoyModels.Services.Validation;
 
 public static class CommunityPostValidation
 {
-    public static void ValidateCommunityPostSearchArguments(this CommunityPostSearchRequest request)
+    public static void ValidateCommunityPostSearchArguments(this CommunityPostSearchRequest request,
+        UserAuthValidation userAuthValidation)
     {
         if (!string.IsNullOrWhiteSpace(request.Title))
             RegularExpressionValidation.ValidateText(request.Title);
+
+        if (request.UserUuid.HasValue)
+            userAuthValidation.ValidateUserAuthRequest(request.UserUuid.Value);
     }
 
     public static async Task ValidateCommunityPostCreateArguments(this CommunityPostCreateRequest request,

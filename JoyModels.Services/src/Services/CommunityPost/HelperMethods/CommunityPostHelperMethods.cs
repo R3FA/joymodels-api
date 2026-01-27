@@ -72,11 +72,8 @@ public static class CommunityPostHelperMethods
         if (!string.IsNullOrWhiteSpace(request.Title))
             baseQuery = baseQuery.Where(x => x.Title.Contains(request.Title));
 
-        baseQuery = request.PostTypeUuid switch
-        {
-            not null => baseQuery.Where(x => x.PostTypeUuid == request.PostTypeUuid),
-            _ => baseQuery
-        };
+        if (request.UserUuid.HasValue)
+            baseQuery = baseQuery.Where(x => x.UserUuid.Equals(request.UserUuid.Value));
 
         var resultQuery =
             GlobalHelperMethods<JoyModels.Models.Database.Entities.CommunityPost>.OrderBy(baseQuery, request.OrderBy);

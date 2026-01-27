@@ -8,5 +8,5 @@ public class CommunityPostSearchRequest : PaginationRequest
     [MaxLength(100, ErrorMessage = "Title cannot exceed 100 characters.")]
     public string? Title { get; set; }
 
-    public Guid? PostTypeUuid { get; set; }
+    public Guid? UserUuid { get; set; }
 }

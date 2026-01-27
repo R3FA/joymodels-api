@@ -45,7 +45,7 @@ public class ModelFaqSectionController(IModelFaqSectionService service) : Contro
     }
 
     [HttpDelete("delete")]
-    public async Task<ActionResult> Delete([FromForm] ModelFaqSectionDeleteRequest request)
+    public async Task<ActionResult> Delete([FromQuery] ModelFaqSectionDeleteRequest request)
     {
         await service.Delete(request);
         return NoContent();

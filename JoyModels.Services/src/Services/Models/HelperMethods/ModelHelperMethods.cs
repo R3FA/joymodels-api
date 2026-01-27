@@ -84,7 +84,8 @@ public static class ModelHelperMethods
             true => baseQuery
                 .Where(x =>
                     string.Equals(x.ModelAvailabilityUu.AvailabilityName, nameof(ModelAvailabilityEnum.Hidden))
-                    && x.UserUuid == userAuthValidation.GetUserClaimUuid()),
+                    && (x.UserUu.UserRoleUu.RoleName.Equals(nameof(UserRoleEnum.Admin))
+                        || x.UserUu.UserRoleUu.RoleName.Equals(nameof(UserRoleEnum.Root)))),
             false => baseQuery
                 .Where(x =>
                     string.Equals(x.ModelAvailabilityUu.AvailabilityName, nameof(ModelAvailabilityEnum.Public)))
