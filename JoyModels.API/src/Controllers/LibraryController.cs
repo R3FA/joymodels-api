@@ -10,7 +10,7 @@ namespace JoyModels.API.Controllers;
 
 [Route("api/library/")]
 [ApiController]
-[Authorize(Policy = "UserOnly")]
+[Authorize(Policy = "VerifiedUsers")]
 public class LibraryController(ILibraryService service) : ControllerBase
 {
     [HttpGet("get/{libraryUuid:guid}")]

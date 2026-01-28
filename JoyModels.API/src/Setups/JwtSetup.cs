@@ -35,11 +35,6 @@ public static class JwtSetup
                     nameof(UserRoleEnum.Unverified)
                 ));
 
-            options.AddPolicy("UserOnly", policy =>
-                policy.RequireRole(
-                    nameof(UserRoleEnum.User)
-                ));
-
             options.AddPolicy("VerifiedUsers", policy =>
                 policy.RequireRole(
                     nameof(UserRoleEnum.User),

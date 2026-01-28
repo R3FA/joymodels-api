@@ -9,7 +9,7 @@ namespace JoyModels.API.Controllers;
 
 [Route("api/shopping-cart/")]
 [ApiController]
-[Authorize(Policy = "UserOnly")]
+[Authorize(Policy = "VerifiedUsers")]
 public class ShoppingCartController(IShoppingCartService service) : ControllerBase
 {
     [HttpGet("get/{modelUuid:guid}")]
