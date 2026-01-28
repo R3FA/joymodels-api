@@ -81,6 +81,7 @@ public static class DependencyInjectionSetup
         services.AddSingleton(ModelSettingsSetup.RegisterModelSettingsDetails(configuration));
 
         services.AddSingleton(StripeSetup.RegisterStripeDetails(configuration));
+        services.AddSingleton(RecommenderSettingsSetup.RegisterRecommenderSettingsDetails(configuration));
 
         services.AddTransient<ISsoService, SsoService>();
         services.AddTransient<IUsersService, UsersService>();

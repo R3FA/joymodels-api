@@ -1,3 +1,5 @@
+using JoyModels.API.Setups.DatabaseSeed;
+
 namespace JoyModels.API.Setups;
 
 public static class WebApplicationSetup

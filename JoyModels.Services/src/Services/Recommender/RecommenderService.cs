@@ -1,14 +1,20 @@
+using System.Text.Json;
 using JoyModels.Models.Database;
+using JoyModels.Models.DataTransferObjects.RecommenderSettings;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Recommender;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Recommender;
 using JoyModels.Models.Enums;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.ML;
 using Microsoft.ML.Trainers;
 
 namespace JoyModels.Services.Services.Recommender;
 
-public class RecommenderService(IDbContextFactory<JoyModelsDbContext> contextFactory) : IRecommenderService
+public class RecommenderService(
+    IDbContextFactory<JoyModelsDbContext> contextFactory,
+    RecommenderSettingsDetails recommenderSettings,
+    ILogger<RecommenderService> logger) : IRecommenderService
 {
     private readonly MLContext _mlContext = new(seed: 42);
     private ITransformer? _trainedModel;
@@ -16,6 +22,9 @@ public class RecommenderService(IDbContextFactory<JoyModelsDbContext> contextFac
     private Dictionary<Guid, uint> _userIdMap = new();
     private Dictionary<Guid, uint> _modelIdMap = new();
     private readonly object _lock = new();
+
+    private string ModelFilePath => Path.Combine(recommenderSettings.ModelPath, "recommender.zip");
+    private string MapsFilePath => Path.Combine(recommenderSettings.ModelPath, "recommender-maps.json");
 
     public bool IsModelTrained => _trainedModel != null;
 
@@ -56,6 +65,96 @@ public class RecommenderService(IDbContextFactory<JoyModelsDbContext> contextFac
             _predictionEngine = predictionEngine;
             _userIdMap = newUserIdMap;
             _modelIdMap = newModelIdMap;
+        }
+
+        SaveModel(dataView.Schema, newUserIdMap, newModelIdMap);
+    }
+
+    public bool LoadModel()
+    {
+        if (!File.Exists(ModelFilePath) || !File.Exists(MapsFilePath))
+        {
+            logger.LogInformation("No saved model found at {Path}.", recommenderSettings.ModelPath);
+            return false;
+        }
+
+        try
+        {
+            logger.LogInformation("Loading recommender model from {Path}...", recommenderSettings.ModelPath);
+
+            var loadedModel = _mlContext.Model.Load(ModelFilePath, out var modelSchema);
+
+            var mapsJson = File.ReadAllText(MapsFilePath);
+            var maps = JsonSerializer.Deserialize<RecommenderMaps>(mapsJson);
+
+            if (maps == null)
+            {
+                logger.LogWarning("Failed to deserialize maps from {MapsFile}.", MapsFilePath);
+                return false;
+            }
+
+            var predictionEngine =
+                _mlContext.Model.CreatePredictionEngine<ModelInteractionRequest, ModelInteractionResponse>(loadedModel);
+
+            lock (_lock)
+            {
+                _trainedModel = loadedModel;
+                _predictionEngine = predictionEngine;
+                _userIdMap = maps.UserIdMap;
+                _modelIdMap = maps.ModelIdMap;
+            }
+
+            logger.LogInformation("Model loaded successfully. Users: {UserCount}, Models: {ModelCount}.",
+                maps.UserIdMap.Count, maps.ModelIdMap.Count);
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to load recommender model.");
+            return false;
+        }
+    }
+
+    private void SaveModel(
+        DataViewSchema schema,
+        Dictionary<Guid, uint> userIdMap,
+        Dictionary<Guid, uint> modelIdMap)
+    {
+        try
+        {
+            logger.LogInformation("Saving recommender model to {Path}...", recommenderSettings.ModelPath);
+
+            Directory.CreateDirectory(recommenderSettings.ModelPath);
+
+            lock (_lock)
+            {
+                if (_trainedModel == null)
+                {
+                    logger.LogWarning("Cannot save model - trained model is null.");
+                    return;
+                }
+
+                _mlContext.Model.Save(_trainedModel, schema, ModelFilePath);
+            }
+
+            logger.LogInformation("Model saved to {ModelFile}.", ModelFilePath);
+
+            var maps = new RecommenderMaps
+            {
+                UserIdMap = userIdMap,
+                ModelIdMap = modelIdMap
+            };
+
+            var mapsJson = JsonSerializer.Serialize(maps);
+            File.WriteAllText(MapsFilePath, mapsJson);
+
+            logger.LogInformation("Maps saved to {MapsFile}. Users: {UserCount}, Models: {ModelCount}.",
+                MapsFilePath, userIdMap.Count, modelIdMap.Count);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to save recommender model.");
         }
     }
 
@@ -305,4 +404,10 @@ public class RecommenderService(IDbContextFactory<JoyModelsDbContext> contextFac
             .Select(m => m.Uuid)
             .ToListAsync();
     }
+}
+
+internal class RecommenderMaps
+{
+    public Dictionary<Guid, uint> UserIdMap { get; set; } = new();
+    public Dictionary<Guid, uint> ModelIdMap { get; set; } = new();
 }

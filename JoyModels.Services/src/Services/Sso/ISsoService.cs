@@ -12,6 +12,7 @@ public interface ISsoService
     Task<SsoUserResponse> Verify(SsoVerifyRequest request);
     Task RequestNewOtpCode(SsoNewOtpCodeRequest request);
     Task<SsoLoginResponse> Login(SsoLoginRequest request);
+    Task<SsoLoginResponse> AdminLogin(SsoLoginRequest request);
     Task<SsoAccessTokenChangeResponse> RequestAccessTokenChange(SsoAccessTokenChangeRequest request);
     Task Logout(SsoLogoutRequest request);
     Task RequestPasswordChange(SsoPasswordChangeRequest request);

@@ -9,7 +9,7 @@ namespace JoyModels.API.Controllers;
 
 [Route("api/orders/")]
 [ApiController]
-[Authorize(Policy = "UserOnly")]
+[Authorize(Policy = "VerifiedUsers")]
 public class OrderController(IOrderService service) : ControllerBase
 {
     [HttpPost("checkout")]
