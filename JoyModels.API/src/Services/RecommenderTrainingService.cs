@@ -11,7 +11,10 @@ public class RecommenderTrainingService(
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await TrainModelAsync();
+        if (!TryLoadModel())
+        {
+            await TrainModelAsync();
+        }
 
         using var timer = new PeriodicTimer(_trainingInterval);
 
@@ -19,6 +22,24 @@ public class RecommenderTrainingService(
         {
             await TrainModelAsync();
         }
+    }
+
+    private bool TryLoadModel()
+    {
+        logger.LogInformation("Attempting to load recommender model from disk...");
+
+        var loaded = recommenderService.LoadModel();
+
+        if (loaded)
+        {
+            logger.LogInformation("Recommender model loaded successfully from disk.");
+        }
+        else
+        {
+            logger.LogInformation("No saved model found. Will train a new model.");
+        }
+
+        return loaded;
     }
 
     private async Task TrainModelAsync()
