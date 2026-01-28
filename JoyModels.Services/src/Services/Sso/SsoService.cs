@@ -163,6 +163,21 @@ public class SsoService(
         return ssoLoginResponse;
     }
 
+    public async Task<SsoLoginResponse> AdminLogin(SsoLoginRequest request)
+    {
+        request.ValidateUserLoginRequestArguments();
+
+        var userEntity = await SsoHelperMethods.GetUserAdminEntity(context, request);
+        request.ValidateUsersPassword(userEntity);
+
+        var ssoLoginResponse = SsoHelperMethods.SetCustomValuesSsoLoginResponse(userEntity, jwtClaimDetails);
+
+        var userTokenEntity = SsoHelperMethods.SetCustomValuesUserTokenEntity(userEntity, ssoLoginResponse);
+        await userTokenEntity.CreateUserToken(context);
+
+        return ssoLoginResponse;
+    }
+
     public async Task<SsoAccessTokenChangeResponse> RequestAccessTokenChange(SsoAccessTokenChangeRequest request)
     {
         await request.ValidateUserRefreshToken(context, mapper);

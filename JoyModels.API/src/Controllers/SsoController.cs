@@ -52,6 +52,12 @@ public class SsoController(ISsoService service) : ControllerBase
         return await service.Login(request);
     }
 
+    [HttpPost("admin-login")]
+    public async Task<ActionResult<SsoLoginResponse>> AdminLogin([FromForm] SsoLoginRequest request)
+    {
+        return await service.AdminLogin(request);
+    }
+
     [HttpPost("request-access-token-change")]
     public async Task<ActionResult<SsoAccessTokenChangeResponse>> RequestAccessTokenChange(
         [FromForm] SsoAccessTokenChangeRequest request)
