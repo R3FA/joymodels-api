@@ -171,10 +171,13 @@ public static class SsoHelperMethods
                 $"User with UUID `{userUuid}` either is unverified or does not exist.");
     }
 
-    public static void CheckIfUserIsUnverified(this User userEntity)
+    public static void SetUserRoleValidation(this User userEntity)
     {
         if (userEntity.UserRoleUu.RoleName is nameof(UserRoleEnum.Unverified))
             throw new ApplicationException("User is unverified.");
+
+        if (userEntity.UserRoleUu.RoleName is nameof(UserRoleEnum.Root))
+            throw new ApplicationException("You cannot set another role for root admin.");
     }
 
     public static User SetCustomValuesUserEntity(this User userEntity, SsoUserCreateRequest request,

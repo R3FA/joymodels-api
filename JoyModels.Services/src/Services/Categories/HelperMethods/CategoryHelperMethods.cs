@@ -4,6 +4,7 @@ using JoyModels.Models.DataTransferObjects.RequestTypes.Categories;
 using JoyModels.Models.Pagination;
 using JoyModels.Services.Extensions;
 using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 
 namespace JoyModels.Services.Services.Categories.HelperMethods;
 
@@ -62,14 +63,22 @@ public static class CategoryHelperMethods
 
     public static async Task DeleteCategoryEntity(JoyModelsDbContext context, Guid categoryUuid)
     {
-        var totalRecords = await context.Categories
-            .Where(x => x.Uuid == categoryUuid)
-            .ExecuteDeleteAsync();
+        try
+        {
+            var totalRecords = await context.Categories
+                .Where(x => x.Uuid == categoryUuid)
+                .ExecuteDeleteAsync();
 
-        if (totalRecords <= 0)
-            throw new KeyNotFoundException(
-                $"Category with UUID `{categoryUuid}` does not exist.");
+            if (totalRecords <= 0)
+                throw new KeyNotFoundException(
+                    $"Category with UUID `{categoryUuid}` does not exist.");
 
-        await context.SaveChangesAsync();
+            await context.SaveChangesAsync();
+        }
+        catch (MySqlException)
+        {
+            throw new InvalidOperationException(
+                $"Category with UUID `{categoryUuid}` cannot be deleted because it is associated with existing models.");
+        }
     }
 }

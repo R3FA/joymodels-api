@@ -47,6 +47,11 @@ public static class JwtSetup
                     nameof(UserRoleEnum.Admin),
                     nameof(UserRoleEnum.Root)
                 ));
+
+            options.AddPolicy("Root", policy =>
+                policy.RequireRole(
+                    nameof(UserRoleEnum.Root)
+                ));
         });
 
         return services;
