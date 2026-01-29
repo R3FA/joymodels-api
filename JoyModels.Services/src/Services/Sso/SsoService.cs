@@ -206,7 +206,7 @@ public class SsoService(
     public async Task SetRole(SsoSetRoleRequest request)
     {
         var userEntity = await SsoHelperMethods.GetUserEntity(context, request.UserUuid, null);
-        userEntity.CheckIfUserIsUnverified();
+        userEntity.SetUserRoleValidation();
 
         var userRoleEntity =
             await SsoHelperMethods.GetUserRoleEntity(context, request.DesignatedUserRoleUuid, null);

@@ -220,9 +220,27 @@ public static class UsersHelperMethods
     public static async Task DeleteUserEntity(JoyModelsDbContext context, Guid userUuid,
         UserAuthValidation userAuthValidation)
     {
+        var callerRole = userAuthValidation.GetUserClaimRole();
+
+        if (callerRole is nameof(UserRoleEnum.Admin) or nameof(UserRoleEnum.Root))
+        {
+            var targetUserRole = await context.Users
+                .Where(x => x.Uuid == userUuid)
+                .Select(x => x.UserRoleUu.RoleName)
+                .FirstOrDefaultAsync();
+
+            if (targetUserRole is null)
+                throw new KeyNotFoundException(
+                    "User doesn't exist.");
+
+            if (targetUserRole is nameof(UserRoleEnum.Admin) or nameof(UserRoleEnum.Root))
+                throw new UnauthorizedAccessException(
+                    "Cannot delete Admin or Root users.");
+        }
+
         var baseQuery = context.Users.AsQueryable();
 
-        baseQuery = userAuthValidation.GetUserClaimRole() switch
+        baseQuery = callerRole switch
         {
             nameof(UserRoleEnum.Admin) or nameof(UserRoleEnum.Root) => baseQuery.Where(x => x.Uuid == userUuid),
             _ => baseQuery.Where(x => x.Uuid == userUuid && x.Uuid == userAuthValidation.GetUserClaimUuid())

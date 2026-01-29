@@ -81,7 +81,7 @@ public class SsoController(ISsoService service) : ControllerBase
         return NoContent();
     }
 
-    [Authorize(Policy = "HeadStaff")]
+    [Authorize(Policy = "Root")]
     [HttpPatch("set-role")]
     public async Task<ActionResult> SetRole([FromForm] SsoSetRoleRequest request)
     {
