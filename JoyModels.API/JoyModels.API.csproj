@@ -31,4 +31,8 @@
         <ProjectReference Include="..\JoyModels.Services\JoyModels.Services.csproj"/>
         <ProjectReference Include="..\JoyModels.Utilities\JoyModels.Utilities.csproj"/>
     </ItemGroup>
+
+    <ItemGroup>
+        <_ContentIncludedByDefault Remove="docker-data\joymodels\ml-models\recommender-maps.json"/>
+    </ItemGroup>
 </Project>

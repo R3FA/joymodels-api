@@ -20,7 +20,7 @@ public sealed class GlobalExceptionHandler(
             ArgumentException or ApplicationException => StatusCodes.Status400BadRequest,
             UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
             KeyNotFoundException => StatusCodes.Status404NotFound,
-            DuplicateNameException => StatusCodes.Status409Conflict,
+            DuplicateNameException or InvalidOperationException => StatusCodes.Status409Conflict,
             _ => StatusCodes.Status500InternalServerError
         };
 
