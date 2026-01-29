@@ -4,6 +4,7 @@ using JoyModels.Models.DataTransferObjects.RequestTypes.Categories;
 using JoyModels.Models.Pagination;
 using JoyModels.Services.Extensions;
 using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 
 namespace JoyModels.Services.Services.Categories.HelperMethods;
 
@@ -74,7 +75,7 @@ public static class CategoryHelperMethods
 
             await context.SaveChangesAsync();
         }
-        catch (DbUpdateException)
+        catch (MySqlException)
         {
             throw new InvalidOperationException(
                 $"Category with UUID `{categoryUuid}` cannot be deleted because it is associated with existing models.");
