@@ -1,13 +1,14 @@
 using JoyModels.Models.DataTransferObjects.RequestTypes.Sso;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Sso;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.Users;
 
 namespace JoyModels.Services.Services.Sso;
 
 public interface ISsoService
 {
     Task<SsoUserResponse> GetByUuid(Guid userUuid);
-    Task<PaginationResponse<SsoUserResponse>> Search(SsoSearchRequest request);
+    Task<PaginationResponse<UsersResponse>> Search(SsoSearchRequest request);
     Task<SsoUserResponse> Create(SsoUserCreateRequest request);
     Task<SsoUserResponse> Verify(SsoVerifyRequest request);
     Task RequestNewOtpCode(SsoNewOtpCodeRequest request);

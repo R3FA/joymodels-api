@@ -32,7 +32,7 @@ public class UsersService(
 
     public async Task<PictureResponse> GetUserAvatar(Guid userUuid)
     {
-        var userResponse = await GetByUuid(userUuid);
+        var userResponse = await UsersHelperMethods.GetUserEntityForAvatar(context, userUuid);
 
         var fullPath = Path.Combine(userImageSettingsDetails.SavePath, "users", userResponse.Uuid.ToString(),
             userResponse.UserPictureLocation);

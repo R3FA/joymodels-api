@@ -1,6 +1,7 @@
 using JoyModels.Models.DataTransferObjects.RequestTypes.Sso;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Sso;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.Users;
 using JoyModels.Services.Services.Sso;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +21,7 @@ public class SsoController(ISsoService service) : ControllerBase
 
     [Authorize(Policy = "HeadStaff")]
     [HttpGet("search")]
-    public async Task<ActionResult<PaginationResponse<SsoUserResponse>>> Search([FromQuery] SsoSearchRequest request)
+    public async Task<ActionResult<PaginationResponse<UsersResponse>>> Search([FromQuery] SsoSearchRequest request)
     {
         return await service.Search(request);
     }

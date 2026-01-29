@@ -30,6 +30,14 @@ public static class JwtSetup
 
         services.AddAuthorization(options =>
         {
+            options.AddPolicy("AllUsers", policy =>
+                policy.RequireRole(
+                    nameof(UserRoleEnum.Unverified),
+                    nameof(UserRoleEnum.User),
+                    nameof(UserRoleEnum.Admin),
+                    nameof(UserRoleEnum.Root)
+                ));
+
             options.AddPolicy("UnverifiedUsers", policy =>
                 policy.RequireRole(
                     nameof(UserRoleEnum.Unverified)

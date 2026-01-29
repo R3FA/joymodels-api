@@ -25,6 +25,16 @@ public static class UsersHelperMethods
         return userEntity ?? throw new KeyNotFoundException("User with sent values is not found.");
     }
 
+    public static async Task<User> GetUserEntityForAvatar(JoyModelsDbContext context, Guid userUuid)
+    {
+        var userEntity = await context.Users
+            .AsNoTracking()
+            .Include(x => x.UserRoleUu)
+            .FirstOrDefaultAsync(x => x.Uuid == userUuid);
+
+        return userEntity ?? throw new KeyNotFoundException("User with sent values is not found.");
+    }
+
     public static async Task<PaginationBase<User>> SearchUserEntities(JoyModelsDbContext context,
         UsersSearchRequest usersSearchRequestDto)
     {

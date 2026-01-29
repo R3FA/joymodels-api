@@ -8,6 +8,7 @@ using JoyModels.Models.DataTransferObjects.RequestTypes.Email;
 using JoyModels.Models.DataTransferObjects.RequestTypes.Sso;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.Sso;
+using JoyModels.Models.DataTransferObjects.ResponseTypes.Users;
 using JoyModels.Models.Enums;
 using JoyModels.Services.Services.Sso.HelperMethods;
 using JoyModels.Services.Validation;
@@ -32,17 +33,13 @@ public class SsoService(
         return pendingUser;
     }
 
-    public async Task<PaginationResponse<SsoUserResponse>> Search(SsoSearchRequest request)
+    public async Task<PaginationResponse<UsersResponse>> Search(SsoSearchRequest request)
     {
         request.ValidateUserSearchArguments();
 
-        var pendingUsersEntity = await SsoHelperMethods.SearchPendingUserEntities(context, request);
+        var unverifiedUserEntities = await SsoHelperMethods.SearchPendingUserEntities(context, request);
 
-        var pendingUsers = mapper.Map<PaginationResponse<SsoUserResponse>>(pendingUsersEntity);
-        for (var i = 0; i < pendingUsersEntity.Data.Count; i++)
-            pendingUsers.Data[i] = mapper.Map<SsoUserResponse>(pendingUsersEntity.Data[i].UserUu);
-
-        return pendingUsers;
+        return mapper.Map<PaginationResponse<UsersResponse>>(unverifiedUserEntities);
     }
 
     public async Task<SsoUserResponse> Create(SsoUserCreateRequest request)

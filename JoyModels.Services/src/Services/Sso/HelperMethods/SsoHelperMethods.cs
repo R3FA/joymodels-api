@@ -79,32 +79,33 @@ public static class SsoHelperMethods
         return pendingUserEntity ?? throw new KeyNotFoundException("Pending user with sent values is not found.");
     }
 
-    public static async Task<PaginationBase<PendingUser>> SearchPendingUserEntities(JoyModelsDbContext context,
+    public static async Task<PaginationBase<User>> SearchPendingUserEntities(JoyModelsDbContext context,
         SsoSearchRequest ssoSearchRequestDto)
     {
         var baseQuery = context.PendingUsers
             .AsNoTracking()
             .Include(x => x.UserUu)
-            .Include(x => x.UserUu.UserRoleUu);
+            .Include(x => x.UserUu.UserRoleUu)
+            .Select(x => x.UserUu);
 
         var filteredQuery = (ssoSearchRequestDto.Nickname, ssoSearchRequestDto.Email) switch
         {
-            (not null, null) => baseQuery.Where(x => x.UserUu.NickName.Contains(ssoSearchRequestDto.Nickname)),
-            (null, not null) => baseQuery.Where(x => x.UserUu.Email.Contains(ssoSearchRequestDto.Email)),
+            (not null, null) => baseQuery.Where(x => x.NickName.Contains(ssoSearchRequestDto.Nickname)),
+            (null, not null) => baseQuery.Where(x => x.Email.Contains(ssoSearchRequestDto.Email)),
             (not null, not null) => baseQuery.Where(x =>
-                x.UserUu.NickName.Contains(ssoSearchRequestDto.Nickname) &&
-                x.UserUu.Email.Contains(ssoSearchRequestDto.Email)),
+                x.NickName.Contains(ssoSearchRequestDto.Nickname) &&
+                x.Email.Contains(ssoSearchRequestDto.Email)),
             _ => baseQuery
         };
 
-        filteredQuery = GlobalHelperMethods<PendingUser>.OrderBy(filteredQuery, ssoSearchRequestDto.OrderBy);
+        filteredQuery = GlobalHelperMethods<User>.OrderBy(filteredQuery, ssoSearchRequestDto.OrderBy);
 
-        var pendingUsersEntity = await PaginationBase<PendingUser>.CreateAsync(filteredQuery,
+        var unverifiedUserEntities = await PaginationBase<User>.CreateAsync(filteredQuery,
             ssoSearchRequestDto.PageNumber,
             ssoSearchRequestDto.PageSize,
             ssoSearchRequestDto.OrderBy);
 
-        return pendingUsersEntity;
+        return unverifiedUserEntities;
     }
 
     public static async Task<JoyModels.Models.Database.Entities.UserRole> GetUserRoleEntity(JoyModelsDbContext context,
