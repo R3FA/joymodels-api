@@ -25,6 +25,12 @@ public class ShoppingCartController(IShoppingCartService service) : ControllerBa
         return await service.Search(request);
     }
 
+    [HttpGet("is-model-in-cart/{modelUuid:guid}")]
+    public async Task<ActionResult<bool>> IsModelInCart([FromRoute] Guid modelUuid)
+    {
+        return await service.IsModelInCart(modelUuid);
+    }
+
     [HttpPost("create")]
     public async Task<ActionResult<ShoppingCartResponse>> Create([FromForm] ShoppingCartCreateRequest request)
     {

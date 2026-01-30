@@ -8,6 +8,7 @@ public interface IShoppingCartService
 {
     Task<ShoppingCartResponse> GetByUuid(Guid modelUuid);
     Task<PaginationResponse<ShoppingCartResponse>> Search(ShoppingCartSearchRequest request);
+    Task<bool> IsModelInCart(Guid modelUuid);
     Task<ShoppingCartResponse> Create(ShoppingCartCreateRequest request);
     Task Delete(Guid modelUuid);
 }
