@@ -5,6 +5,7 @@ using JoyModels.Models.DataTransferObjects.ResponseTypes.Pagination;
 using JoyModels.Models.DataTransferObjects.ResponseTypes.ShoppingCart;
 using JoyModels.Services.Services.ShoppingCart.HelperMethods;
 using JoyModels.Services.Validation;
+using Microsoft.EntityFrameworkCore;
 
 namespace JoyModels.Services.Services.ShoppingCart;
 
@@ -24,6 +25,14 @@ public class ShoppingCartService(JoyModelsDbContext context, IMapper mapper, Use
             await ShoppingCartHelperMethods.SearchShoppingCartItemEntities(context, userAuthValidation, request);
 
         return mapper.Map<PaginationResponse<ShoppingCartResponse>>(shoppingCartItemEntities);
+    }
+
+    public async Task<bool> IsModelInCart(Guid modelUuid)
+    {
+        return await context.ShoppingCartItems
+            .AnyAsync(x =>
+                x.UserUuid == userAuthValidation.GetUserClaimUuid()
+                && x.ModelUuid == modelUuid);
     }
 
     public async Task<ShoppingCartResponse> Create(ShoppingCartCreateRequest request)
