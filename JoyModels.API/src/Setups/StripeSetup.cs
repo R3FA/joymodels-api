@@ -10,10 +10,9 @@ public static class StripeSetup
         var stripeSection = configuration.GetSection("Stripe");
 
         var secretKey = stripeSection["SecretKey"];
-        var webhookSecret = stripeSection["WebhookSecret"];
         var currency = stripeSection["Currency"];
 
-        if (string.IsNullOrWhiteSpace(secretKey) || string.IsNullOrWhiteSpace(webhookSecret))
+        if (string.IsNullOrWhiteSpace(secretKey))
             throw new ApplicationException("Stripe settings are not configured!");
 
         StripeConfiguration.ApiKey = secretKey;
@@ -21,7 +20,6 @@ public static class StripeSetup
         return new StripeSettingsDetails
         {
             SecretKey = secretKey,
-            WebhookSecret = webhookSecret,
             Currency = currency ?? "usd"
         };
     }

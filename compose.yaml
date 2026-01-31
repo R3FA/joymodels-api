@@ -1,22 +1,97 @@
-﻿services:
+﻿networks:
+  joymodels:
+    driver: bridge
+services:
   mariadb:
+    container_name: mariadb
+    networks:
+      - joymodels
     image: mariadb:lts
     restart: always
+    ports:
+      - "3306:3306"
     environment:
       MARIADB_DATABASE: joymodels-db
       MARIADB_ROOT_PASSWORD: password
-    ports:
-      - "3306:3306"
     volumes:
       - ./JoyModels.Models/src/Database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
   
   rabbitmq:
+    container_name: rabbitmq
+    networks:
+      - joymodels
     image: rabbitmq:management-alpine
     restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
     environment:
       - RABBITMQ_DEFAULT_USER=root
       - RABBITMQ_DEFAULT_PASS=YgN*iGXg7pbU3Mkh4UU%
       - RABBITMQ_DEFAULT_VHOST=root
+  
+  communications:
+    networks:
+      - joymodels
+    container_name: communications
+    image: joymodels-backend/communications:latest
+    build:
+      dockerfile: JoyModels.Communications/Dockerfile
+      context: .
+    environment:
+      - Connection__MariaDB__Server=mariadb
+      - Connection__MariaDB__Port=3306
+      - Connection__MariaDB__Database=joymodels-db
+      - Connection__MariaDB__User=root
+      - Connection__MariaDB__Password=password
+      - Connection__RabbitMQ__Host=rabbitmq
+      - Connection__RabbitMQ__User=root
+      - Connection__RabbitMQ__VirtualHost=root
+      - Connection__RabbitMQ__Password=YgN*iGXg7pbU3Mkh4UU%
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+    restart: unless-stopped
+
+  app:
+    networks:
+      - joymodels
+    container_name: app
+    image: joymodels-backend/api:latest
+    build:
+      dockerfile: JoyModels.API/Dockerfile
+      context: .
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "5204:8080"
+    environment:
+      - Connection__MariaDB__Server=mariadb
+      - Connection__MariaDB__Port=3306
+      - Connection__MariaDB__Database=joymodels-db
+      - Connection__MariaDB__User=root
+      - Connection__MariaDB__Password=password
+      - Connection__RabbitMQ__Host=rabbitmq
+      - Connection__RabbitMQ__User=root
+      - Connection__RabbitMQ__VirtualHost=root
+      - Connection__RabbitMQ__Password=YgN*iGXg7pbU3Mkh4UU%
+      - ImageSettings__SavePath=/storage/joymodels/uploads/pictures
+      - ModelSettings__SavePath=/storage/joymodels/uploads
+      - RecommenderSettings__ModelPath=/storage/joymodels/ml-models
+      - Stripe__SecretKey=${STRIPE_SECRET_KEY}
+    env_file:
+      - .env
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      communications:
+        condition: service_started
+    restart: unless-stopped

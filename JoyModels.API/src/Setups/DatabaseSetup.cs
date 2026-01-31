@@ -15,6 +15,9 @@ public static class DatabaseSetup
                                       $"Database={mariaDbDetails["Database"]};" +
                                       $"User={mariaDbDetails["User"]};" +
                                       $"Password={mariaDbDetails["Password"]};";
+
+        Console.WriteLine(mariaDbConnectionString);
+
         var mariaDbVersion = ServerVersion.AutoDetect(mariaDbConnectionString);
 
         services.AddPooledDbContextFactory<JoyModelsDbContext>(options =>
