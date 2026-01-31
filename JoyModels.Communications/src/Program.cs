@@ -5,6 +5,7 @@ var builder = Host.CreateDefaultBuilder()
     {
         configuration.AddJsonFile("appsettings.json", optional: false);
         configuration.AddJsonFile("appsettings.Development.json", optional: true);
+        configuration.AddEnvironmentVariables();
     })
     .ConfigureServices((hostContext, services) =>
     {
