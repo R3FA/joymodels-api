@@ -104,6 +104,9 @@ public static class DependencyInjectionSetup
 
         services.AddHostedService<RecommenderTrainingService>();
 
+        services.AddHealthChecks()
+            .AddCheck<RecommenderHealthCheck>("recommender");
+
         services
             .AddControllers()
             .AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);

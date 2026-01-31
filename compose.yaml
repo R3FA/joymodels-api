@@ -87,6 +87,12 @@ services:
       - Stripe__SecretKey=${STRIPE_SECRET_KEY}
     env_file:
       - .env
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ]
+      start_period: 60s
+      interval: 30s
+      timeout: 10s
+      retries: 3
     depends_on:
       mariadb:
         condition: service_healthy
