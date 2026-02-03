@@ -26,7 +26,7 @@ git clone https://github.com/R3FA/joymodels-api.git
 ```
 
 ### Running with Docker
-To build the necessary images and run the provided [compose.yml](compose.yml), simply run the following command
+To build the necessary images and run the provided [compose.yaml](compose.yaml), simply run the following command
 ```bash
 docker compose up
 ```
