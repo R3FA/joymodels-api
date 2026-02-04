@@ -61,6 +61,4 @@ Username: user2
 Password: strinG1!
 ```
 
-**Note:** Check [compose.yml](compose.yaml) to see if you need to set any environment variables explicitly!
-
-**Note:** Check the appsettings.json file of each app to see if you need to set any environment variables explicitly!
+**Note:** Check [compose.yaml](compose.yaml) to set environment value for STRIPE_SECRET_KEY. It can be set with an .env file.
