@@ -17,7 +17,7 @@ Before using the source code, ensure you have the following installed and config
 Furthermore, you should have the following services running
 - [MariaDB Server](https://mariadb.org/download/?t=mariadb&p=mariadb&r=12.1.2&os=Linux&cpu=x86_64&pkg=tar_gz&i=systemd&mirror=bme)
 - [RabbitMQ](https://www.rabbitmq.com/)
-- [Docker](https://docs.docker.com/engine/) (if you intend to run this inside of a container)
+- [Docker](https://docs.docker.com/engine/) (if you intend to run all of backend services inside of a docker container)
 
 ### Initial Setup
 Clone the repository
